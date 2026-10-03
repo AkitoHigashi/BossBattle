@@ -1,9 +1,9 @@
 
 using System;
 
-public class Health
+public class HealthEntity
 {
-    public Health(int maxHealth)
+    public HealthEntity(int maxHealth)
     {
         MaxValue = maxHealth;
         CurrentValue = maxHealth;

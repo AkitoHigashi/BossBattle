@@ -3,5 +3,10 @@ using UnityEngine;
 
 public interface IMovement
 {
-    void Move(Vector3 direction);
+    void Move(MovementData movementData);
+}
+
+public struct MovementData
+{
+    public Vector3 Direction;
 }
