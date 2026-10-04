@@ -1,3 +1,3 @@
-public struct AttackData
+public readonly struct AttackData
 {
 }

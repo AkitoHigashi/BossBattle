@@ -1,7 +1,7 @@
 
 using UnityEngine;
 
-public struct MovementData
+public readonly struct MovementData
 {
     public Vector3 Direction;
 }
