@@ -14,7 +14,7 @@ public class Character
         _health = health ?? throw new System.ArgumentNullException(nameof(health));
         _status = status ?? throw new System.ArgumentNullException(nameof(status));
         _movement = movement ?? throw new System.ArgumentNullException(nameof(movement));
-        _attackSystem = attackSystem ?? throw new System.ArgumentNullException(nameof(attackSystem));
+        _attackSystem = attackSystem;
     }
 
     public HealthEntity Health => _health;
