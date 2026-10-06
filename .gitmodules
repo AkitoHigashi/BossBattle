@@ -1,0 +1,3 @@
+[submodule "Assets/Mock_Art"]
+	path = Assets/Mock_Art
+	url = https://github.com/AkitoHigashi/BOSSBattle_SubM_mock.git
