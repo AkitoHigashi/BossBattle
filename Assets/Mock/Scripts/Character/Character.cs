@@ -33,7 +33,7 @@ public class Character
     public void Attack(AttackData attackData)
     {
         if (_attackSystem == null)
-            throw new System.InvalidOperationException("No attack system has been configured for this character.");
+            return;
         _attackSystem.Attack(attackData);
     }
 

@@ -7,12 +7,7 @@ public class CharacterComposition : MonoBehaviour
     [SerializeField] private CharacterData _characterData;
     public Character Character { get; private set; }
 
-    private void Awake()
-    {
-        Initialize();
-    }
-
-    private void Initialize()
+    public void Initialize()
     {
         if (Character != null)
             return;

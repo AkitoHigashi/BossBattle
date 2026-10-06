@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PlayerInput))]
 public class InputBuffer : MonoBehaviour
 {
+    public bool IsInitialized { get; private set; }
     public InputAction MoveAction => _moveAction;
     public InputAction InteractAction => _interactAction;
     public InputAction DodgeAction => _dodgeAction;
@@ -40,16 +41,11 @@ public class InputBuffer : MonoBehaviour
     private InputAction _ultimateAction;
     private InputAction _uniqueAction;
 
-    private void OnEnable() => SetActionsEnabled(true);
-    private void OnDisable() => SetActionsEnabled(false);
-
-    private void Awake()
+    public void Initialize()
     {
-        Init();
-    }
+        if (IsInitialized)
+            return;
 
-    public void Init()
-    {
         if (TryGetComponent<PlayerInput>(out var playerInput))
         {
             if (playerInput.actions == null)
@@ -66,29 +62,7 @@ public class InputBuffer : MonoBehaviour
             _skill6Action = playerInput.actions[SKILL6_ACTION];
             _ultimateAction = playerInput.actions[ULTIMATE_ACTION];
             _uniqueAction = playerInput.actions[UNIQUE_ACTION];
-            SetActionsEnabled(isActiveAndEnabled);
+            IsInitialized = true;
         }
-    }
-
-    private void SetActionsEnabled(bool value)
-    {
-        SetActionEnabled(_moveAction, value);
-        SetActionEnabled(_interactAction, value);
-        SetActionEnabled(_dodgeAction, value);
-        SetActionEnabled(_skill1Action, value);
-        SetActionEnabled(_skill2Action, value);
-        SetActionEnabled(_skill3Action, value);
-        SetActionEnabled(_skill4Action, value);
-        SetActionEnabled(_skill5Action, value);
-        SetActionEnabled(_skill6Action, value);
-        SetActionEnabled(_ultimateAction, value);
-        SetActionEnabled(_uniqueAction, value);
-    }
-
-    private static void SetActionEnabled(InputAction action, bool value)
-    {
-        if (action == null) return;
-        if (value) action.Enable();
-        else action.Disable();
     }
 }
