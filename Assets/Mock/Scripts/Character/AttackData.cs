@@ -4,11 +4,11 @@ public readonly struct AttackData
 {
     public AttackData(IReadOnlyList<IHitEffect> hitEffects, float damage)
     {
-        HitEffect = hitEffects;
+        HitEffects = hitEffects;
         Damage = damage;
     }
     
-    public IReadOnlyList<IHitEffect> HitEffect { get; }
+    public IReadOnlyList<IHitEffect> HitEffects { get; }
     public float Damage { get; }
 
 }
