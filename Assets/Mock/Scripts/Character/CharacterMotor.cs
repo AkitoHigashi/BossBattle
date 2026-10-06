@@ -10,6 +10,8 @@ public class CharacterMotor : MonoBehaviour
     private float _pendingExternalY;
     private Vector3 _overrideVelocity;
     private bool _hasOverrideVelocity;
+    private Vector3 _facingDirection;
+    private float _rotationSpeed;
 
     private void Awake()
     {
@@ -20,6 +22,13 @@ public class CharacterMotor : MonoBehaviour
     {
         velocity.y = 0f;
         _locomotionVelocity = velocity;
+    }
+
+    public void SetFacingDirection(Vector3 direction, float rotationSpeed)
+    {
+        direction.y = 0f;
+        _facingDirection = direction;
+        _rotationSpeed = Mathf.Max(0f, rotationSpeed);
     }
 
     
@@ -60,11 +69,20 @@ public class CharacterMotor : MonoBehaviour
         velocity.y += _pendingExternalY;
         _pendingExternalY = 0f;
         _rigidbody.linearVelocity = velocity;
+
+        if (_facingDirection.sqrMagnitude > 0.0001f && _rotationSpeed > 0f)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(_facingDirection, Vector3.up);
+            Quaternion rotation = Quaternion.RotateTowards(
+                _rigidbody.rotation, targetRotation, _rotationSpeed * Time.fixedDeltaTime);
+            _rigidbody.MoveRotation(rotation);
+        }
     }
 
     private void OnDisable()
     {
         _locomotionVelocity = Vector3.zero;
+        _facingDirection = Vector3.zero;
         ClearExternalVelocity();
         ClearOverrideVelocity();
     }

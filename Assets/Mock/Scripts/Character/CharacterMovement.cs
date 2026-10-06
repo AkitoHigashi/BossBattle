@@ -18,5 +18,6 @@ public class CharacterMovement : IMovement
         direction.y = 0f;
         direction = Vector3.ClampMagnitude(direction, 1f);
         _motor.SetLocomotionVelocity(direction * _data.MoveSpeed);
+        _motor.SetFacingDirection(direction, _data.RotationSpeed);
     }
 }

@@ -45,8 +45,16 @@ public class InputBuffer : MonoBehaviour
 
     private void Awake()
     {
+        Init();
+    }
+
+    public void Init()
+    {
         if (TryGetComponent<PlayerInput>(out var playerInput))
         {
+            if (playerInput.actions == null)
+                throw new System.InvalidOperationException("PlayerInputのActionsにInputActionアセットを設定してください。");
+
             _moveAction = playerInput.actions[MOVE_ACTION];
             _interactAction = playerInput.actions[INTERACT_ACTION];
             _dodgeAction = playerInput.actions[DODGE_ACTION];

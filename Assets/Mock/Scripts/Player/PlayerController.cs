@@ -8,20 +8,29 @@ public class PlayerController : MonoBehaviour
     private InputAction _moveAction;
     private Character _character;
 
-    private void Awake()
+    private void Start()
     {
         _inputBuffer = GetComponent<InputBuffer>();
         _character = GetComponent<CharacterComposition>().Character;
+
+        SubscribeToMove();
     }
 
     private void OnEnable()
     {
+        SubscribeToMove();
+    }
+
+    private void SubscribeToMove()
+    {
         if (_character == null || _inputBuffer == null)
             return;
 
-        _moveAction = _inputBuffer.MoveAction;
-        if (_moveAction == null)
+        if (_moveAction != null)
             return;
+
+        _inputBuffer.Init();
+        _moveAction = _inputBuffer.MoveAction;
 
         _moveAction.performed += OnMove;
         _moveAction.canceled += OnMove;
