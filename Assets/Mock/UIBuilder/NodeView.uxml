@@ -1,12 +1,12 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/Mock/UIBuilder/NodeView.uss?fileID=7433441132597879392&amp;guid=dd6d758c35e63ee4893a31375214eb50&amp;type=3#NodeView"/>
-    <ui:VisualElement name="node-border">
-        <ui:VisualElement name="input"/>
-        <ui:VisualElement name="title">
+    <ui:VisualElement name="node-border" style="height: 174px; width: 158px;">
+        <ui:VisualElement name="input" style="height: 28px; width: 155px;"/>
+        <ui:VisualElement name="title" style="height: 137px; width: 155px;">
             <ui:Label text="Label" name="title-label"/>
             <ui:VisualElement name="title-button-container"/>
         </ui:VisualElement>
-        <ui:VisualElement name="output"/>
+        <ui:VisualElement name="output" style="height: 28px; width: 155px;"/>
     </ui:VisualElement>
-    <ui:VisualElement name="selection-border" picking-mode="Ignore" style="bottom: -1px;"/>
+    <ui:VisualElement name="selection-border" picking-mode="Ignore" style="bottom: -1px; left: 0; right: -1px;"/>
 </ui:UXML>
