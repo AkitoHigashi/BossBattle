@@ -45,7 +45,7 @@ public class InputBuffer : MonoBehaviour
     private void OnEnable() => SetActionsEnabled(true);
     private void OnDisable() => SetActionsEnabled(false);
 
-    public void Init()
+    private void Awake()
     {
         if (_initialized) return;
         _initialized = true;
