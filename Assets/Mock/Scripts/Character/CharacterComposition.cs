@@ -5,19 +5,7 @@ using UnityEngine;
 public class CharacterComposition : MonoBehaviour
 {
     [SerializeField] private CharacterData _characterData;
-    [SerializeField, Min(1)] private int _maxHealth = 1;
-
-    private Character _character;
-
-    public Character Character
-    {
-        get
-        {
-            if (_character == null)
-                Initialize();
-            return _character;
-        }
-    }
+    public Character Character { get; private set; }
 
     private void Awake()
     {
@@ -26,15 +14,15 @@ public class CharacterComposition : MonoBehaviour
 
     private void Initialize()
     {
-        if (_character != null)
+        if (Character != null)
             return;
 
         if (_characterData == null)
             throw new System.InvalidOperationException("キャラクターのデータが設定されていません。");
 
         var movement = new CharacterMovement(_characterData, GetComponent<CharacterMotor>());
-        var health = new HealthEntity(Mathf.Max(1, _maxHealth));
+        var health = new HealthEntity(_characterData.MaxHealth);
         var status = new Status(0, 0, 0);
-        _character = new Character(health, status, movement);
+        Character = new Character(health, status, movement);
     }
 }

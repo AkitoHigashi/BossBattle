@@ -13,7 +13,7 @@ public class InputBuffer : MonoBehaviour
     public InputAction Skill4Action => _skill4Action;
     public InputAction Skill5Action => _skill5Action;
     public InputAction Skill6Action => _skill6Action;
-    public InputAction UltimateAction => _ultimeteAction;
+    public InputAction UltimateAction => _ultimateAction;
     public InputAction UniqueAction => _uniqueAction;
 
     private const string MOVE_ACTION = "Move";
@@ -25,7 +25,7 @@ public class InputBuffer : MonoBehaviour
     private const string SKILL4_ACTION = "Skill4";
     private const string SKILL5_ACTION = "Skill5";
     private const string SKILL6_ACTION = "Skill6";
-    private const string ULTIMETE_ACTION = "Ultimate";
+    private const string ULTIMATE_ACTION = "Ultimate";
     private const string UNIQUE_ACTION = "Unique";
 
     private InputAction _moveAction;
@@ -37,18 +37,14 @@ public class InputBuffer : MonoBehaviour
     private InputAction _skill4Action;
     private InputAction _skill5Action;
     private InputAction _skill6Action;
-    private InputAction _ultimeteAction;
+    private InputAction _ultimateAction;
     private InputAction _uniqueAction;
-
-    private bool _initialized;
 
     private void OnEnable() => SetActionsEnabled(true);
     private void OnDisable() => SetActionsEnabled(false);
 
     private void Awake()
     {
-        if (_initialized) return;
-        _initialized = true;
         if (TryGetComponent<PlayerInput>(out var playerInput))
         {
             _moveAction = playerInput.actions[MOVE_ACTION];
@@ -60,7 +56,7 @@ public class InputBuffer : MonoBehaviour
             _skill4Action = playerInput.actions[SKILL4_ACTION];
             _skill5Action = playerInput.actions[SKILL5_ACTION];
             _skill6Action = playerInput.actions[SKILL6_ACTION];
-            _ultimeteAction = playerInput.actions[ULTIMETE_ACTION];
+            _ultimateAction = playerInput.actions[ULTIMATE_ACTION];
             _uniqueAction = playerInput.actions[UNIQUE_ACTION];
             SetActionsEnabled(isActiveAndEnabled);
         }
@@ -77,7 +73,7 @@ public class InputBuffer : MonoBehaviour
         SetActionEnabled(_skill4Action, value);
         SetActionEnabled(_skill5Action, value);
         SetActionEnabled(_skill6Action, value);
-        SetActionEnabled(_ultimeteAction, value);
+        SetActionEnabled(_ultimateAction, value);
         SetActionEnabled(_uniqueAction, value);
     }
 
