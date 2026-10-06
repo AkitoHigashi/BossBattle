@@ -11,7 +11,6 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         _inputBuffer = GetComponent<InputBuffer>();
-        _inputBuffer.Init();
         _character = GetComponent<CharacterComposition>().Character;
     }
 
