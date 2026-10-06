@@ -5,10 +5,16 @@ public class Character
 {
 
     public Character(HealthEntity health, Status status, IMovement movement)
+        : this(health, status, movement, null)
+    {
+    }
+
+    public Character(HealthEntity health, Status status, IMovement movement, IAttackSystem attackSystem)
     {
         _health = health;
         _status = status;
         _movement = movement;
+        _attackSystem = attackSystem;
     }
 
     public HealthEntity Health => _health;
@@ -26,6 +32,8 @@ public class Character
     
     public void Attack(AttackData attackData)
     {
+        if (_attackSystem == null)
+            throw new System.InvalidOperationException("No attack system has been configured for this character.");
         _attackSystem.Attack(attackData);
     }
 

@@ -1,45 +1,51 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(InputBuffer), typeof(CharacterMover))]
+[RequireComponent(typeof(InputBuffer), typeof(CharacterComposition))]
 public class PlayerController : MonoBehaviour
 {
     private InputBuffer _inputBuffer;
-    private CharacterMover _mover;
+    private InputAction _moveAction;
+    private Character _character;
 
     private void Awake()
     {
         _inputBuffer = GetComponent<InputBuffer>();
-        _mover = GetComponent<CharacterMover>();
         _inputBuffer.Init();
-        _mover.Init();
+        _character = GetComponent<CharacterComposition>().Character;
     }
 
     private void OnEnable()
     {
-        _inputBuffer.MoveAction.performed += OnMove;
-        _inputBuffer.MoveAction.canceled += OnMove;
+        if (_character == null || _inputBuffer == null)
+            return;
+
+        _moveAction = _inputBuffer.MoveAction;
+        if (_moveAction == null)
+            return;
+
+        _moveAction.performed += OnMove;
+        _moveAction.canceled += OnMove;
+
+        Vector2 input = _moveAction.ReadValue<Vector2>();
+        _character.Move(new MovementData(new Vector3(input.x, 0f, input.y)));
     }
 
     private void OnDisable()
     {
-        if (_inputBuffer?.MoveAction != null)
+        if (_moveAction != null)
         {
-            _inputBuffer.MoveAction.performed -= OnMove;
-            _inputBuffer.MoveAction.canceled -= OnMove;
+            _moveAction.performed -= OnMove;
+            _moveAction.canceled -= OnMove;
+            _moveAction = null;
         }
 
-        _mover.SetMoveDirection(Vector3.zero);
+        _character?.Move(new MovementData(Vector3.zero));
     }
 
     private void OnMove(InputAction.CallbackContext context)
     {
-        Vector2 input = context.ReadValue<Vector2>();
-
-        _mover.SetMoveDirection(
-            new Vector3(input.x, 0f, input.y)
-        );
+        Vector2 input = context.canceled ? Vector2.zero : context.ReadValue<Vector2>();
+        _character.Move(new MovementData(new Vector3(input.x, 0f, input.y)));
     }
-
 }
-
