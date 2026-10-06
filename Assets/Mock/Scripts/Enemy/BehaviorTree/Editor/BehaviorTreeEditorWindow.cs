@@ -2,7 +2,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace BehaviorTree.Mock
+namespace BTree.EditorTools
 {
     public class BehaviorTreeEditorWindow : EditorWindow
     {

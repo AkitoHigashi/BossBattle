@@ -1,10 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
-using BehaviorTree.Mock.Editor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
 
-namespace BehaviorTree.Mock
+namespace BTree.EditorTools
 {
     /// <summary>
     ///  ウィンドウのグラフビューを表すクラス
