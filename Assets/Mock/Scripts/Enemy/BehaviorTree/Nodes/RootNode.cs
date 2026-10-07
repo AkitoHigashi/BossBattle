@@ -4,6 +4,12 @@ public class RootNode : BtNode
 {
     [SerializeField]private BtNode _childNode;
 
+    public override void Initialize(BlackBoard blackBoard)
+    {
+        _blackBoard = blackBoard;
+        _childNode.Initialize(_blackBoard);
+    }
+
     protected override void OnUpdate()
     {
         _childNode.Evaluate();

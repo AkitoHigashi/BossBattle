@@ -2,6 +2,7 @@
 
 public abstract class BtNode : ScriptableObject
 {
+    [SerializeField] private BtNode _childNode;
     /// <summary>
     /// 現在のNodeの状態
     /// </summary>
@@ -25,7 +26,9 @@ public abstract class BtNode : ScriptableObject
 
         return Status;
     }
+    public abstract void Initialize(BlackBoard blackBoard);
     protected abstract void OnUpdate();
     protected virtual void OnSuccess() { }
     protected virtual void OnFailure() { }
+    protected BlackBoard _blackBoard;
 }

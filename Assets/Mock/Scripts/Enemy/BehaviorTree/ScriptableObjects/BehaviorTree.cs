@@ -5,9 +5,12 @@ using UnityEngine;
 public class BehaviorTree : ScriptableObject
 {
     [SerializeField] private RootNode _rootNode;
-    [SerializeField] private BlackBoard _blackBoard;
-    [SerializeField] private List<BtNode> _nodes;
-
+    private BlackBoard _blackBoard;
+    public void Initialize(BlackBoard blackBoard)
+    {
+        _blackBoard = blackBoard;
+        _rootNode.Initialize(_blackBoard);
+    }
 
     public void Update()
     {
