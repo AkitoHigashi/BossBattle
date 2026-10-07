@@ -1,6 +1,6 @@
 using UnityEngine;
 [System.Serializable, CreateAssetMenu(fileName = "RootNode", menuName = "Behavior Tree/Mock/Nodes/RootNode")]
-public class RootNode : BtNode
+public sealed class RootNode : BtNode
 {
     [SerializeField]private BtNode _childNode;
 
