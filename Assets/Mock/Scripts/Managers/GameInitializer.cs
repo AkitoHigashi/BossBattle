@@ -9,11 +9,6 @@ public class GameInitializer : MonoBehaviour
 
     public bool IsInitialized { get; private set; }
 
-    private void Start()
-    {
-        Initialize();
-    }
-
     public void Initialize()
     {
         if (IsInitialized)
@@ -28,4 +23,10 @@ public class GameInitializer : MonoBehaviour
 
         IsInitialized = true;
     }
+
+    private void Start()
+    {
+        Initialize();
+    }
+
 }
