@@ -1,9 +1,7 @@
 {
     "name": "MockBehaviorTree.Editor",
     "rootNamespace": "BTree.EditorTools",
-    "references": [
-        "BehaviorTree.Runtime"
-    ],
+    "references": [],
     "includePlatforms": [
         "Editor"
     ],

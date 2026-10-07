@@ -1,14 +1,14 @@
+using System.Collections.Generic;
 using UnityEngine;
 
-public class DecoratorNode : BtNode
+public abstract class DecoratorNode : BtNode
 {
-    public override void Initialize(BlackBoard blackBoard)
-    {
-        throw new System.NotImplementedException();
-    }
+    [SerializeField] protected BtNode _childNode;
 
-    protected override void OnUpdate()
+    public override BtNode Clone(List<BtNode> clones)
     {
-        throw new System.NotImplementedException();
+        var clone = (DecoratorNode)base.Clone(clones);
+        clone._childNode = _childNode != null ? _childNode.Clone(clones) : null;
+        return clone;
     }
 }

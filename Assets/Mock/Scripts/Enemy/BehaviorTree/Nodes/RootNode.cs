@@ -1,17 +1,25 @@
+using System.Collections.Generic;
 using UnityEngine;
-[System.Serializable, CreateAssetMenu(fileName = "RootNode", menuName = "Behavior Tree/Mock/Nodes/RootNode")]
+
+[CreateAssetMenu(fileName = "RootNode", menuName = "Behavior Tree/Mock/Nodes/RootNode")]
 public sealed class RootNode : BtNode
 {
-    [SerializeField]private BtNode _childNode;
+    [SerializeField] private BtNode _childNode;
 
-    public override void Initialize(BlackBoard blackBoard)
+    public override BtNode Clone(List<BtNode> clones)
     {
-        _blackBoard = blackBoard;
-        _childNode.Initialize(_blackBoard);
+        var clone = (RootNode)base.Clone(clones);
+        clone._childNode = _childNode != null ? _childNode.Clone(clones) : null;
+        return clone;
     }
 
-    protected override void OnUpdate()
+    protected override NodeStatus OnUpdate()
     {
-        _childNode.Evaluate();
+        if (_childNode == null)
+        {
+            return NodeStatus.Failure;
+        }
+
+        return _childNode.Evaluate();// 子の結果をそのまま上へ流す
     }
 }
