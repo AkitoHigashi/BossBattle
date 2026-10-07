@@ -3,15 +3,22 @@ using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshAgent))]
 public class BtAgent : MonoBehaviour
 {
-    [SerializeField] private BehaviorTree _behaviorTree;
+    public NavMeshAgent NavMeshAgent => navMeshAgent;
+    public float Speed => navMeshAgent.speed;
+    public float AttackRange => _attackRange;
 
+    [SerializeField] private BehaviorTree _behaviorTree;
+    [SerializeField] private float _attackRange = 1.5f;
     private NavMeshAgent navMeshAgent;
     private BehaviorTree _runtimeTree;
-    void Start()
+    private void Start()
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
-        navMeshAgent.updatePosition = false;
-        navMeshAgent.updateRotation = false;
         _runtimeTree = _behaviorTree;
+    }
+
+    private void Update()
+    {
+        _runtimeTree.Update();
     }
 }
