@@ -1,7 +1,7 @@
 ﻿using R3;
 using UnityEngine;
 using UnityEngine.AI;
-[RequireComponent(typeof(NavMeshAgent))]
+[RequireComponent(typeof(NavMeshAgent)), DisallowMultipleComponent]
 public class BtAgent : MonoBehaviour
 {
     [SerializeField] private float _healthValue = 100f;
