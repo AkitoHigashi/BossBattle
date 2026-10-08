@@ -9,8 +9,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aefcc002a437a4f48ab196345602a76c, type: 3}
-  m_Name: SequenceNode
-  m_EditorClassIdentifier: Assembly-CSharp::SequenceNode
-  _childNodes:
-  - {fileID: 11400000, guid: 54e0d70559077784ea2d58bfd6e6b744, type: 2}
+  m_Script: {fileID: 11500000, guid: 11bdb2f1d7b8081418a2e18959c69321, type: 3}
+  m_Name: AttackNode
+  m_EditorClassIdentifier: Assembly-CSharp::AttackNode
