@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "SequenceNode", menuName = "Behavior Tree/Mock/Nodes/Sequence Node")]
+[CreateAssetMenu(fileName = "SequenceNode", menuName = "Behavior Tree/Mock/Nodes/Composite Nodes/Sequence Node")]
 public sealed class SequenceNode : CompositeNode
 {
     protected override NodeStatus OnUpdate()

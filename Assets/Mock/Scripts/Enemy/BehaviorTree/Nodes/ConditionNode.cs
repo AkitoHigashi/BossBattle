@@ -10,5 +10,5 @@ public abstract class ConditionNode : BtNode
         return clone;
     }
 
-    [SerializeField] private BtNode _childNode;
+    [SerializeField] protected BtNode _childNode;
 }
