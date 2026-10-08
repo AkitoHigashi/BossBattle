@@ -1,14 +1,17 @@
-
-
-
 public class Character
 {
 
     public Character(HealthEntity health, Status status, IMovement movement)
+        : this(health, status, movement, null)
     {
-        _health = health;
-        _status = status;
-        _movement = movement;
+    }
+
+    public Character(HealthEntity health, Status status, IMovement movement, IAttackSystem attackSystem)
+    {
+        _health = health ?? throw new System.ArgumentNullException(nameof(health));
+        _status = status ?? throw new System.ArgumentNullException(nameof(status));
+        _movement = movement ?? throw new System.ArgumentNullException(nameof(movement));
+        _attackSystem = attackSystem;
     }
 
     public HealthEntity Health => _health;
@@ -23,14 +26,16 @@ public class Character
     {
         _movement.Move(movementData);
     }
-    
+
     public void Attack(AttackData attackData)
     {
+        if (_attackSystem == null)
+            return;
         _attackSystem.Attack(attackData);
     }
 
-   private HealthEntity _health;
-   private Status _status;
-   private IMovement _movement;
-   private IAttackSystem _attackSystem;
+    private HealthEntity _health;
+    private Status _status;
+    private IMovement _movement;
+    private IAttackSystem _attackSystem;
 }
