@@ -32,7 +32,7 @@ public class BtAgent : MonoBehaviour
     private void Start()
     {
         _health = new ReactiveProperty<float>(_healthValue);
-        _blackBoard = new BlackBoard(_target, _health, _attackRange, _navMeshAgent, _animator);
+        _blackBoard = new BlackBoard(_target, _health, _attackRange, _navMeshAgent, _animator, transform);
         _runtimeTree.Initialize(_blackBoard);
     }
 
