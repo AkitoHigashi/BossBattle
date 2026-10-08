@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 35d764e077a1eff4481212b2ace53cc6, type: 3}
-  m_Name: MockBehaviorTree
-  m_EditorClassIdentifier: Assembly-CSharp::BehaviorTree
-  _rootNode: {fileID: 11400000, guid: 28f34c5d494a898488ddbce82bc0a25e, type: 2}
+  m_Script: {fileID: 11500000, guid: aefcc002a437a4f48ab196345602a76c, type: 3}
+  m_Name: SequenceNode
+  m_EditorClassIdentifier: Assembly-CSharp::SequenceNode
+  _childNodes: []
