@@ -4,7 +4,7 @@ using UnityEngine.AI;
 
 public class BlackBoard
 {
-    public BlackBoard(PlayerMovement target,
+    public BlackBoard(CharacterMotor target,
         ReactiveProperty<float> health, 
         float attackRange, 
         NavMeshAgent navMeshAgent,
@@ -18,14 +18,14 @@ public class BlackBoard
         _animator = animator;
         _transform = transform; 
     }
-    public PlayerMovement Target => _target;
+    public CharacterMotor Target => _target;
     public ReactiveProperty<float> Health => _health;
     public float AttackRange => _attackRange;
     public NavMeshAgent NavMeshAgent => _navMeshAgent;
     public Animator Animator => _animator;
     public Transform Transform => _transform;
 
-    private PlayerMovement _target;
+    private CharacterMotor _target;
     private ReactiveProperty<float> _health;
     private float _attackRange;
     private NavMeshAgent _navMeshAgent;

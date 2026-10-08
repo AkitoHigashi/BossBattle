@@ -8,7 +8,7 @@ public class BtAgent : MonoBehaviour
     [SerializeField] private float _healthValue = 100f;
     [SerializeField] private BehaviorTree _behaviorTree;
     [SerializeField] private float _attackRange = 1.5f;
-    [SerializeField] private PlayerMovement _target;
+    [SerializeField] private CharacterMotor _target;
 
     private ReactiveProperty<float> _health;
     private NavMeshAgent _navMeshAgent;
