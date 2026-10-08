@@ -6,7 +6,6 @@ using UnityEngine;
 public class BehaviorTree : ScriptableObject
 {
     [SerializeField] private RootNode _rootNode;
-
     [NonSerialized] private BlackBoard _blackBoard;
     [NonSerialized] private List<BtNode> _clonedNodes = new List<BtNode>();
 
@@ -59,7 +58,6 @@ public class BehaviorTree : ScriptableObject
 
     private void OnDestroy()
     {
-        // 自分は既に破棄処理中なので、ここで破棄するのは複製したNodeだけ
         foreach (var node in _clonedNodes)
         {
             if (node != null)
