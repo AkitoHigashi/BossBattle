@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e748119f413ddd45b5f9609addd619f, type: 3}
+  m_Name: AttackDefinition
+  m_EditorClassIdentifier: Assembly-CSharp::AttackDefinition
+  _baseDamage: 1
+  _motionData:
+    _motionId: 
+    _duration: 0
+    _canCancel: 0
+    _executor: {fileID: 11400000, guid: 1e3482122de0c3a4b84ba33da614c493, type: 2}
+    _animatorTriggerName: 
+  _damageCalculation: {fileID: 11400000, guid: f7c96e7cc16f16647aa435f81d6929aa, type: 2}
+  _hitEffects:
+  - {fileID: 11400000, guid: f6beefad80c4ed543802eaccef19c5cf, type: 2}
+  _allowMultipleHitsPerActivation: 0

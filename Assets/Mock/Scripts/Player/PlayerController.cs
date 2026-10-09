@@ -9,7 +9,8 @@ public class PlayerController : MonoBehaviour
     private Character _character;
     private bool _initialized;
     private bool _subscribed;
-
+    [SerializeField] 
+    private AttackDefinition[] _attackDefinition;
     public void Initialize(InputBuffer inputBuffer, Character character)
     {
         if (_initialized)
@@ -70,5 +71,14 @@ public class PlayerController : MonoBehaviour
     {
         Vector2 input = context.canceled ? Vector2.zero : context.ReadValue<Vector2>();
         _character.Move(new MovementData(new Vector3(input.x, 0f, input.y)));
+    }
+
+    private void OnAttack(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            AttackData attackData = new AttackData(_attackDefinition[0]); 
+            _character.Attack(attackData);
+        }
     }
 }

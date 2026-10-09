@@ -2,7 +2,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
 [DisallowMultipleComponent]
-public class CharacterMotor : MonoBehaviour
+public class CharacterMotor : MonoBehaviour, IForceReceiver
 {
     private Rigidbody _rigidbody;
     /// <summary>
@@ -64,6 +64,11 @@ public class CharacterMotor : MonoBehaviour
         _pendingExternalY += velocity.y;
         velocity.y = 0f;
         _externalVelocity += velocity;
+    }
+
+    public void AddForce(Vector3 force)
+    {
+        AddExternalVelocity(force);
     }
 
     /// <summary>
