@@ -37,5 +37,6 @@ public class Character
     private HealthEntity _health;
     private Status _status;
     private IMovement _movement;
+    private ISkillSystem _skillSystem;
     private IAttackSystem _attackSystem;
 }
