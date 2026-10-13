@@ -16,12 +16,45 @@
       "dependencies": {},
       "hash": "a77a1b4a89824fb6df293099de3060daf2a432c1"
     },
+    "com.etdofresh.fishyeos": {
+      "version": "https://github.com/ETdoFresh/FishyEOS.git?path=/FishNet/Plugins/FishyEOS",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "1be0b553fb083129a6bcebc7a9ffed8256c186a5"
+    },
+    "com.firstgeargames.fishnet": {
+      "version": "https://github.com/FirstGearGames/FishNet.git?path=Assets/FishNet",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.nuget.newtonsoft-json": "3.2.1",
+        "com.unity.ugui": "1.0.0",
+        "com.unity.modules.animation": "1.0.0",
+        "com.unity.modules.imgui": "1.0.0",
+        "com.unity.modules.particlesystem": "1.0.0",
+        "com.unity.modules.physics": "1.0.0",
+        "com.unity.modules.physics2d": "1.0.0",
+        "com.unity.modules.ui": "1.0.0"
+      },
+      "hash": "6e7ee695e9d4ce56b0d1f115a0eeec118d5bb4e2"
+    },
     "com.github-glitchenzo.nugetforunity": {
       "version": "https://github.com/GlitchEnzo/NuGetForUnity.git?path=src/NuGetForUnity",
       "depth": 0,
       "source": "git",
       "dependencies": {},
       "hash": "acc1c7bc9ea34c33b830e40316fca52553878d29"
+    },
+    "com.playeveryware.eos": {
+      "version": "https://github.com/EOS-Contrib/eos_plugin_for_unity_upm.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.nuget.newtonsoft-json": "3.0.2",
+        "com.unity.editorcoroutines": "1.0.0"
+      },
+      "hash": "0b8f679193c5b6c74df5bddbe3248c9d7aadaee8"
     },
     "com.unity.ai.navigation": {
       "version": "2.0.14",
@@ -55,6 +88,12 @@
         "com.unity.test-framework": "1.4.6",
         "com.unity.test-framework.performance": "3.2.0"
       }
+    },
+    "com.unity.editorcoroutines": {
+      "version": "6.6.0",
+      "depth": 1,
+      "source": "builtin",
+      "dependencies": {}
     },
     "com.unity.ext.nunit": {
       "version": "2.1.0",
