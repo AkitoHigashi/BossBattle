@@ -7,10 +7,10 @@ using UnityEngine;
 
 public class SkillSystem : ISkillSystem, IDisposable
 {
-    public Observable<bool> IsSkillUsable => _isSkillUsable;
+    public Observable<bool> IsExecuting => _sExecuting;
     private readonly SkillContext _skillContext;
     private readonly Dictionary<SkillDefinition, float> _nestUsableTimes = new Dictionary<SkillDefinition, float>();
-    private readonly ReactiveProperty<bool> _isSkillUsable = new ReactiveProperty<bool>(true);
+    private readonly ReactiveProperty<bool> _sExecuting = new ReactiveProperty<bool>(true);
     private CancellationTokenSource _cts;
     private bool _disposed;
 
@@ -27,7 +27,7 @@ public class SkillSystem : ISkillSystem, IDisposable
     public bool TryUseSkill(SkillDefinition definition)
     {
         //未定義、実行中、破棄済みの場合は使用不可。
-        if (_disposed || _isSkillUsable.Value || definition == null || definition.Actions.Length == 0)
+        if (_disposed || _sExecuting.Value || definition == null || definition.Actions == null || definition.Actions.Length == 0)
         {
             return false;
         }
@@ -37,9 +37,9 @@ public class SkillSystem : ISkillSystem, IDisposable
             return false;
         }
 
-        _isSkillUsable.Value = true;
+        _sExecuting.Value = true;
         _nestUsableTimes[definition] = Time.time + definition.Cooldown;
-        CancellationTokenSource cst =new CancellationTokenSource();
+        CancellationTokenSource cst = new CancellationTokenSource();
         _cts = cst;
         ExecutAsync(definition, cst).Forget();
         return true;
@@ -69,10 +69,10 @@ public class SkillSystem : ISkillSystem, IDisposable
     {
         try
         {
-            foreach(var action in skill.Actions)
+            foreach (var action in skill.Actions)
             {
                 cts.Token.ThrowIfCancellationRequested();
-                if(action == null)
+                if (action == null)
                 {
                     throw new InvalidOperationException($"スキルが設定されていない   {skill.SkillName}");
                 }
@@ -93,7 +93,7 @@ public class SkillSystem : ISkillSystem, IDisposable
             _skillContext.AbortActiveAction();
             if (ReferenceEquals(_cts, cts)) _cts = null;
             cts.Dispose();
-            if (!_disposed) _isSkillUsable.Value = false;
+            if (!_disposed) _sExecuting.Value = true;
         }
     }
 
@@ -102,7 +102,7 @@ public class SkillSystem : ISkillSystem, IDisposable
     /// </summary>
     public void CancelActiveSkill()
     {
-        if(!_disposed && _cts != null)
+        if (!_disposed && _cts != null)
         {
             _cts.Cancel();
         }
@@ -110,9 +110,9 @@ public class SkillSystem : ISkillSystem, IDisposable
 
     public void Dispose()
     {
-        if(_disposed) return;
+        if (_disposed) return;
         _disposed = true;
         _cts?.Cancel();
-        _isSkillUsable.Dispose();
+        _sExecuting.Dispose();
     }
 }

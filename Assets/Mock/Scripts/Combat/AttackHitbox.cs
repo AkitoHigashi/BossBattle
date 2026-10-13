@@ -23,7 +23,7 @@ public class AttackHitbox : MonoBehaviour
     /// <summary>
     /// 攻撃の当たり判定のサンプル数。サンプル数が多いほど、攻撃の範囲が正確に判定されるが、パフォーマンスに影響する可能性がある。
     /// </summary>
-    [SerializeField] private int _sampleCount = 3;
+    [SerializeField, Min(2)] private int _sampleCount = 3;
     /// <summary>
     /// 攻撃の当たり判定の前回のサンプル位置。攻撃の範囲を決定するために使用される。
     /// </summary>
@@ -50,6 +50,7 @@ public class AttackHitbox : MonoBehaviour
     public void Init(Transform owner)
     {
         _ownerRoot = owner ?? throw new System.ArgumentNullException(nameof(owner));
+        _sampleCount = Mathf.Max(2, _sampleCount);
         _previous = new Vector3[_sampleCount];
         AbortHit();
     }
@@ -136,11 +137,14 @@ public class AttackHitbox : MonoBehaviour
     /// </summary>
     private void SaveCurrentPoints()
     {
-        int count = Physics.OverlapCapsuleNonAlloc(
-            _rootTransform.position, _tipTransform.position,
-            _radius, _overlapResults, _targetLayers,
-            QueryTriggerInteraction.Collide);
-        for (int i = 0; i < count; i++) ApplyHit(_overlapResults[i]);
+        Vector3 root = _rootTransform.position;
+        Vector3 tip = _tipTransform.position;
+        int count = _previous.Length;
+        for (int i = 0; i < count; i++)
+        {
+            float t = (float)i / (count - 1);
+            _previous[i] = Vector3.Lerp(root, tip, t);
+        }
     }
 
     /// <summary>

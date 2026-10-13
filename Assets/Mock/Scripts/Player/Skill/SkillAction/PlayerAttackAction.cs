@@ -40,49 +40,42 @@ public class PlayerAttackAction : SkillAction
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
+
                 stateInfo = animator.GetCurrentAnimatorStateInfo(0);
 
-                if (stateInfo.fullPathHash == stateHash && !animator.IsInTransition(0))
+                if (stateInfo.fullPathHash == stateHash &&
+                    !animator.IsInTransition(0))
                 {
                     break;
                 }
-                if (Time.time - entryStartedAt >= STATEENTRYTIMEOUT + TIMEOUTMARGIN)
+
+                if (Time.time - entryStartedAt >= STATEENTRYTIMEOUT)
                 {
-                    Debug.LogWarning($"AnimatorStateの遷移がタイムアウトしました。{_stateFullPath}");
-                    break;
+                    throw new TimeoutException(
+                        $"State遷移失敗: {_stateFullPath}"
+                    );
                 }
+
                 await UniTask.NextFrame(cancellationToken);
+            }
 
-                //実際のState再生時間を取得
-                float duration = stateInfo.length;
+            // Stateに入ったら再生時間を取得
+            float duration = stateInfo.length;
+            float timeoutAt = Time.time + duration + TIMEOUTMARGIN;
 
-                if (duration <= 0f)
+            // AnimationEventによる攻撃終了を待つ
+            while (receiver.IsPlaying)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if (Time.time >= timeoutAt)
                 {
-                    throw new InvalidOperationException($"{_stateFullPath}のAnimatorStateの再生時間が0以下です。");
+                    throw new TimeoutException(
+                        $"攻撃終了イベントなし: {_stateFullPath}"
+                    );
                 }
 
-                float timeoutAt = Time.time + duration + TIMEOUTMARGIN;
-
-                while (receiver.IsPlaying)
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    if (Time.time >= timeoutAt)
-                    {
-                        Debug.LogWarning($"攻撃アニメーションの再生がタイムアウトしました。{_stateFullPath}");
-                        break;
-                    }
-                    // 終了イベントなしで他Stateへ移った場合は異常
-                    stateInfo = animator.GetCurrentAnimatorStateInfo(0);
-
-                    if (stateInfo.fullPathHash != stateHash)
-                    {
-                        throw new InvalidOperationException(
-                            $"{_stateFullPath}: 攻撃が途中で中断されました。"
-                        );
-                    }
-
-                    await UniTask.NextFrame(cancellationToken);
-                }
+                await UniTask.NextFrame(cancellationToken);
             }
         }
         finally
