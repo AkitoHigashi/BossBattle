@@ -12,3 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11bdb2f1d7b8081418a2e18959c69321, type: 3}
   m_Name: AttackNode
   m_EditorClassIdentifier: Assembly-CSharp::AttackNode
+  _damage: 10
+  _debugOnly: 1
+  _attackArea: {fileID: 11400000, guid: af078b5fdb20df047b34a6f50ec88957, type: 2}
+  _origin:
+    _type: 0
+    _mapBounds:
+      m_Center: {x: 0, y: 0, z: 0}
+      m_Extent: {x: 10, y: 0, z: 10}
+    _offset: {x: 0, y: 0, z: 0}
+  _attackRadius: 3
+  _attackAngle: 360
+  _attackInterval: 1
