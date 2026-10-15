@@ -1,4 +1,8 @@
 using UnityEngine;
+
+/// <summary>
+/// 扇型の範囲の攻撃ノード、円形も対応
+/// </summary>
 [CreateAssetMenu(fileName = "AreaAttackNode", menuName = "Behavior Tree/Mock/Nodes/Action Nodes/AreaAttackNode")]
 public class AreaAttackNode : AttackNode
 {
@@ -8,15 +12,75 @@ public class AreaAttackNode : AttackNode
     [SerializeField,Min(0.01f)] 
     private float _attackRange = 5f;
 
-    protected override NodeStatus OnUpdate()
+    protected override void ExecuteAttack()
     {
         if (_blackBoard?.Transform == null)
-            return NodeStatus.Failure;
+            return;
 
-        DrawSector(_blackBoard.Transform);
-        return NodeStatus.Success;
+        var owner = _blackBoard.Transform;
+
+        var target = _blackBoard.Target;
+        if (target == null)
+            return;
+
+        if (!IsInRange(owner, target.transform.position))
+            return;
+
+        var composition = target.GetComponent<CharacterComposition>();
+        if (composition == null)
+        {
+            Debug.LogWarning(
+                "targetにCharacterCompositionがありません。");
+            return;
+        }
+
+        var character = composition.Character;
+        if (character == null || character.Health.CurrentValue <= 0)
+            return;
+
+        ApplyDamage(character);
     }
 
+    protected override void DrawTelegraph()
+    {
+        if (_blackBoard?.Transform != null)
+            DrawSector(_blackBoard.Transform);
+    }
+
+    /// <summary>
+    /// 指定された位置が攻撃範囲内かどうかを判定する。
+    /// </summary>
+    /// <param name="owner">攻撃者</param>
+    /// <param name="targetPosition">対象の位置</param>
+    /// <returns>範囲内だったらtrue</returns>
+    private bool IsInRange(Transform owner, Vector3 targetPosition)
+    {
+        Vector3 offset = targetPosition - owner.position;
+        offset.y = 0f;
+
+        float radius = Mathf.Max(0.01f, _attackRange);
+
+        // 半径外なら命中しない
+        if (offset.sqrMagnitude > radius * radius)
+            return false;
+
+        // 中心と重なっている場合は命中する。
+        if (offset.sqrMagnitude < 0.000001f)
+            return true;
+
+        float angle = Mathf.Clamp(_arcAngle, 0f, 360f);
+
+        if (angle >= 360f)
+            return true;
+
+        Vector3 forward = Vector3.ProjectOnPlane(
+            owner.forward, Vector3.up).normalized;
+
+        if (forward.sqrMagnitude < 0.000001f)
+            forward = Vector3.forward;
+
+        return Vector3.Angle(forward, offset) <= angle * 0.5f;
+    }
 
     /// <summary>
     /// 攻撃範囲をデバッグ表示する。円弧の中心はownerの位置、正面はownerの正面に対応する。

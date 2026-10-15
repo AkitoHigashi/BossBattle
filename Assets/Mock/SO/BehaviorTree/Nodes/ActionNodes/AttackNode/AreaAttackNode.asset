@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b1ae71282bc1ff54981819f3a1b85786, type: 3}
   m_Name: AreaAttackNode
   m_EditorClassIdentifier: Assembly-CSharp::AreaAttackNode
-  _attackMultiplier: 10
+  _attackMultiplier: 0.01
+  _attackInterval: 1
+  _telegraphTime: 1
   _arcAngle: 360
-  _attackRange: 1
+  _attackRange: 5

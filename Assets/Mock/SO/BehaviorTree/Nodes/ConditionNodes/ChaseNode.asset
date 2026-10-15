@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ea8471df83b41c2a37cb25804e7667c, type: 3}
   m_Name: ChaseNode
   m_EditorClassIdentifier: Assembly-CSharp::ChaseNode
-  _arrivalDistance: 1.5
+  _arrivalDistance: 3
