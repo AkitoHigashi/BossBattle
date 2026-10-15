@@ -31,7 +31,7 @@ public class BlackBoard
     private CharacterMotor _target;
     private ReactiveProperty<float> _health;
     private float _attackRange;
-    private int _attackDamage = 10;
+    private int _attackDamage;
     private NavMeshAgent _navMeshAgent;
     private Animator _animator;
     private Transform _transform;

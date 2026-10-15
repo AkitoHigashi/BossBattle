@@ -1,5 +1,4 @@
 using UnityEngine;
-[CreateAssetMenu(fileName = "AttackNode", menuName = "Behavior Tree/Mock/Nodes/Action Nodes/AttackNode")]
 public abstract class AttackNode : ActionNode
 {
     protected float Damage => _attackMultiplier;
