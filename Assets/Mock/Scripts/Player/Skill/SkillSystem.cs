@@ -7,10 +7,13 @@ using UnityEngine;
 
 public class SkillSystem : ISkillSystem, IDisposable
 {
-    public Observable<bool> IsExecuting => _sExecuting;
+    /// <summary>
+    /// 現在スキルが実行中かどうかを外部へ通知する
+    /// </summary>
+    public Observable<bool> IsExecuting => _isExecuting;
     private readonly SkillContext _skillContext;
     private readonly Dictionary<SkillDefinition, float> _nestUsableTimes = new Dictionary<SkillDefinition, float>();
-    private readonly ReactiveProperty<bool> _sExecuting = new ReactiveProperty<bool>(false);
+    private readonly ReactiveProperty<bool> _isExecuting = new ReactiveProperty<bool>(false);
     private CancellationTokenSource _cts;
     private bool _disposed;
 
@@ -27,7 +30,7 @@ public class SkillSystem : ISkillSystem, IDisposable
     public bool TryUseSkill(SkillDefinition definition)
     {
         //未定義、実行中、破棄済みの場合は使用不可。
-        if (_disposed || _sExecuting.Value || definition == null || definition.Actions == null || definition.Actions.Length == 0)
+        if (_disposed || _isExecuting.Value || definition == null || definition.Actions == null || definition.Actions.Length == 0)
         {
             return false;
         }
@@ -37,7 +40,7 @@ public class SkillSystem : ISkillSystem, IDisposable
             return false;
         }
 
-        _sExecuting.Value = true;
+        _isExecuting.Value = true;
         _nestUsableTimes[definition] = Time.time + definition.Cooldown;
         CancellationTokenSource cst = new CancellationTokenSource();
         _cts = cst;
@@ -98,7 +101,7 @@ public class SkillSystem : ISkillSystem, IDisposable
             {
                 if (ReferenceEquals(_cts, cts)) _cts = null;
                 cts.Dispose();
-                if (!_disposed) _sExecuting.Value = false;
+                if (!_disposed) _isExecuting.Value = false;
             }
         }
     }
@@ -108,9 +111,15 @@ public class SkillSystem : ISkillSystem, IDisposable
     /// </summary>
     public void CancelActiveSkill()
     {
-        if (!_disposed && _cts != null)
+        if (_disposed)
+            return;
+
+        try
         {
-            _cts.Cancel();
+            _cts?.Cancel();
+        }
+        finally
+        {
             _skillContext.AbortActiveAction();
         }
     }
@@ -124,12 +133,11 @@ public class SkillSystem : ISkillSystem, IDisposable
         try
         {
             cts?.Cancel();
-            _skillContext.AbortActiveAction();
         }
         finally
         {
-            cts?.Dispose();
-            _sExecuting.Dispose();
+            _skillContext.AbortActiveAction();
+            _isExecuting.Dispose();
         }
     }
 }
