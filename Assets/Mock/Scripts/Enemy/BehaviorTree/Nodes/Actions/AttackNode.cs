@@ -6,11 +6,16 @@ public abstract class AttackNode : ActionNode
     protected float AttackInterval => _attackInterval;
 
 
-    // 派生クラスが実装する攻撃処理
+    /// <summary>
+    /// 攻撃処理
+    /// </summary>
     protected abstract void ExecuteAttack();
 
 
-    // progress：予兆開始時は0、終了時は1
+    /// <summary>
+    /// 予兆を描画する関数
+    /// </summary>
+    /// <param name="progress">予兆開始時は0、終了時は1</param>
     protected virtual void DrawTelegraph(float progress) { }
 
     protected sealed override NodeStatus OnUpdate()
