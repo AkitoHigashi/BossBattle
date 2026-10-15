@@ -1,0 +1,38 @@
+{
+  "ProductName": "BossBattle",
+  "ProductId": "5d561f5ca5ef4b7591779902d7ad775b",
+  "ProductVersion": "1.0",
+  "imported": true,
+  "Clients": [
+    {
+      "Value": {
+        "ClientId": "xyza7891RehXlmT542U2ZCFl33uu8Gpn",
+        "ClientSecret": "+9om39voW3pPV+JfzTt06Ez9idcvQsTMXAActLWbotM",
+        "EncryptionKey": "B2CFC0F3A07C85B36128CBF317CCD5A3E1193D05376916FFD9479137EA63D0E2"
+      },
+      "Name": "Client"
+    }
+  ],
+  "Environments": {
+    "Deployments": [
+      {
+        "Value": {
+          "SandboxId": {
+            "Value": "f24c55cff1224c6e8a63fc3792b8f73c"
+          },
+          "DeploymentId": "13a42d80c1d2499180434a12463b4114"
+        },
+        "Name": "Deployment"
+      }
+    ],
+    "Sandboxes": [
+      {
+        "Value": {
+          "Value": "f24c55cff1224c6e8a63fc3792b8f73c"
+        },
+        "Name": "Sandbox"
+      }
+    ]
+  },
+  "schemaVersion": "1.0"
+}

@@ -1,0 +1,15 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35d764e077a1eff4481212b2ace53cc6, type: 3}
+  m_Name: MockBehaviorTree
+  m_EditorClassIdentifier: Assembly-CSharp::BehaviorTree
+  _rootNode: {fileID: 11400000, guid: 28f34c5d494a898488ddbce82bc0a25e, type: 2}
