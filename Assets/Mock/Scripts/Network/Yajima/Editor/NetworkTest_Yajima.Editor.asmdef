@@ -1,0 +1,7 @@
+{
+  "name": "NetworkTest_Yajima.Editor",
+  "rootNamespace": "NetworkTest_Yajima.Editor",
+  "references": ["NetworkTest_Yajima", "FishNet.Runtime", "UnityEngine.UI", "Unity.InputSystem"],
+  "includePlatforms": ["Editor"],
+  "autoReferenced": true
+}
