@@ -10,8 +10,8 @@ public abstract class AttackNode : ActionNode
     protected abstract void ExecuteAttack();
 
 
-    // 派生クラスが予兆を描画する。
-    protected virtual void DrawTelegraph() { }
+    // progress：予兆開始時は0、終了時は1
+    protected virtual void DrawTelegraph(float progress) { }
 
     protected sealed override NodeStatus OnUpdate()
     {
@@ -25,11 +25,17 @@ public abstract class AttackNode : ActionNode
         {
             if (Time.time < _finishTime)
             {
-                DrawTelegraph();
+                // 予兆描画の進捗を計算する
+                float progress = _telegraphTime > 0f
+                    ? Mathf.Clamp01(
+                        1f - (_finishTime - Time.time) / _telegraphTime)
+                    : 1f;
+
+                DrawTelegraph(progress);
                 return NodeStatus.Running;
             }
 
-            // ここから描画しない＝予兆を消して攻撃する。
+            // 広がり切ったら描画を止め、攻撃する。
             ExecuteAttack();
 
             _finishTime = Time.time + Mathf.Max(0f, _attackInterval);

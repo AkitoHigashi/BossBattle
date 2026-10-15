@@ -25,7 +25,7 @@ public sealed class ChaseNode : ActionNode
         Vector3 targetPosition = _blackBoard.Target.transform.position;
 
         // 指定距離に到達したら、このノードの処理を完了する。
-        if (Vector3.Distance(_blackBoard.Transform.position, targetPosition) <= Mathf.Max(0.01f, _arrivalDistance))
+        if (Vector3.Distance(_blackBoard.Transform.position, targetPosition) < Mathf.Max(0.01f, _arrivalDistance))
         {
             agent.ResetPath();
             agent.isStopped = true;

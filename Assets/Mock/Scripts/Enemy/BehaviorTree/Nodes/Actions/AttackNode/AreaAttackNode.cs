@@ -12,6 +12,13 @@ public class AreaAttackNode : AttackNode
     [SerializeField,Min(0.01f)] 
     private float _attackRange = 5f;
 
+    private const float FullCircleDegrees = 360f;
+    private const float MinAttackRadius = 0.01f;
+
+    // 描画する線の角度間隔。小さいほど細かくなる。
+    private const float OutlineStepDegrees = 5f;
+    private const float FillStepDegrees = 4f;
+
     protected override void ExecuteAttack()
     {
         if (_blackBoard?.Transform == null)
@@ -41,10 +48,17 @@ public class AreaAttackNode : AttackNode
         ApplyDamage(character);
     }
 
-    protected override void DrawTelegraph()
+    protected override void DrawTelegraph(float progress)
     {
-        if (_blackBoard?.Transform != null)
-            DrawSector(_blackBoard.Transform);
+        var owner = _blackBoard?.Transform;
+        if (owner == null) return;
+
+        float maxRadius = Mathf.Max(0.01f, _attackRange);
+
+        DrawSector(owner, maxRadius);
+
+        //一定速度じゃないけどモックだから許してちょ
+        DrawFilledSector(owner, maxRadius * Mathf.Clamp01(progress));
     }
 
     /// <summary>
@@ -58,49 +72,40 @@ public class AreaAttackNode : AttackNode
         Vector3 offset = targetPosition - owner.position;
         offset.y = 0f;
 
-        float radius = Mathf.Max(0.01f, _attackRange);
+        float radius = Mathf.Max(MinAttackRadius, _attackRange);
 
         // 半径外なら命中しない
         if (offset.sqrMagnitude > radius * radius)
             return false;
 
-        // 中心と重なっている場合は命中する。
-        if (offset.sqrMagnitude < 0.000001f)
-            return true;
+        float angle = Mathf.Clamp(_arcAngle, 0f, FullCircleDegrees);
 
-        float angle = Mathf.Clamp(_arcAngle, 0f, 360f);
-
-        if (angle >= 360f)
+        if (angle >= FullCircleDegrees)
             return true;
 
         Vector3 forward = Vector3.ProjectOnPlane(
             owner.forward, Vector3.up).normalized;
 
-        if (forward.sqrMagnitude < 0.000001f)
-            forward = Vector3.forward;
-
         return Vector3.Angle(forward, offset) <= angle * 0.5f;
     }
 
     /// <summary>
-    /// 攻撃範囲をデバッグ表示する。円弧の中心はownerの位置、正面はownerの正面に対応する。
+    /// 攻撃範囲を表示する
     /// </summary>
-    /// <param name="owner"></param>
-    private void DrawSector(Transform owner)
+    /// <param name="owner">円弧の中心にしたいTransform</param>
+    /// <param name="radius">半径</param>
+    private void DrawSector(Transform owner, float radius)
     {
         Vector3 center = owner.position;
         // 正面方向
         Vector3 forward = Vector3.ProjectOnPlane(
             owner.forward, Vector3.up).normalized;
 
-        if (forward.sqrMagnitude < 0.000001f)
-            forward = Vector3.forward;
-
-        float radius = Mathf.Max(0.01f, _attackRange);
-        float angle = Mathf.Clamp(_arcAngle, 0f, 360f);
+        float angle = Mathf.Clamp(_arcAngle, 0f, FullCircleDegrees);
         float halfAngle = angle * 0.5f;
-        // 5度ごとに分割する
-        int segments = Mathf.Max(1, Mathf.CeilToInt(angle / 5f));
+
+        int segments = Mathf.Max(
+    1, Mathf.CeilToInt(angle / OutlineStepDegrees));
 
         // 最初の頂点は中心から左端の外周に向かう線の先端
         Vector3 previous = center
@@ -108,7 +113,7 @@ public class AreaAttackNode : AttackNode
             * forward * radius;
 
         // 円形の場合、中心から外周への線は描かない。
-        if (angle < 360f)
+        if (angle < FullCircleDegrees)
             Debug.DrawLine(center, previous, Color.yellow);
 
         // 外周の頂点を順に描画する
@@ -124,8 +129,43 @@ public class AreaAttackNode : AttackNode
             previous = next;
         }
 
-        if (angle < 360f)
+        if (angle < FullCircleDegrees)
             Debug.DrawLine(center, previous, Color.yellow);
+    }
+
+    /// <summary>
+    /// 中心から進捗に応じた距離まで線を引く
+    /// </summary>
+    /// <param name="owner">円弧の中心にしたいTransform</param>
+    /// <param name="radius">半径</param>
+    private void DrawFilledSector(Transform owner, float radius)
+    {
+        if (radius <= 0f)
+            return;
+
+        Vector3 center = owner.position;
+
+        Vector3 forward = Vector3.ProjectOnPlane(
+            owner.forward, Vector3.up).normalized;
+
+        float angle = Mathf.Clamp(_arcAngle, 0f, FullCircleDegrees);
+
+        int segments = Mathf.Max(
+            1, Mathf.CeilToInt(angle / FillStepDegrees));
+
+
+        for (int i = 0; i <= segments; i++)
+        {
+            float yaw = -angle * 0.5f + angle * i / segments;
+
+            Vector3 direction =
+                Quaternion.AngleAxis(yaw, Vector3.up) * forward;
+
+            Debug.DrawLine(
+                center,
+                center + direction * radius,
+                Color.red);
+        }
     }
 
 }
