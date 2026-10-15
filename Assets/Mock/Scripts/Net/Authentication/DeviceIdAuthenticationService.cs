@@ -224,7 +224,7 @@ public class DeviceIdAuthenticationService : IAuthenticationService
             default:
                 Debug.LogError($"EOSデバイスID作成失敗: {callbackInfo.ResultCode}");
                 CompleteLogin(false);
-                break;
+                return;
         }
 
         EOSManager.Instance.StartConnectLoginWithDeviceToken(_displayName, OnLoginComplete);

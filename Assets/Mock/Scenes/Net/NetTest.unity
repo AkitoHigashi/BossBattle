@@ -129,6 +129,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1477178529}
   - component: {fileID: 1477178528}
+  - component: {fileID: 1477178530}
   m_Layer: 0
   m_Name: Test
   m_TagString: Untagged
@@ -163,6 +164,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1477178530
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1477178527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9577f15ce8ddcb34b93f5e24f37efa09, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::P2PConnectionTest
+  _hostProductUserId: 0002a58cef9a4602b6bb6122c6a4c80c
 --- !u!1 &1606918094
 GameObject:
   m_ObjectHideFlags: 0
