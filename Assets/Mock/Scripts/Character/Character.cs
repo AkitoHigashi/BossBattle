@@ -17,10 +17,9 @@ public class Character
     public HealthEntity Health => _health;
     public Status Status => _status;
     private HealthEntity _health;
-    private Status _status;
-    private IMovement _movement;
-    private ISkillSystem _skillSystem;
-    private IAttackSystem _attackSystem;
+    private readonly Status _status;
+    private readonly IMovement _movement;
+    private readonly IAttackSystem _attackSystem;
 
     public void TakeDamage(int damage)
     {

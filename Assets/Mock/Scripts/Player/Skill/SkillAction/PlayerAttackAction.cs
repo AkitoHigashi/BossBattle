@@ -171,7 +171,7 @@ public class PlayerAttackAction : SkillAction
     /// </summary>
     private static void ValidateAnimator(Animator animator)
     {
-        if (animator == null || !animator.isActiveAndEnabled || animator.runtimeAnimatorController == null || animator.speed <= 0f)
+        if (animator == null || !animator.isActiveAndEnabled || animator.runtimeAnimatorController == null)
             throw new InvalidOperationException("攻撃Animatorが未設定、無効、または停止しています。");
     }
 }
