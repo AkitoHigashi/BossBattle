@@ -10,6 +10,7 @@ public class BlinkAction : SkillAction
 
     public override async UniTask ExecuteAsync(SkillContext context, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         CharacterMotor motor = context.CharacterMotor;
         Vector3 direction = motor.transform.forward;
         direction.y = 0f;
@@ -22,8 +23,7 @@ public class BlinkAction : SkillAction
             float elapsed = 0f;
             while (elapsed < _duration)
             {
-                if (cancellationToken.IsCancellationRequested)
-                    break;
+                cancellationToken.ThrowIfCancellationRequested();
                 await UniTask.Yield(PlayerLoopTiming.FixedUpdate, cancellationToken);
                 elapsed += Time.fixedDeltaTime;
             }

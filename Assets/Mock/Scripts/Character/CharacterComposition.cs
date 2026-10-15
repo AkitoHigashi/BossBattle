@@ -1,4 +1,3 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterMotor))]
@@ -29,11 +28,20 @@ public class CharacterComposition : MonoBehaviour
         var movement = new CharacterMovement(_characterData, motor);
         var health = new HealthEntity(_characterData.MaxHealth);
         var status = new Status(0, 0, 0);
+        bool hasCombat = _animator != null || _attackHitbox != null || _animationEvents != null;
+        if (hasCombat)
+        {
+            if (_animator == null || _attackHitbox == null || _animationEvents == null)
+                throw new System.InvalidOperationException("スキルにはAnimator、AttackHitbox、AttackAnimationEventsの全参照が必要です。");
+            _attackHitbox.Init(transform);
+            _animationEvents.Init(_attackHitbox);
+            SkillContext context = new SkillContext(motor, _animator, _animationEvents);
+            SkillSystem = new SkillSystem(context);
+        }
         Character = new Character(health, status, movement);
-        _attackHitbox.Init(transform);
-        SkillContext context = new SkillContext(motor,_animator,_animationEvents);
-        SkillSystem = new SkillSystem(context);
     }
+
+    private void OnDisable() => SkillSystem?.CancelActiveSkill();
     private void OnDestroy()
     {
         SkillSystem?.Dispose();

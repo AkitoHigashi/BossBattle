@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering.Universal;
 
 public class AttackHitbox : MonoBehaviour
 {
@@ -50,8 +49,11 @@ public class AttackHitbox : MonoBehaviour
     public void Init(Transform owner)
     {
         _ownerRoot = owner ?? throw new System.ArgumentNullException(nameof(owner));
+        if (_rootTransform == null || _tipTransform == null)
+            throw new System.InvalidOperationException("AttackHitboxのBladeRootとBladeTipを設定してください。");
         _sampleCount = Mathf.Max(2, _sampleCount);
-        _previous = new Vector3[_sampleCount];
+        if (_previous == null || _previous.Length != _sampleCount)
+            _previous = new Vector3[_sampleCount];
         AbortHit();
     }
 
@@ -61,6 +63,8 @@ public class AttackHitbox : MonoBehaviour
     /// <param name="damage"></param>
     public void BeginHit(int damage)
     {
+        if (_previous == null || _ownerRoot == null)
+            throw new System.InvalidOperationException("AttackHitbox.Initを先に呼び出してください。");
         _damage = damage;
         _active = true;
         _hitTargets.Clear();
@@ -98,10 +102,10 @@ public class AttackHitbox : MonoBehaviour
     {
         Vector3 root = _rootTransform.position;
         Vector3 tip = _tipTransform.position;
-        for (int i = 0; i < _sampleCount; i++)
+        for (int i = 0; i < _previous.Length; i++)
         {
             // SampleCount=3ならt=0, 0.5, 1（根元/中央/先端）。
-            float t = (float)i / (_sampleCount - 1);
+            float t = (float)i / (_previous.Length - 1);
             Vector3 current = Vector3.Lerp(root, tip, t);
             Vector3 delta = current - _previous[i];
             float distance = delta.magnitude;
@@ -154,7 +158,8 @@ public class AttackHitbox : MonoBehaviour
     private void ApplyHit(Collider collider)
     {
         if (collider.transform.IsChildOf(_ownerRoot)) return;
-        if (collider.TryGetComponent<IDamageable>(out var damageable))
+        var damageable = collider.GetComponentInParent<IDamageable>();
+        if (damageable != null)
         {
             if (_hitTargets.Add(damageable))
             {
@@ -164,6 +169,12 @@ public class AttackHitbox : MonoBehaviour
     }
 
     private void OnDisable() => AbortHit();
+
+    private void OnValidate()
+    {
+        _sampleCount = Mathf.Max(2, _sampleCount);
+        _radius = Mathf.Max(0.01f, _radius);
+    }
 
     // Sceneビュー選択中のデバッグ表示。実際に掃引した軌跡そのものは描いていない。
     private void OnDrawGizmosSelected()

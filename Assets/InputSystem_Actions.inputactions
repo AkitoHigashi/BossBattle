@@ -30,7 +30,7 @@
                     "name": "Attack",
                     "type": "Button",
                     "id": "6c2ab1b8-8984-453a-af3d-a3c78ae1679a",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false,
@@ -190,6 +190,16 @@
                     "name": "Unique",
                     "type": "Button",
                     "id": "0218ddde-4c89-4d02-b916-295af233cf1e",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
+                },
+                {
+                    "name": "NormalAttack",
+                    "type": "Button",
+                    "id": "34e880da-b4d4-4127-b27b-eb95afe8ee08",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -690,6 +700,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Unique",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "84b55bd1-b19a-4097-a37a-5075880e5a8f",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "NormalAttack",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

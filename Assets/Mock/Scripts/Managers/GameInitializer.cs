@@ -6,6 +6,7 @@ public class GameInitializer : MonoBehaviour
     [SerializeField] private InputBuffer _inputBuffer;
     [SerializeField] private CharacterComposition _characterComposition;
     [SerializeField] private PlayerController _playerController;
+    [SerializeField] private SkillTestInput _skillTestInput;
 
     public bool IsInitialized { get; private set; }
 
@@ -20,6 +21,8 @@ public class GameInitializer : MonoBehaviour
         _inputBuffer.Initialize();
         _characterComposition.Initialize();
         _playerController.Initialize(_inputBuffer, _characterComposition.Character);
+        if (_skillTestInput != null)
+            _skillTestInput.Initialize(_inputBuffer, _characterComposition.SkillSystem);
 
         IsInitialized = true;
     }
