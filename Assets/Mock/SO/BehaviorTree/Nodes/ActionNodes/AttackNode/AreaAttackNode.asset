@@ -15,5 +15,6 @@ MonoBehaviour:
   _attackMultiplier: 0.01
   _attackInterval: 1
   _telegraphTime: 1
-  _arcAngle: 360
-  _attackRange: 5
+  _range:
+    _radius: 5
+    _angle: 90

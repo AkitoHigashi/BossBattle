@@ -6,11 +6,10 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "AreaAttackNode", menuName = "Behavior Tree/Mock/Nodes/Action Nodes/AreaAttackNode")]
 public class AreaAttackNode : AttackNode
 {
-    [SerializeField,Range(0f, 360f)] 
-    private float _arcAngle = 60f;
-    
-    [SerializeField,Min(0.01f)] 
-    private float _attackRange = 5f;
+    [SerializeField]
+    private SectorRange _range = new SectorRange(5f, 60f);
+
+    public SectorRange Range => _range;
 
     private const float FullCircleDegrees = 360f;
     private const float MinAttackRadius = 0.01f;
@@ -30,8 +29,13 @@ public class AreaAttackNode : AttackNode
         if (target == null)
             return;
 
-        if (!IsInRange(owner, target.transform.position))
+        if (!_range.Contains(
+                owner.position,
+                owner.forward,
+                target.transform.position))
+        {
             return;
+        }
 
         var composition = target.GetComponent<CharacterComposition>();
         if (composition == null)
@@ -48,45 +52,21 @@ public class AreaAttackNode : AttackNode
         ApplyDamage(character);
     }
 
+    /// <summary>
+    /// 外側の輪郭と、中心から進捗に応じた距離までの線を描画する
+    /// </summary>
+    /// <param name="progress"></param>
     protected override void DrawTelegraph(float progress)
     {
         var owner = _blackBoard?.Transform;
-        if (owner == null) return;
+        if (owner == null)
+            return;
 
-        float maxRadius = Mathf.Max(0.01f, _attackRange);
+        DrawSector(owner, _range.Radius);
 
-        DrawSector(owner, maxRadius);
-
-        //一定速度じゃないけどモックだから許してちょ
-        DrawFilledSector(owner, maxRadius * Mathf.Clamp01(progress));
-    }
-
-    /// <summary>
-    /// 指定された位置が攻撃範囲内かどうかを判定する。
-    /// </summary>
-    /// <param name="owner">攻撃者</param>
-    /// <param name="targetPosition">対象の位置</param>
-    /// <returns>範囲内だったらtrue</returns>
-    private bool IsInRange(Transform owner, Vector3 targetPosition)
-    {
-        Vector3 offset = targetPosition - owner.position;
-        offset.y = 0f;
-
-        float radius = Mathf.Max(MinAttackRadius, _attackRange);
-
-        // 半径外なら命中しない
-        if (offset.sqrMagnitude > radius * radius)
-            return false;
-
-        float angle = Mathf.Clamp(_arcAngle, 0f, FullCircleDegrees);
-
-        if (angle >= FullCircleDegrees)
-            return true;
-
-        Vector3 forward = Vector3.ProjectOnPlane(
-            owner.forward, Vector3.up).normalized;
-
-        return Vector3.Angle(forward, offset) <= angle * 0.5f;
+        DrawFilledSector(
+            owner,
+            _range.Radius * Mathf.Clamp01(progress));
     }
 
     /// <summary>
@@ -98,14 +78,14 @@ public class AreaAttackNode : AttackNode
     {
         Vector3 center = owner.position;
         // 正面方向
-        Vector3 forward = Vector3.ProjectOnPlane(
-            owner.forward, Vector3.up).normalized;
+        Vector3 forward =
+         SectorRange.GetHorizontalForward(owner.forward);
 
-        float angle = Mathf.Clamp(_arcAngle, 0f, FullCircleDegrees);
+        float angle = _range.Angle;
         float halfAngle = angle * 0.5f;
 
         int segments = Mathf.Max(
-    1, Mathf.CeilToInt(angle / OutlineStepDegrees));
+        1, Mathf.CeilToInt(angle / OutlineStepDegrees));
 
         // 最初の頂点は中心から左端の外周に向かう線の先端
         Vector3 previous = center
@@ -145,10 +125,10 @@ public class AreaAttackNode : AttackNode
 
         Vector3 center = owner.position;
 
-        Vector3 forward = Vector3.ProjectOnPlane(
-            owner.forward, Vector3.up).normalized;
+        Vector3 forward =
+        SectorRange.GetHorizontalForward(owner.forward);
 
-        float angle = Mathf.Clamp(_arcAngle, 0f, FullCircleDegrees);
+        float angle = _range.Angle;
 
         int segments = Mathf.Max(
             1, Mathf.CeilToInt(angle / FillStepDegrees));
