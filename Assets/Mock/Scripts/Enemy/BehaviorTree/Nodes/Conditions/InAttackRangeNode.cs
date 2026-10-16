@@ -1,4 +1,3 @@
-using GameKit.Dependencies.Utilities.Types;
 using UnityEngine;
 
 /// <summary>
@@ -13,7 +12,7 @@ public sealed class InAttackRangeNode : ConditionNode
 
     protected override NodeStatus OnUpdate()
     {
-        if (_childNode is not AreaAttackNode attack)
+        if (_childNode is not IRangeAttackNode rangeAttack)
         {
             _isChildRunning = false;
             return NodeStatus.Failure;
@@ -31,10 +30,8 @@ public sealed class InAttackRangeNode : ConditionNode
             var owner = _blackBoard.Transform;
             var target = _blackBoard.Target.transform;
 
-            // 攻撃が持つ範囲を受け取って判定する。
-            SectorRange range = attack.Range;
-
-            if (!range.Contains(
+            // 形状を知らずに、攻撃ノードへ範囲判定を依頼する。
+            if (!rangeAttack.IsInAttackRange(
                     owner.position,
                     owner.forward,
                     target.position))
@@ -44,7 +41,7 @@ public sealed class InAttackRangeNode : ConditionNode
         }
 
         // 開始後は範囲を再確認せず、硬直終了まで継続。
-        var status = attack.Evaluate();
+        var status = _childNode.Evaluate();
 
         _isChildRunning = status == NodeStatus.Running;
 

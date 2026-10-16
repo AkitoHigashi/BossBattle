@@ -14,4 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SequenceNode
   _childNodes:
   - {fileID: 11400000, guid: 290781c7311f32c4883392ad320bb78d, type: 2}
-  - {fileID: 11400000, guid: 54e0d70559077784ea2d58bfd6e6b744, type: 2}
+  - {fileID: 11400000, guid: ddcf8eb27a526c544a80c77870e29279, type: 2}
+  - {fileID: 11400000, guid: 541e5d0b088fa7d489cce846848b1147, type: 2}
