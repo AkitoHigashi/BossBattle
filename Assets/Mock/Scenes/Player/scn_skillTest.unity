@@ -407,7 +407,6 @@ MonoBehaviour:
   _inputBuffer: {fileID: 2099440925}
   _characterComposition: {fileID: 2099440922}
   _playerController: {fileID: 2099440921}
-  _skillTestInput: {fileID: 2099440932}
 --- !u!4 &809501582
 Transform:
   m_ObjectHideFlags: 0
@@ -1258,7 +1257,6 @@ GameObject:
   - component: {fileID: 2099440922}
   - component: {fileID: 2099440921}
   - component: {fileID: 2099440933}
-  - component: {fileID: 2099440932}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -1278,6 +1276,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c1a6fa038e5f0a4489022e91da260ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
+  _normalAttack: {fileID: 11400000, guid: 3c19a281ce72aef49b9eac948a05c769, type: 2}
+  _skill1: {fileID: 11400000, guid: 096a31444b1d06f4f98fe9437ff3e8f4, type: 2}
+  _logSkillResults: 0
 --- !u!114 &2099440922
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1588,20 +1589,6 @@ Transform:
   - {fileID: 1179213161}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2099440932
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2099440920}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 55d029281059e9f4192f5dbc418e108f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SkillTestInput
-  _normalAttack: {fileID: 11400000, guid: 3c19a281ce72aef49b9eac948a05c769, type: 2}
-  _blinkSlash: {fileID: 11400000, guid: 096a31444b1d06f4f98fe9437ff3e8f4, type: 2}
 --- !u!114 &2099440933
 MonoBehaviour:
   m_ObjectHideFlags: 0
