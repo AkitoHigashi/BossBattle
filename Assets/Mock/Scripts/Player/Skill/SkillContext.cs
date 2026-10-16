@@ -22,7 +22,12 @@ public sealed class SkillContext
     /// </summary>
     public void AbortActiveAction()
     {
-        if (AnimationEvents != null) AnimationEvents.CancelAttack();
-        if (CharacterMotor != null) CharacterMotor.ClearOverrideVelocity();
+        AnimationEvents?.CancelAttack();
+
+        if (CharacterMotor == null)
+            return;
+
+        CharacterMotor.ClearOverrideVelocity();
+        CharacterMotor.ClearOverrideFacingDirection();
     }
 }

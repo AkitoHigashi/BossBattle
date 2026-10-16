@@ -66,6 +66,22 @@ public class CharacterMotor : MonoBehaviour
     public void SetFacingDirection(Vector3 direction, float rotationSpeed)
     {
         direction.y = 0f;
+
+        // 入力がゼロなら新しい方向を設定しない
+        if (direction.sqrMagnitude <= 0.0001f)
+            return;
+
+        _facingDirection = direction.normalized;
+        _rotationSpeed = Mathf.Max(0f, rotationSpeed);
+    }
+
+    /// <summary>
+    /// スキル実行中の回転方向を一時的に上書きする。
+    /// </summary>
+    public void SetOverrideFacingDirection(Vector3 direction,float rotationSpeed)
+    {
+        direction.y = 0f;
+
         if (direction.sqrMagnitude <= 0.0001f)
             throw new ArgumentException("有効な回転方向を指定してください。",nameof(direction));
 
@@ -136,10 +152,15 @@ public class CharacterMotor : MonoBehaviour
         _rigidbody.linearVelocity = velocity;
 
         //スキル中は回転overrideを優先する
-        Vector3 facingDirection = _hasOverrideFacingDirection ? _overrideFacingDirection : _facingDirection;
-        float rotationSpeed = _hasOverrideFacingDirection ? _overrideRotationSpeed : _rotationSpeed;
+        Vector3 facingDirection = _hasOverrideFacingDirection
+            ? _overrideFacingDirection
+            : _facingDirection;
 
-        if (_facingDirection.sqrMagnitude <= 0.0001f || _rotationSpeed <= 0f)
+        float rotationSpeed = _hasOverrideFacingDirection
+            ? _overrideRotationSpeed
+            : _rotationSpeed;
+
+        if (facingDirection.sqrMagnitude <= 0.0001f || rotationSpeed <= 0f)
             return;
 
         Quaternion targetRotation = Quaternion.LookRotation(facingDirection, Vector3.up);

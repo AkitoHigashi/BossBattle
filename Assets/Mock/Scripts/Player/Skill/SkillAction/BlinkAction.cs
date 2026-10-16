@@ -20,14 +20,16 @@ public class BlinkAction : SkillAction
     {
         cancellationToken.ThrowIfCancellationRequested();
         CharacterMotor motor = context.CharacterMotor;
+        // 発動時点の向きを取得
+        Vector3 forward = motor.transform.forward;
+        forward.y = 0f;
+
+        // 設定された方向モードで移動方向を決定
         Vector3 moveDirection = _direction switch
         {
-            MoveDirectionMode.Forward => motor.transform.forward,
-
+            MoveDirectionMode.Forward => forward,
             MoveDirectionMode.AimDirection => direction,
-
-            MoveDirectionMode.Back => -motor.transform.forward,
-
+            MoveDirectionMode.Back => -forward,
             _ => Vector3.zero
         };
 
