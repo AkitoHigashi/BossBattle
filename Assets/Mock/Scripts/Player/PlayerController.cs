@@ -7,12 +7,14 @@ public class PlayerController : MonoBehaviour
     [Header("Skill")]
     [SerializeField] private SkillDefinition _normalAttack;
     [SerializeField] private SkillDefinition _skill1;
+    [SerializeField] private SkillDefinition _dodge;
 
     [SerializeField, Header("スキルの受付結果をConsoleに表示するか")] private bool _logSkillResults = false;
     private InputBuffer _inputBuffer;
     private InputAction _moveAction;
     private InputAction _attackAction;
     private InputAction _skill1Action;
+    private InputAction _skillDodge;
     private Character _character;
     private SkillSystem _skillSystem;
     private bool _initialized;
@@ -40,6 +42,7 @@ public class PlayerController : MonoBehaviour
         _moveAction = inputBuffer.MoveAction;
         _attackAction = inputBuffer.AttackAction;
         _skill1Action = inputBuffer.Skill1Action;
+        _skillDodge = inputBuffer.DodgeAction;
         _initialized = true;
 
         if (isActiveAndEnabled)
@@ -65,6 +68,8 @@ public class PlayerController : MonoBehaviour
                 _attackAction.started += OnAttack;
             if (_skill1 != null)
                 _skill1Action.started += OnSkill1;
+            if (_skillDodge != null)
+                _skillDodge.started += OnDodge;
         }
         _subscribed = true;
 
@@ -84,6 +89,8 @@ public class PlayerController : MonoBehaviour
                     _attackAction.started -= OnAttack;
                 if (_skill1 != null)
                     _skill1Action.started -= OnSkill1;
+                if (_skillDodge != null)
+                    _skillDodge.started -= OnDodge;
             }
             _subscribed = false;
         }
@@ -106,6 +113,11 @@ public class PlayerController : MonoBehaviour
     private void OnSkill1(InputAction.CallbackContext context)
     {
         UseSkill(_skill1);
+    }
+
+    private void OnDodge(InputAction.CallbackContext context)
+    {
+        UseSkill(_dodge);
     }
 
     /// <summary>

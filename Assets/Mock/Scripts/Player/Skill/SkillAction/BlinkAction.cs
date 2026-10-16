@@ -20,28 +20,25 @@ public class BlinkAction : SkillAction
     {
         cancellationToken.ThrowIfCancellationRequested();
         CharacterMotor motor = context.CharacterMotor;
-        direction.y = 0f;
+        Vector3 moveDirection = _direction switch
+        {
+            MoveDirectionMode.Forward => motor.transform.forward,
+
+            MoveDirectionMode.AimDirection => direction,
+
+            MoveDirectionMode.Back => -motor.transform.forward,
+
+            _ => Vector3.zero
+        };
+
+        moveDirection.y = 0f;
         if (_duration <= 0f || _speed <= 0f || direction.sqrMagnitude < 0.0001f)
             return;
 
+        moveDirection.y = 0f;
         try
         {
-            Vector3 dic = motor.transform.forward;
-            dic.y = 0f;
-            switch (_direction)
-            {
-                case MoveDirectionMode.Forward:
-
-                    motor.SetOverrideVelocity(dic.normalized * _speed);
-                    break;
-                case MoveDirectionMode.AimDirection:
-                    motor.SetOverrideVelocity(direction.normalized * _speed);
-                    break;
-                case MoveDirectionMode.Back:
-                    motor.SetOverrideVelocity(dic.normalized * -1 * _speed);
-                    break;
-            }
-
+            motor.SetOverrideVelocity(moveDirection.normalized * _speed);
             float elapsed = 0f;
             while (elapsed < _duration)
             {

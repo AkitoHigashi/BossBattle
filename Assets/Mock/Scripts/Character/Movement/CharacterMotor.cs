@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
@@ -6,11 +7,11 @@ public class CharacterMotor : MonoBehaviour
 {
     private Rigidbody _rigidbody;
     /// <summary>
-    /// 通常移動のワールド座標系XZ速度。Overrideが有効でない場合に使用します。
+    /// 通常移動速度
     /// </summary>
     private Vector3 _locomotionVelocity;
     /// <summary>
-    /// 通常移動またはOverrideに加算する外部XZ速度。明示的な解除まで保持します。
+    /// ノックバックなどの外部速度
     /// </summary>
     private Vector3 _externalVelocity;
     /// <summary>
@@ -18,14 +19,28 @@ public class CharacterMotor : MonoBehaviour
     /// </summary>
     private float _pendingExternalY;
     /// <summary>
-    /// 通常移動のXZ速度を置き換える速度。外部速度の加算と現在のY速度は維持します。
+    /// スキルなどによる移動速度のOverride
     /// </summary>
     private Vector3 _overrideVelocity;
     private bool _hasOverrideVelocity;
     /// <summary>
-    /// ワールド座標系の水平な目標方向。現在の向きや回転角そのものではありません。
+    /// 通常移動時の回転方向・回転速度
     /// </summary>
     private Vector3 _facingDirection;
+    /// <summary>
+    /// スキル実行中に優先する回転方向。
+    /// </summary>
+    private Vector3 _overrideFacingDirection;
+    /// <summary>
+    /// スキル実行中の回転速度。
+    /// 0の場合は現在の向きを維持する。
+    /// </summary>
+    private float _overrideRotationSpeed;
+    /// <summary>
+    /// スキル実行中の回転速度。
+    /// 0の場合は現在の向きを維持する。
+    /// </summary>
+    private bool _hasOverrideFacingDirection;
     private float _rotationSpeed;
 
     private void Awake()
@@ -51,8 +66,12 @@ public class CharacterMotor : MonoBehaviour
     public void SetFacingDirection(Vector3 direction, float rotationSpeed)
     {
         direction.y = 0f;
-        _facingDirection = direction;
-        _rotationSpeed = Mathf.Max(0f, rotationSpeed);
+        if (direction.sqrMagnitude <= 0.0001f)
+            throw new ArgumentException("有効な回転方向を指定してください。",nameof(direction));
+
+        _overrideFacingDirection = direction.normalized;
+        _overrideRotationSpeed = Mathf.Max(0f, rotationSpeed);
+        _hasOverrideFacingDirection = true;
     }
 
     /// <summary>
@@ -64,6 +83,17 @@ public class CharacterMotor : MonoBehaviour
         _pendingExternalY += velocity.y;
         velocity.y = 0f;
         _externalVelocity += velocity;
+    }
+
+    /// <summary>
+    /// 回転方向のOverrideを解除する。
+    /// 通常移動の回転制御に戻る。
+    /// </summary>
+    public void ClearOverrideFacingDirection()
+    {
+        _overrideFacingDirection = Vector3.zero;
+        _overrideRotationSpeed = 0f;
+        _hasOverrideFacingDirection = false;
     }
 
     /// <summary>
@@ -97,8 +127,7 @@ public class CharacterMotor : MonoBehaviour
 
     private void FixedUpdate()
     {
-        Vector3 horizontal = (_hasOverrideVelocity ? _overrideVelocity : _locomotionVelocity)
-            + _externalVelocity;
+        Vector3 horizontal = (_hasOverrideVelocity ? _overrideVelocity : _locomotionVelocity) + _externalVelocity;
         Vector3 velocity = _rigidbody.linearVelocity;
         velocity.x = horizontal.x;
         velocity.z = horizontal.z;
@@ -106,14 +135,17 @@ public class CharacterMotor : MonoBehaviour
         _pendingExternalY = 0f;
         _rigidbody.linearVelocity = velocity;
 
+        //スキル中は回転overrideを優先する
+        Vector3 facingDirection = _hasOverrideFacingDirection ? _overrideFacingDirection : _facingDirection;
+        float rotationSpeed = _hasOverrideFacingDirection ? _overrideRotationSpeed : _rotationSpeed;
+
         if (_facingDirection.sqrMagnitude <= 0.0001f || _rotationSpeed <= 0f)
             return;
 
-        Quaternion targetRotation = Quaternion.LookRotation(_facingDirection, Vector3.up);
+        Quaternion targetRotation = Quaternion.LookRotation(facingDirection, Vector3.up);
         Quaternion rotation = Quaternion.RotateTowards(
-               _rigidbody.rotation, targetRotation, _rotationSpeed * Time.fixedDeltaTime);
+               _rigidbody.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime);
         _rigidbody.MoveRotation(rotation);
-
     }
 
     private void OnDisable()
@@ -122,5 +154,6 @@ public class CharacterMotor : MonoBehaviour
         _facingDirection = Vector3.zero;
         ClearExternalVelocity();
         ClearOverrideVelocity();
+        ClearOverrideFacingDirection();
     }
 }

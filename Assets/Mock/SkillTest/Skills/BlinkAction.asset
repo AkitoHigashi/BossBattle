@@ -12,5 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1482f91072aee348bdaa948ddb72c77, type: 3}
   m_Name: BlinkAction
   m_EditorClassIdentifier: Assembly-CSharp::BlinkAction
+  _direction: 1
   _speed: 35
   _duration: 0.05
