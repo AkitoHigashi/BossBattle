@@ -12,7 +12,7 @@ namespace NetworkTest_Yajima
         InputSystem_Actions _inputActions;
         bool _registered = false;
 
-        public void InitOwner()
+        void InitOwner()
         {
             if (!IsOwner) return;
             _inputActions ??= new();
@@ -49,7 +49,16 @@ namespace NetworkTest_Yajima
 
         private void Update()
         {
+            if (!IsOwner) return;
+            MoveInput();
+            JumpInput();
+        }
+
+        private void FixedUpdate()
+        {
+            if (!IsOwner) return;
             Move();
+            Jump();
         }
 
         /// <summary>

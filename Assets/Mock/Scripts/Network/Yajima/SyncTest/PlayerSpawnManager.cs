@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using FishNet.Connection;
 using FishNet.Managing;
 using FishNet.Managing.Scened;
+using FishNet.Object;
 using UnityEngine;
 
 namespace NetworkTest_Yajima
@@ -56,9 +57,12 @@ namespace NetworkTest_Yajima
             }
 
             Transform spawn = _spawnPos[_nextSpawn];
-            Player player = Instantiate(_player, spawn.position, spawn.rotation);
-            // 読み込み中はActiveSceneがIngameTestとは限らないため、生成先を明示します。
-            _networkManager.ServerManager.Spawn(player.NetworkObject, client, gameObject.scene);
+            NetworkObject player = Instantiate(_player, spawn.position, spawn.rotation);
+
+            // ServerManagerでSpawnを使える
+            // (生成同期するオブジェクト, 誰に連携させるか, どのシーンに生成するか)
+            _networkManager.ServerManager.Spawn(player, client, gameObject.scene);
+            // スポーン失敗の場合サーバー上から消す
             if (!player.IsSpawned)
             {
                 Destroy(player.gameObject);
