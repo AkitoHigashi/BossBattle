@@ -15,6 +15,7 @@ public class BlinkAction : SkillAction
     [SerializeField] private MoveDirectionMode _direction;
     [SerializeField] private float _speed = 35f;
     [SerializeField] private float _duration = 0.05f;
+    [SerializeField] private float _aimRotationSpeed = 9000f;
 
     public override async UniTask ExecuteAsync(SkillContext context, CancellationToken cancellationToken, Vector3 direction)
     {
@@ -34,13 +35,24 @@ public class BlinkAction : SkillAction
         };
 
         moveDirection.y = 0f;
-        if (_duration <= 0f || _speed <= 0f || direction.sqrMagnitude < 0.0001f)
+        if (_duration <= 0f || _speed <= 0f || moveDirection.sqrMagnitude <= 0.0001f)
             return;
 
         moveDirection.y = 0f;
         try
         {
             motor.SetOverrideVelocity(moveDirection.normalized * _speed);
+            if (_direction == MoveDirectionMode.AimDirection)
+            {
+                // マウス方向へのブリンク
+                motor.SetOverrideFacingDirection(moveDirection,_aimRotationSpeed);
+            }
+            else
+            {
+                // 前方回避・後方回避では向きを固定
+                motor.SetOverrideFacingDirection(forward,0f);
+            }
+
             float elapsed = 0f;
             while (elapsed < _duration)
             {
@@ -53,6 +65,7 @@ public class BlinkAction : SkillAction
         finally
         {
             motor.ClearOverrideVelocity();
+            motor.ClearOverrideFacingDirection();
         }
     }
 }

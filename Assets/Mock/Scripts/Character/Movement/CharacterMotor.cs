@@ -38,7 +38,6 @@ public class CharacterMotor : MonoBehaviour
     private float _overrideRotationSpeed;
     /// <summary>
     /// スキル実行中の回転速度。
-    /// 0の場合は現在の向きを維持する。
     /// </summary>
     private bool _hasOverrideFacingDirection;
     private float _rotationSpeed;
