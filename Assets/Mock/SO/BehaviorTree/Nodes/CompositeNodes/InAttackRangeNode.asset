@@ -12,4 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0997927a830a7e64ba96a98102176975, type: 3}
   m_Name: InAttackRangeNode
   m_EditorClassIdentifier: Assembly-CSharp::InAttackRangeNode
-  _childNode: {fileID: 11400000, guid: 3cb35fdb304cae94dbf214d4c403e725, type: 2}
+  _childNode: {fileID: 11400000, guid: b255c6ba514a9774492eea947e6e6564, type: 2}
+  _range: {fileID: 11400000, guid: fd3771dfb725af94fae8bc094620c508, type: 2}
+  _telegraphTime: 1
