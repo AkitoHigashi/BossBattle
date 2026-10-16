@@ -4,12 +4,21 @@ using UnityEngine;
 /// 扇型の範囲の攻撃ノード、円形も対応
 /// </summary>
 [CreateAssetMenu(fileName = "AreaAttackNode", menuName = "Behavior Tree/Mock/Nodes/Action Nodes/AreaAttackNode")]
-public class AreaAttackNode : AttackNode
+public class AreaAttackNode : AttackNode, IRangeAttackNode
 {
     [SerializeField]
     private SectorRange _range = new SectorRange(5f, 60f);
 
     public SectorRange Range => _range;
+
+    /// <summary>この攻撃が持つ範囲設定を使って、指定位置を判定する。</summary>
+    public bool IsInAttackRange(
+        Vector3 origin,
+        Vector3 forward,
+        Vector3 targetPosition)
+    {
+        return _range.Contains(origin, forward, targetPosition);
+    }
 
     private const float FullCircleDegrees = 360f;
     private const float MinAttackRadius = 0.01f;
@@ -29,7 +38,7 @@ public class AreaAttackNode : AttackNode
         if (target == null)
             return;
 
-        if (!_range.Contains(
+        if (!IsInAttackRange(
                 owner.position,
                 owner.forward,
                 target.transform.position))
