@@ -34,7 +34,7 @@ public class PlayerAttackAction : SkillAction
     /// </summary>
     private const float NOPROGRESSTIMEOUT = 1f;
 
-    public override async UniTask ExecuteAsync(SkillContext context, CancellationToken cancellationToken)
+    public override async UniTask ExecuteAsync(SkillContext context, CancellationToken cancellationToken,Vector3 direction)
     {
         Animator animator = context.Animator;
         AttackAnimationEvents receiver = context.AnimationEvents;

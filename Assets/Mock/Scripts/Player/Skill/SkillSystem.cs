@@ -23,11 +23,11 @@ public class SkillSystem : ISkillSystem, IDisposable
     }
 
     /// <summary>
-    /// 
+    /// スキルの実行を試す。
     /// </summary>
     /// <param name="definition"></param>
     /// <returns></returns>
-    public bool TryUseSkill(SkillDefinition definition)
+    public bool TryUseSkill(SkillDefinition definition, Vector3 direction)
     {
         //未定義、実行中、破棄済みの場合は使用不可。
         if (_disposed || _isExecuting.Value || definition == null || definition.Actions == null || definition.Actions.Length == 0)
@@ -44,7 +44,7 @@ public class SkillSystem : ISkillSystem, IDisposable
         _nestUsableTimes[definition] = Time.time + definition.Cooldown;
         CancellationTokenSource cst = new CancellationTokenSource();
         _cts = cst;
-        ExecutAsync(definition, cst, cst.Token).Forget();
+        ExecutAsync(definition, cst, cst.Token, direction).Forget();
         return true;
     }
 
@@ -68,7 +68,7 @@ public class SkillSystem : ISkillSystem, IDisposable
     /// <param name="skill"></param>
     /// <param name="cts"></param>
     /// <returns></returns>
-    private async UniTask ExecutAsync(SkillDefinition skill, CancellationTokenSource cts, CancellationToken token)
+    private async UniTask ExecutAsync(SkillDefinition skill, CancellationTokenSource cts, CancellationToken token, Vector3 direction)
     {
         try
         {
@@ -79,7 +79,7 @@ public class SkillSystem : ISkillSystem, IDisposable
                 {
                     throw new InvalidOperationException($"スキルが設定されていない   {skill.SkillName}");
                 }
-                await action.ExecuteAsync(_skillContext, token);
+                await action.ExecuteAsync(_skillContext, token, direction);
             }
         }
         //プレイヤーが死んだ時とか

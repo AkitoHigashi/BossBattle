@@ -62,9 +62,9 @@ public class PlayerController : MonoBehaviour
         if (_skillSystem != null)
         {
             if (_normalAttack != null)
-                _attackAction.performed += OnAttack;
+                _attackAction.started += OnAttack;
             if (_skill1 != null)
-                _skill1Action.performed += OnSkill1;
+                _skill1Action.started += OnSkill1;
         }
         _subscribed = true;
 
@@ -78,8 +78,13 @@ public class PlayerController : MonoBehaviour
         {
             _moveAction.performed -= OnMove;
             _moveAction.canceled -= OnMove;
-            _attackAction.started -= OnAttack;
-            _skill1Action.started -= OnSkill1;
+            if (_skillSystem != null)
+            {
+                if (_normalAttack != null)
+                    _attackAction.started -= OnAttack;
+                if (_skill1 != null)
+                    _skill1Action.started -= OnSkill1;
+            }
             _subscribed = false;
         }
 
@@ -112,7 +117,7 @@ public class PlayerController : MonoBehaviour
             return;
 
         // スキルの実行を要求
-        bool accepted = _skillSystem.TryUseSkill(definition);
+        bool accepted = _skillSystem.TryUseSkill(definition, GetMOuseDirection());
 
         // テスト時のみ結果をログ出力
         if (_logSkillResults)
@@ -125,5 +130,31 @@ public class PlayerController : MonoBehaviour
                 this
             );
         }
+    }
+
+    /// <summary>
+    /// マウスカーソルが指すワールド方向を取得する
+    /// </summary>
+    /// <returns></returns>
+    private Vector3 GetMOuseDirection()
+    {
+        if (Camera.main == null || Mouse.current == null)
+            return transform.forward;
+
+        Vector2 mousePosition = Mouse.current.position.ReadValue();
+        Ray ray = Camera.main.ScreenPointToRay(mousePosition);
+        Plane plane = new Plane(Vector3.up, transform.position);
+
+        if (!plane.Raycast(ray, out float distance))
+            return transform.forward;
+
+        Vector3 targetPoint = ray.GetPoint(distance);
+        Vector3 direction = targetPoint - transform.position;
+        direction.y = 0f;
+
+        if (direction.sqrMagnitude < 0.0001f)
+            return transform.forward;
+
+        return direction.normalized;
     }
 }

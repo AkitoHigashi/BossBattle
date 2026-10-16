@@ -25,7 +25,11 @@ public class SkillTestInput : MonoBehaviour
         if (isActiveAndEnabled) Subscribe();
     }
 
-    private void OnEnable() { if (_skills != null) Subscribe(); }
+    private void OnEnable()
+    {
+        if (_skills != null) Subscribe();
+    }
+
     private void Subscribe()
     {
         if (_subscribed) return;
@@ -33,13 +37,24 @@ public class SkillTestInput : MonoBehaviour
         _blinkAction.performed += OnBlink;
         _subscribed = true;
     }
-    private void OnAttack(InputAction.CallbackContext context) => Use(_normalAttack);
-    private void OnBlink(InputAction.CallbackContext context) => Use(_blinkSlash);
+
+    private void OnAttack(InputAction.CallbackContext context)
+    {
+        Use(_normalAttack);
+    }
+
+    private void OnBlink(InputAction.CallbackContext context)
+    {
+        Use(_blinkSlash);
+    }
+
     private void Use(SkillDefinition definition)
     {
-        bool accepted = _skills.TryUseSkill(definition);
+        Vector3 direction = this.transform.forward;
+        bool accepted = _skills.TryUseSkill(definition, direction);
         Debug.Log($"[SkillTest] {definition.SkillName}: accepted={accepted}, cooldown={_skills.GetCooldownRemaing(definition):0.00}s", this);
     }
+
     private void OnDisable()
     {
         if (_subscribed)
