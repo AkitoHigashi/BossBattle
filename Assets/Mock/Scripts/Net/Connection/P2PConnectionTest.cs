@@ -1,4 +1,3 @@
-
 using FishNet;
 using FishNet.Transporting;
 using FishNet.Transporting.FishyEOSPlugin;
