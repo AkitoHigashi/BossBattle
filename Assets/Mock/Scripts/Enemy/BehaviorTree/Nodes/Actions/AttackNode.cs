@@ -1,76 +1,57 @@
 using UnityEngine;
-public abstract class AttackNode : ActionNode
+
+/// <summary>
+/// 攻撃を与えるノード
+/// </summary>
+[CreateAssetMenu(
+    fileName = "AttackNode",
+    menuName = "Behavior Tree/Mock/Nodes/Action Nodes/AttackNode")]
+public class AttackNode : ActionNode
 {
-    protected float Damage => _attackMultiplier;
-    protected float AttackInterval => _attackInterval;
+    [SerializeField, Min(0.01f)]
+    private float _attackMultiplier = 1.5f;
 
+    [SerializeField, Min(0f)]
+    private float _attackInterval = 1f;
 
-    /// <summary>
-    /// 攻撃処理
-    /// </summary>
-    protected abstract void ExecuteAttack();
+    private bool _isWaiting;
+    private float _finishTime;
 
-
-    /// <summary>
-    /// 予兆を描画する関数
-    /// </summary>
-    /// <param name="progress">予兆開始時は0、終了時は1</param>
-    protected virtual void DrawTelegraph(float progress) { }
-
-    protected sealed override NodeStatus OnUpdate()
+    protected override NodeStatus OnUpdate()
     {
-        if (_state == AttackState.Ready)
+        if (!_isWaiting)
         {
-            _finishTime = Time.time + _telegraphTime;
-            _state = AttackState.Telegraph;
-        }
+            var target = _blackBoard?.Target;
+            if (target == null)
+                return NodeStatus.Failure;
 
-        if (_state == AttackState.Telegraph)
-        {
-            if (Time.time < _finishTime)
+            var composition =
+                target.GetComponent<CharacterComposition>();
+
+            var character = composition?.Character;
+
+            if (character == null ||
+                character.Health.CurrentValue <= 0)
             {
-                // 予兆描画の進捗を計算する
-                float progress = _telegraphTime > 0f
-                    ? Mathf.Clamp01(
-                        1f - (_finishTime - Time.time) / _telegraphTime)
-                    : 1f;
-
-                DrawTelegraph(progress);
-                return NodeStatus.Running;
+                return NodeStatus.Failure;
             }
 
-            // 広がり切ったら描画を止め、攻撃する。
-            ExecuteAttack();
+            int damage = (int)(
+                _blackBoard.AttackDamage * _attackMultiplier);
 
-            _finishTime = Time.time + Mathf.Max(0f, _attackInterval);
-            _state = AttackState.Recovery;
+            character.TakeDamage(damage);
+            Debug.Log($"{damage}ダメージ", target);
+
+            _finishTime =
+                Time.time + Mathf.Max(0f, _attackInterval);
+
+            _isWaiting = true;
         }
 
         if (Time.time < _finishTime)
             return NodeStatus.Running;
 
-        _state = AttackState.Ready;
+        _isWaiting = false;
         return NodeStatus.Success;
-    }
-
-    protected void ApplyDamage(Character target)
-    {
-        if (target == null) return;
-
-        target.TakeDamage((int)(_blackBoard.AttackDamage * _attackMultiplier));
-
-        Debug.Log($"{target}に{(int)(_blackBoard.AttackDamage * _attackMultiplier)}ダメージ");
-    }
-
-    [SerializeField, Min(0.01f)] private float _attackMultiplier = 1.5f;
-    [SerializeField, Min(0f)] private float _attackInterval = 1f;
-    [SerializeField, Min(0f)] private float _telegraphTime = 1f;
-    private float _finishTime;
-    private AttackState _state;
-    private enum AttackState
-    {
-        Ready,
-        Telegraph,
-        Recovery
     }
 }
