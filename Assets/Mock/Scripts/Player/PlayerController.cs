@@ -1,8 +1,8 @@
 using System;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(CharacterMotor))]
 public class PlayerController : MonoBehaviour
 {
     [Header("Skill")]
@@ -43,6 +43,10 @@ public class PlayerController : MonoBehaviour
             throw new ArgumentNullException(nameof(character));
         if (data == null)
             throw new ArgumentNullException(nameof(data));
+        if (!TryGetComponent<CharacterMotor>(out var motor))
+        {
+            throw new InvalidOperationException("PlayerControllerにCharacterMotorが必要です。");
+        }
         if (!inputBuffer.IsInitialized || inputBuffer.MoveAction == null)
             throw new InvalidOperationException("PlayerControllerより先にInputBufferを初期化してください。");
 
@@ -132,7 +136,7 @@ public class PlayerController : MonoBehaviour
             }
             _subscribed = false;
         }
-
+        _motor?.ClearAimFacingDirection();
         _character?.Move(new MovementData(Vector3.zero));
         _skillSystem?.CancelActiveSkill();
     }
@@ -196,7 +200,7 @@ public class PlayerController : MonoBehaviour
             return false;
 
         Vector2 mousePosition = Mouse.current.position.ReadValue();
-        Ray ray = Camera.main.ScreenPointToRay(mousePosition);
+        Ray ray = camera.ScreenPointToRay(mousePosition);
         Plane plane = new Plane(Vector3.up, transform.position);
 
         if (!plane.Raycast(ray, out float distance))

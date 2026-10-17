@@ -151,7 +151,7 @@ public class CharacterMotor : MonoBehaviour
     {
         direction.y = 0f;
 
-        if (direction.sqrMagnitude <= -0.0001f)
+        if (direction.sqrMagnitude <= 0.0001f)
             return;
 
         _aimFacingDirection = direction.normalized;
