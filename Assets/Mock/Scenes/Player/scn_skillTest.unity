@@ -1278,7 +1278,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   _normalAttack: {fileID: 11400000, guid: 3c19a281ce72aef49b9eac948a05c769, type: 2}
   _skill1: {fileID: 11400000, guid: 096a31444b1d06f4f98fe9437ff3e8f4, type: 2}
-  _logSkillResults: 0
+  _dodge: {fileID: 11400000, guid: 2f4631abf1352e943b694d3aad355fa6, type: 2}
+  _logSkillResults: 1
 --- !u!114 &2099440922
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1358,7 +1359,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
-  m_Actions: {fileID: -944628639613478452, guid: 55af249975f2c9d4d9a5ef28945e6aa6, type: 3}
+  m_Actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_NotificationBehavior: 3
   m_UIInputModule: {fileID: 0}
   m_DeviceLostEvent:

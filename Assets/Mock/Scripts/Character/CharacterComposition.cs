@@ -4,6 +4,7 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class CharacterComposition : MonoBehaviour
 {
+    public CharacterData CharacterData => _characterData;
     public Character Character { get; private set; }
     public SkillSystem SkillSystem { get; private set; }
 

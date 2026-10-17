@@ -38,7 +38,6 @@ public class BlinkAction : SkillAction
         if (_duration <= 0f || _speed <= 0f || moveDirection.sqrMagnitude <= 0.0001f)
             return;
 
-        moveDirection.y = 0f;
         try
         {
             motor.SetOverrideVelocity(moveDirection.normalized * _speed);

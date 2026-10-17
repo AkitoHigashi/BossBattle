@@ -40,6 +40,10 @@ public class CharacterMotor : MonoBehaviour
     /// スキル実行中の回転速度。
     /// </summary>
     private bool _hasOverrideFacingDirection;
+
+    private Vector3 _aimFacingDirection;
+    private float _aimRotationSpeed;
+    private bool _hasAimFacingDirection;
     private float _rotationSpeed;
 
     private void Awake()
@@ -77,12 +81,12 @@ public class CharacterMotor : MonoBehaviour
     /// <summary>
     /// スキル実行中の回転方向を一時的に上書きする。
     /// </summary>
-    public void SetOverrideFacingDirection(Vector3 direction,float rotationSpeed)
+    public void SetOverrideFacingDirection(Vector3 direction, float rotationSpeed)
     {
         direction.y = 0f;
 
         if (direction.sqrMagnitude <= 0.0001f)
-            throw new ArgumentException("有効な回転方向を指定してください。",nameof(direction));
+            throw new ArgumentException("有効な回転方向を指定してください。", nameof(direction));
 
         _overrideFacingDirection = direction.normalized;
         _overrideRotationSpeed = Mathf.Max(0f, rotationSpeed);
@@ -140,6 +144,31 @@ public class CharacterMotor : MonoBehaviour
         _hasOverrideVelocity = false;
     }
 
+    /// <summary>
+    /// プレイヤーの照準方向を設定する。
+    /// </summary>
+    public void SetAimFactingDirection(Vector3 direction, float rotationnSpeed)
+    {
+        direction.y = 0f;
+
+        if (direction.sqrMagnitude <= -0.0001f)
+            return;
+
+        _aimFacingDirection = direction.normalized;
+        _aimRotationSpeed = Mathf.Max(0f, rotationnSpeed);
+        _hasAimFacingDirection = true;
+    }
+
+    /// <summary>
+    /// マウス照準による回転制御を解除する。
+    /// </summary>
+    public void ClearAimFacingDirection()
+    {
+        _aimFacingDirection = Vector3.zero;
+        _aimRotationSpeed = 0f;
+        _hasAimFacingDirection = false;
+    }
+
     private void FixedUpdate()
     {
         Vector3 horizontal = (_hasOverrideVelocity ? _overrideVelocity : _locomotionVelocity) + _externalVelocity;
@@ -150,14 +179,27 @@ public class CharacterMotor : MonoBehaviour
         _pendingExternalY = 0f;
         _rigidbody.linearVelocity = velocity;
 
-        //スキル中は回転overrideを優先する
-        Vector3 facingDirection = _hasOverrideFacingDirection
-            ? _overrideFacingDirection
-            : _facingDirection;
+        Vector3 facingDirection;
+        float rotationSpeed;
 
-        float rotationSpeed = _hasOverrideFacingDirection
-            ? _overrideRotationSpeed
-            : _rotationSpeed;
+        // 優先度1：マウス照準
+        if (_hasAimFacingDirection)
+        {
+            facingDirection = _aimFacingDirection;
+            rotationSpeed = _aimRotationSpeed;
+        }
+        // 優先度2：スキル
+        else if (_hasOverrideFacingDirection)
+        {
+            facingDirection = _overrideFacingDirection;
+            rotationSpeed = _overrideRotationSpeed;
+        }
+        // 優先度3：通常移動
+        else
+        {
+            facingDirection = _facingDirection;
+            rotationSpeed = _rotationSpeed;
+        }
 
         if (facingDirection.sqrMagnitude <= 0.0001f || rotationSpeed <= 0f)
             return;
@@ -175,5 +217,6 @@ public class CharacterMotor : MonoBehaviour
         ClearExternalVelocity();
         ClearOverrideVelocity();
         ClearOverrideFacingDirection();
+        ClearAimFacingDirection();
     }
 }
