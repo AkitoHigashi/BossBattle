@@ -6,7 +6,8 @@ public class BlackBoard
 {
     public BlackBoard(CharacterMotor target,
         ReactiveProperty<float> health, 
-        float attackRange, 
+        float attackRange,
+        int attackDamage,
         NavMeshAgent navMeshAgent,
         Animator animator,
         Transform transform)
@@ -14,6 +15,7 @@ public class BlackBoard
         _target = target;
         _health = health;
         _attackRange = attackRange;
+        _attackDamage = attackDamage;
         _navMeshAgent = navMeshAgent;
         _animator = animator;
         _transform = transform; 
@@ -21,6 +23,7 @@ public class BlackBoard
     public CharacterMotor Target => _target;
     public ReactiveProperty<float> Health => _health;
     public float AttackRange => _attackRange;
+    public int AttackDamage => _attackDamage;
     public NavMeshAgent NavMeshAgent => _navMeshAgent;
     public Animator Animator => _animator;
     public Transform Transform => _transform;
@@ -28,6 +31,7 @@ public class BlackBoard
     private CharacterMotor _target;
     private ReactiveProperty<float> _health;
     private float _attackRange;
+    private int _attackDamage;
     private NavMeshAgent _navMeshAgent;
     private Animator _animator;
     private Transform _transform;

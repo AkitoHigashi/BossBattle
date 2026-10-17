@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 689d7f5d849e97540a453dd65e07522f, type: 3}
   m_Name: NearByPlayerNode
   m_EditorClassIdentifier: Assembly-CSharp::NearByPlayerNode
-  _childNode: {fileID: 11400000, guid: 5cc54dcc7af5cf740acae412493b1af3, type: 2}
+  _childNode: {fileID: 0}

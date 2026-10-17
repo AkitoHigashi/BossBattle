@@ -9,6 +9,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 11bdb2f1d7b8081418a2e18959c69321, type: 3}
-  m_Name: AttackNode
-  m_EditorClassIdentifier: Assembly-CSharp::AttackNode
+  m_Script: {fileID: 11500000, guid: 05aea194352712145957c18a2295c807, type: 3}
+  m_Name: FaceTargetNode
+  m_EditorClassIdentifier: Assembly-CSharp::FaceTargetNode
