@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1482f91072aee348bdaa948ddb72c77, type: 3}
   m_Name: DodgeAction
   m_EditorClassIdentifier: Assembly-CSharp::BlinkAction
-  _direction: 0
+  _direction: 3
   _speed: 35
   _duration: 0.05
+  _aimRotationSpeed: 9000
