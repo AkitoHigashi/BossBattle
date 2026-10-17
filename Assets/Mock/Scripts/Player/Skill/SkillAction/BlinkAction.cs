@@ -6,7 +6,8 @@ public enum MoveDirectionMode
 {
     Forward,
     AimDirection,
-    Back
+    Back,
+    InputDirection
 }
 
 [CreateAssetMenu(fileName = "BlinkAction", menuName = "Skill/Action/BlinkAction")]
@@ -31,6 +32,7 @@ public class BlinkAction : SkillAction
             MoveDirectionMode.Forward => forward,
             MoveDirectionMode.AimDirection => direction,
             MoveDirectionMode.Back => -forward,
+            MoveDirectionMode.InputDirection => direction,
             _ => Vector3.zero
         };
 
@@ -44,12 +46,12 @@ public class BlinkAction : SkillAction
             if (_direction == MoveDirectionMode.AimDirection)
             {
                 // マウス方向へのブリンク
-                motor.SetOverrideFacingDirection(moveDirection,_aimRotationSpeed);
+                motor.SetOverrideFacingDirection(moveDirection, _aimRotationSpeed);
             }
             else
             {
                 // 前方回避・後方回避では向きを固定
-                motor.SetOverrideFacingDirection(forward,0f);
+                motor.SetOverrideFacingDirection(forward, 0f);
             }
 
             float elapsed = 0f;

@@ -43,10 +43,6 @@ public class PlayerController : MonoBehaviour
             throw new ArgumentNullException(nameof(character));
         if (data == null)
             throw new ArgumentNullException(nameof(data));
-        if (!TryGetComponent<CharacterMotor>(out var motor))
-        {
-            throw new InvalidOperationException("PlayerControllerにCharacterMotorが必要です。");
-        }
         if (!inputBuffer.IsInitialized || inputBuffer.MoveAction == null)
             throw new InvalidOperationException("PlayerControllerより先にInputBufferを初期化してください。");
 
@@ -82,7 +78,7 @@ public class PlayerController : MonoBehaviour
         if (TryGetMouseDirection(out Vector3 direction))
         {
             // 回転速度はCharacterDataから取得
-            _motor.SetAimFactingDirection(direction,_characterData.MouseRotationSpeed);
+            _motor.SetAimFactingDirection(direction, _characterData.MouseRotationSpeed);
         }
         else
         {
@@ -159,7 +155,9 @@ public class PlayerController : MonoBehaviour
 
     private void OnDodge(InputAction.CallbackContext context)
     {
-        UseSkill(_dodge);
+        Vector2 input = _moveAction.ReadValue<Vector2>();
+        Vector3 direction = new Vector3(input.x, 0f, input.y);
+        UseSkill(_dodge, direction.normalized);
     }
 
     /// <summary>
@@ -167,9 +165,15 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     private void UseSkill(SkillDefinition definition)
     {
+        Vector3 direction = TryGetMouseDirection(out var mouseDirectoin) ? mouseDirectoin : transform.forward;
+        UseSkill(definition, direction);
+    }
+
+    private void UseSkill(SkillDefinition definition,Vector3 direction)
+    {
         if (_skillSystem == null || definition == null)
             return;
-        Vector3 direction = TryGetMouseDirection(out var mouseDirectoin) ? mouseDirectoin : transform.forward;
+
         // スキルの実行を要求
         bool accepted = _skillSystem.TryUseSkill(definition, direction);
 
