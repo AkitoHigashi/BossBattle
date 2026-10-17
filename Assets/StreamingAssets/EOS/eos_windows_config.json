@@ -11,7 +11,7 @@
     "EncryptionKey": "B2CFC0F3A07C85B36128CBF317CCD5A3E1193D05376916FFD9479137EA63D0E2"
   },
   "isServer": false,
-  "platformOptionsFlags": -1,
+  "platformOptionsFlags": "None",
   "authScopeOptionsFlags": "BasicProfile",
   "integratedPlatformManagementFlags": 0,
   "tickBudgetInMilliseconds": 0,
