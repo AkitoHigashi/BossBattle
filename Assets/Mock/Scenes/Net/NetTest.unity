@@ -129,13 +129,14 @@ GameObject:
   m_Component:
   - component: {fileID: 572807755}
   - component: {fileID: 572807754}
+  - component: {fileID: 572807756}
   m_Layer: 0
   m_Name: NetWorkCubeSpawer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &572807754
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -143,7 +144,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 572807753}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 64b5425b9653d0c48af4c4607678f1cb, type: 3}
   m_Name: 
@@ -164,6 +165,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &572807756
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 572807753}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af7e131c915a4d24aa901c0e3fb13691, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkEnemySpawner
+  _enemyPrefab: {fileID: 3212036713293649020, guid: 5bc26300096711e4e846b30349578f18, type: 3}
+  _spawnPosition: {x: 5, y: 1, z: 5}
 --- !u!1 &1477178527
 GameObject:
   m_ObjectHideFlags: 0
@@ -545,7 +560,7 @@ PrefabInstance:
     - target: {fileID: 6496733941511580393, guid: 67443025b9705014dac491326e918c9e, type: 3}
       propertyPath: _playerPrefab
       value: 
-      objectReference: {fileID: 7331566594972606513, guid: c2ff6254ca422b9409f8eaf9e8e10cc8, type: 3}
+      objectReference: {fileID: 7331566594972606513, guid: bdd67eb329a2b714db384ff08f35e9f4, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 682649832265540937, guid: 67443025b9705014dac491326e918c9e, type: 3}
