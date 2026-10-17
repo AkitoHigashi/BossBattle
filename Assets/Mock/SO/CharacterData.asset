@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: CharacterData
   m_EditorClassIdentifier: Assembly-CSharp::CharacterData
   _moveSpeed: 5
-  _rotationSpeed: 720
+  _rotationSpeed: 1440
   _maxHealth: 1
