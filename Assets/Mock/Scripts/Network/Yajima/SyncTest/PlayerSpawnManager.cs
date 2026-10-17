@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using FishNet;
 using FishNet.Connection;
 using FishNet.Managing;
 using FishNet.Managing.Scened;
@@ -11,32 +12,24 @@ namespace NetworkTest_Yajima
     {
         [SerializeField] Player _player;
         [SerializeField] Transform[] _spawnPos;
-        private NetworkManager _networkManager;
         private readonly HashSet<int> _spawnedClients = new();
         private int _nextSpawn;
 
         private void Awake()
         {
-            _networkManager = FindAnyObjectByType<NetworkManager>();
-            if (_networkManager == null)
-            {
-                Debug.LogWarning("NetworkManagerが見つかりません", this);
-                return;
-            }
-
-            _networkManager.SceneManager.OnClientPresenceChangeEnd += OnClientPresenceChangeEnd;
+            InstanceFinder.SceneManager.OnClientPresenceChangeEnd += OnClientPresenceChangeEnd;
         }
 
         private void OnDestroy()
         {
-            if (_networkManager != null && _networkManager.Initialized)
-                _networkManager.SceneManager.OnClientPresenceChangeEnd -= OnClientPresenceChangeEnd;
+            if (InstanceFinder.ServerManager == null) return;
+            InstanceFinder.SceneManager.OnClientPresenceChangeEnd -= OnClientPresenceChangeEnd;
         }
 
         private void OnClientPresenceChangeEnd(ClientPresenceChangeEventArgs args)
         {
             // この通知はサーバー側で、対象クライアントのシーン所属が確定した後に届きます。
-            if (!args.Added || args.Scene != gameObject.scene || !_networkManager.ServerManager.Started) return;
+            if (!args.Added || args.Scene != gameObject.scene || !InstanceFinder.ServerManager.Started) return;
             SpawnPlayer(args.Connection);
         }
 
@@ -61,7 +54,7 @@ namespace NetworkTest_Yajima
 
             // ServerManagerでSpawnを使える
             // (生成同期するオブジェクト, 誰に連携させるか, どのシーンに生成するか)
-            _networkManager.ServerManager.Spawn(player, client, gameObject.scene);
+            InstanceFinder.ServerManager.Spawn(player, client, gameObject.scene);
             // スポーン失敗の場合サーバー上から消す
             if (!player.IsSpawned)
             {
