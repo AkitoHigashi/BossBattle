@@ -157,6 +157,9 @@ public class PlayerController : MonoBehaviour
     {
         Vector2 input = _moveAction.ReadValue<Vector2>();
         Vector3 direction = new Vector3(input.x, 0f, input.y);
+        if (direction.sqrMagnitude <= 0.001f)
+            direction = transform.forward;
+        direction.y = 0f;
         UseSkill(_dodge, direction.normalized);
     }
 
@@ -169,7 +172,7 @@ public class PlayerController : MonoBehaviour
         UseSkill(definition, direction);
     }
 
-    private void UseSkill(SkillDefinition definition,Vector3 direction)
+    private void UseSkill(SkillDefinition definition, Vector3 direction)
     {
         if (_skillSystem == null || definition == null)
             return;
