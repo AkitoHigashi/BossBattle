@@ -10,7 +10,8 @@ public class BlackBoard
         int attackDamage,
         NavMeshAgent navMeshAgent,
         Animator animator,
-        Transform transform)
+        Transform transform,
+        AttackPredictionView predictionView = null)
     {
         _target = target;
         _health = health;
@@ -19,6 +20,7 @@ public class BlackBoard
         _navMeshAgent = navMeshAgent;
         _animator = animator;
         _transform = transform; 
+        PredictionView = predictionView;
     }
     public CharacterMotor Target => _target;
     public ReactiveProperty<float> Health => _health;
@@ -27,6 +29,8 @@ public class BlackBoard
     public NavMeshAgent NavMeshAgent => _navMeshAgent;
     public Animator Animator => _animator;
     public Transform Transform => _transform;
+    public AttackPredictionView PredictionView { get; }
+    public AerialAttackContext AerialAttack { get; } = new AerialAttackContext();
 
     private CharacterMotor _target;
     private ReactiveProperty<float> _health;
