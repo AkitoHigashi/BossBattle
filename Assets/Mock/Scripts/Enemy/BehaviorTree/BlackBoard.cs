@@ -21,6 +21,7 @@ public class BlackBoard
         _animator = animator;
         _transform = transform; 
         PredictionView = predictionView;
+        GroundBaseOffset = navMeshAgent != null ? navMeshAgent.baseOffset : 0f;
     }
     public CharacterMotor Target => _target;
     public ReactiveProperty<float> Health => _health;
@@ -30,7 +31,8 @@ public class BlackBoard
     public Animator Animator => _animator;
     public Transform Transform => _transform;
     public AttackPredictionView PredictionView { get; }
-    public AerialAttackContext AerialAttack { get; } = new AerialAttackContext();
+    public float GroundBaseOffset { get; }
+    public AttackContext Attack { get; } = new AttackContext();
 
     private CharacterMotor _target;
     private ReactiveProperty<float> _health;

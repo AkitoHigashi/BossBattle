@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AttackPredictionNode
   _range: {fileID: 11400000, guid: fd3771dfb725af94fae8bc094620c508, type: 2}
   _duration: 2
+  _sampleRadius: 2

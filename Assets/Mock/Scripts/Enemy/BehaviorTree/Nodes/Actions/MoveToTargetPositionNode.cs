@@ -22,8 +22,7 @@ public sealed class MoveToTargetPositionNode : ActionNode
     {
         var agent = _blackBoard?.NavMeshAgent;
         var target = _blackBoard?.Target;
-        if (agent == null || target == null || !agent.isActiveAndEnabled || !agent.isOnNavMesh ||
-            !_blackBoard.AerialAttack.HasLandingPoint)
+        if (agent == null || target == null || !agent.isActiveAndEnabled || !agent.isOnNavMesh)
             return NodeStatus.Failure;
 
         if (!_isMoving)
@@ -47,7 +46,6 @@ public sealed class MoveToTargetPositionNode : ActionNode
             if (!NavMesh.SamplePosition(ground, out NavMeshHit hit, Mathf.Max(0.01f, _sampleRadius), filter))
                 return NodeStatus.Failure;
 
-            _blackBoard.AerialAttack.GroundPosition = hit.position;
             return NodeStatus.Success;
         }
 

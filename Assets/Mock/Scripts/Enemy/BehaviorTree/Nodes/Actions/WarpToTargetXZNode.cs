@@ -11,8 +11,7 @@ public sealed class WarpToTargetXZNode : ActionNode
     {
         var agent = _blackBoard?.NavMeshAgent;
         var target = _blackBoard?.Target;
-        if (agent == null || target == null || !agent.isActiveAndEnabled || !agent.isOnNavMesh ||
-            !_blackBoard.AerialAttack.HasLandingPoint)
+        if (agent == null || target == null || !agent.isActiveAndEnabled || !agent.isOnNavMesh)
             return NodeStatus.Failure;
 
         Vector3 targetPosition = target.transform.position;
@@ -40,7 +39,6 @@ public sealed class WarpToTargetXZNode : ActionNode
         agent.ResetPath();
         agent.isStopped = true;
         agent.velocity = Vector3.zero;
-        _blackBoard.AerialAttack.GroundPosition = hit.position;
         return NodeStatus.Success;
     }
 }

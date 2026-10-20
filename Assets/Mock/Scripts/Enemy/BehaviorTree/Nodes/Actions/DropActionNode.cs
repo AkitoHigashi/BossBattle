@@ -8,10 +8,10 @@ public sealed class DropActionNode : AttackNode
 
     protected override NodeStatus OnUpdate()
     {
-        var attack = _blackBoard?.AerialAttack;
+        var attack = _blackBoard?.Attack;
         var agent = _blackBoard?.NavMeshAgent;
         if (agent == null || !agent.isActiveAndEnabled || !agent.isOnNavMesh ||
-            !attack.HasLandingPoint || !attack.HasPrediction)
+            !attack.HasPrediction)
             return NodeStatus.Failure;
 
         // 同じ攻撃の再評価でもダメージは一度だけ。
@@ -21,10 +21,10 @@ public sealed class DropActionNode : AttackNode
         agent.ResetPath();
         agent.isStopped = true;
         agent.velocity = Vector3.zero;
-        agent.baseOffset = Mathf.MoveTowards(agent.baseOffset, attack.LandingBaseOffset,
+        agent.baseOffset = Mathf.MoveTowards(agent.baseOffset, _blackBoard.GroundBaseOffset,
             Mathf.Max(0.01f, _fallSpeed) * Time.deltaTime);
 
-        if (!Mathf.Approximately(agent.baseOffset, attack.LandingBaseOffset))
+        if (!Mathf.Approximately(agent.baseOffset, _blackBoard.GroundBaseOffset))
             return NodeStatus.Running;
 
         return ApplyDamage();
@@ -32,19 +32,23 @@ public sealed class DropActionNode : AttackNode
 
     private NodeStatus ApplyDamage()
     {
-        var attack = _blackBoard.AerialAttack;
-        attack.DamageApplied = true;
+        var attack = _blackBoard.Attack;
         var target = _blackBoard.Target;
         if (target == null || !attack.Range.Contains(attack.Pose.Origin, attack.Pose.Forward, target.transform.position))
+        {
+            attack.DamageApplied = true;
             return NodeStatus.Success;
+        }
 
         var character = target.GetComponent<CharacterComposition>()?.Character;
         if (character == null)
         {
-            Debug.LogWarning("範囲攻撃の対象にCharacterCompositionがありません。", target);
+            Debug.LogWarning("範囲攻撃の対象に初期化済みのCharacterCompositionがありません。", target);
             return NodeStatus.Failure;
         }
 
+        // 対象の確認後、TakeDamageの通知から再評価されても二重に当たらないよう先に立てる。
+        attack.DamageApplied = true;
         if (character.Health.CurrentValue > 0)
         {
             int damage = Mathf.RoundToInt(Damage);

@@ -24,9 +24,6 @@ public abstract class MoveVerticalNode : ActionNode
 
         if (!_isMoving)
         {
-            if (!TryBeginMovement(agent))
-                return NodeStatus.Failure;
-
             agent.ResetPath();
             agent.isStopped = true;
             agent.velocity = Vector3.zero;
@@ -56,6 +53,4 @@ public abstract class MoveVerticalNode : ActionNode
     {
         _isMoving = false;
     }
-
-    protected virtual bool TryBeginMovement(NavMeshAgent agent) => true;
 }
