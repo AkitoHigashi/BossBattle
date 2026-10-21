@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SectorRangeSettings
   _range:
     _radius: 5
-    _angle: 90
+    _angle: 360

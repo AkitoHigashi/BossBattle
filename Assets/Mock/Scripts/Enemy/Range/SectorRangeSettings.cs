@@ -15,6 +15,8 @@ public class SectorRangeSettings : ScriptableObject
     [SerializeField]
     private SectorRange _range = new SectorRange(5f, 360f);
 
+    public SectorRange Range => _range;
+
     public bool Contains(
         Vector3 origin,
         Vector3 forward,
