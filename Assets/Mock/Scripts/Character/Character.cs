@@ -16,6 +16,10 @@ public class Character
 
     public HealthEntity Health => _health;
     public Status Status => _status;
+    private HealthEntity _health;
+    private readonly Status _status;
+    private readonly IMovement _movement;
+    private readonly IAttackSystem _attackSystem;
 
     public void TakeDamage(int damage)
     {
@@ -29,13 +33,6 @@ public class Character
 
     public void Attack(AttackData attackData)
     {
-        if (_attackSystem == null)
-            return;
-        _attackSystem.Attack(attackData);
+        _attackSystem?.Attack(attackData);
     }
-
-    private HealthEntity _health;
-    private Status _status;
-    private IMovement _movement;
-    private IAttackSystem _attackSystem;
 }
