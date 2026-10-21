@@ -15,6 +15,8 @@ GameObject:
   - component: {fileID: 8660774160037746268}
   - component: {fileID: 2508719783060195972}
   - component: {fileID: 8019766654423068343}
+  - component: {fileID: 1342494878331446347}
+  - component: {fileID: 3462219561531898277}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -179,6 +181,7 @@ MonoBehaviour:
   <PredictedOwner>k__BackingField: {fileID: 0}
   NetworkBehaviours:
   - {fileID: 8660774160037746268}
+  - {fileID: 8019766654423068343}
   InitializedParentNetworkBehaviour: {fileID: 0}
   InitializedNestedNetworkObjects: []
   RuntimeParentNetworkBehaviour: {fileID: 0}
@@ -189,7 +192,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _preventDespawnOnDisconnect: 0
   _defaultDespawnType: 0
-  _initializedTimestamp: -8584095429377566903
+  _initializedTimestamp: -8584094607917501827
 --- !u!114 &8019766654423068343
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -202,10 +205,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2836e36774ca1c4bbbee976e17b649c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: FishNet.Runtime::FishNet.Component.Transforming.NetworkTransform
-  _componentIndexCache: 255
+  _componentIndexCache: 1
   _addedNetworkObject: {fileID: 2508719783060195972}
-  _networkObjectCache: {fileID: 0}
-  _componentConfiguration: 0
+  _networkObjectCache: {fileID: 2508719783060195972}
+  _componentConfiguration: 2
   _synchronizeParent: 0
   _packing:
     Position: 1
@@ -236,3 +239,49 @@ MonoBehaviour:
     X: 0
     Y: 0
     Z: 0
+--- !u!54 &1342494878331446347
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1982283643353118406}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 80
+  m_CollisionDetection: 0
+--- !u!114 &3462219561531898277
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1982283643353118406}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2cd7087c2f514c58ad53460983438a0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: NetworkTest_Yajima::NetworkTest_Yajima.SyncMethodComparison
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 2508719783060195972}
+  _networkObjectCache: {fileID: 0}
+  speed: 3
+  automaticInput: 1
+  tamperSpeed: 0
+  tamperMultiplier: 4

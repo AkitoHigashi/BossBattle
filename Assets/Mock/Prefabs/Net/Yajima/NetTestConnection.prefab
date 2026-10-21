@@ -3227,11 +3227,11 @@ MonoBehaviour:
   _maximumClientPacketSize: 20480
   _intermediateLayer: {fileID: 0}
   _latencySimulator:
-    _enabled: 0
+    _enabled: 1
     _simulateHost: 1
     _latency: 0
     _outOfOrder: 0
-    _packetLoss: 0
+    _packetLoss: 0.009999999776482582
 --- !u!114 &1633929505009228539
 MonoBehaviour:
   m_ObjectHideFlags: 0
