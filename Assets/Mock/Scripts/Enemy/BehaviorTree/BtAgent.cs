@@ -2,12 +2,13 @@ using R3;
 using UnityEngine;
 using UnityEngine.AI;
 
-[RequireComponent(typeof(NavMeshAgent)), DisallowMultipleComponent]
+[RequireComponent(typeof(NavMeshAgent), typeof(AttackPredictionView)), DisallowMultipleComponent]
 public class BtAgent : MonoBehaviour
 {
     [SerializeField] private float _healthValue = 100f;
     [SerializeField] private BehaviorTree _behaviorTree;
     [SerializeField] private float _attackRange = 1.5f;
+    [SerializeField] private int _attackDamage = 10;
     [SerializeField] private CharacterMotor _target;
 
     private ReactiveProperty<float> _health;
@@ -15,6 +16,7 @@ public class BtAgent : MonoBehaviour
     private Animator _animator;
     private BehaviorTree _runtimeTree;
     private BlackBoard _blackBoard;
+    private AttackPredictionView _predictionView;
     private void Awake()
     {
         if (_behaviorTree == null)
@@ -26,13 +28,14 @@ public class BtAgent : MonoBehaviour
 
         _navMeshAgent = GetComponent<NavMeshAgent>();
         _animator = GetComponent<Animator>();
+        _predictionView = GetComponent<AttackPredictionView>();
         _runtimeTree = _behaviorTree.Clone();
     }
 
     private void Start()
     {
         _health = new ReactiveProperty<float>(_healthValue);
-        _blackBoard = new BlackBoard(_target, _health, _attackRange, _navMeshAgent, _animator, transform);
+        _blackBoard = new BlackBoard(_target, _health, _attackRange, _attackDamage, _navMeshAgent, _animator, transform, _predictionView);
         _runtimeTree.Initialize(_blackBoard);
     }
 

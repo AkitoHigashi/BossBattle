@@ -119,6 +119,124 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &572807753
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 572807755}
+  - component: {fileID: 572807754}
+  - component: {fileID: 572807756}
+  m_Layer: 0
+  m_Name: NetWorkCubeSpawer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &572807754
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 572807753}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64b5425b9653d0c48af4c4607678f1cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkCubeSpawner
+  _cubePrefab: {fileID: 2886620420531390630, guid: ae60d08d78605934782ce38fbbcd1e19, type: 3}
+--- !u!4 &572807755
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 572807753}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0, y: -0, z: -0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &572807756
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 572807753}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af7e131c915a4d24aa901c0e3fb13691, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkEnemySpawner
+  _enemyPrefab: {fileID: 3212036713293649020, guid: 5bc26300096711e4e846b30349578f18, type: 3}
+  _spawnPosition: {x: 5, y: 1, z: 5}
+--- !u!1 &1477178527
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1477178529}
+  - component: {fileID: 1477178528}
+  - component: {fileID: 1477178530}
+  m_Layer: 0
+  m_Name: Test
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1477178528
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1477178527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a833d8033c7cf644084805ef89e5473b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AuthenticationTest
+--- !u!4 &1477178529
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1477178527}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0, y: -0, z: -0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1477178530
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1477178527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9577f15ce8ddcb34b93f5e24f37efa09, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::P2PConnectionTest
+  _hostProductUserId: 0002a58cef9a4602b6bb6122c6a4c80c
 --- !u!1 &1606918094
 GameObject:
   m_ObjectHideFlags: 0
@@ -438,7 +556,11 @@ PrefabInstance:
     - target: {fileID: 6496733941511580391, guid: 67443025b9705014dac491326e918c9e, type: 3}
       propertyPath: _spawnablePrefabs
       value: 
-      objectReference: {fileID: 11400000, guid: 6c5acb018f614f84bb9964673594e0f9, type: 2}
+      objectReference: {fileID: 11400000, guid: 36067223d19bf034792ce69a3f8f66d6, type: 2}
+    - target: {fileID: 6496733941511580393, guid: 67443025b9705014dac491326e918c9e, type: 3}
+      propertyPath: _playerPrefab
+      value: 
+      objectReference: {fileID: 7331566594972606513, guid: bdd67eb329a2b714db384ff08f35e9f4, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 682649832265540937, guid: 67443025b9705014dac491326e918c9e, type: 3}
@@ -452,3 +574,5 @@ SceneRoots:
   - {fileID: 1616920304}
   - {fileID: 1606918096}
   - {fileID: 7945691905378247127}
+  - {fileID: 1477178529}
+  - {fileID: 572807755}
