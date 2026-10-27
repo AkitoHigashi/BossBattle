@@ -34,11 +34,11 @@ public class PlayerAttackAction : SkillAction
     /// </summary>
     private const float NOPROGRESSTIMEOUT = 1f;
 
-    public override async UniTask ExecuteAsync(SkillContext context, CancellationToken cancellationToken,Vector3 direction)
+    public override async UniTask ExecuteAsync(SkillContext context, SkillExecution execution)
     {
         Animator animator = context.Animator;
         AttackAnimationEvents receiver = context.AnimationEvents;
-        cancellationToken.ThrowIfCancellationRequested();
+        execution.Token.ThrowIfCancellationRequested();
         ValidateAnimator(animator);
 
         if (receiver == null)
@@ -64,7 +64,7 @@ public class PlayerAttackAction : SkillAction
             AnimatorStateInfo stateInfo;
             while (true)
             {
-                cancellationToken.ThrowIfCancellationRequested();
+                execution.Token.ThrowIfCancellationRequested();
                 ValidateAnimator(animator);
                 stateInfo = animator.GetCurrentAnimatorStateInfo(0);
                 // 目的のStateに入り、Transitionも完了していれば終了
@@ -73,7 +73,7 @@ public class PlayerAttackAction : SkillAction
                 // 指定時間以内に遷移できなければ異常終了
                 if (Time.time - entryStartedAt >= STATEENTRYTIMEOUT)
                     throw new TimeoutException($"攻撃Stateへの遷移に失敗しました: {_stateFullPath}");
-                await UniTask.NextFrame(cancellationToken);
+                await UniTask.NextFrame(execution.Token);
             }
 
             // 現在のアニメーション再生進行度
@@ -83,7 +83,7 @@ public class PlayerAttackAction : SkillAction
             // AnimationEventの終了通知が届くまで待つ
             while (receiver.IsPlaying)
             {
-                cancellationToken.ThrowIfCancellationRequested();
+                execution.Token.ThrowIfCancellationRequested();
                 ValidateAnimator(animator);
                 stateInfo = animator.GetCurrentAnimatorStateInfo(0);
                 // 終了イベント前に別Stateへ移動していたら異常
@@ -102,7 +102,7 @@ public class PlayerAttackAction : SkillAction
                 // 一定時間アニメーションが進まなかった場合
                 if (Time.time - lastProgressAt >= NOPROGRESSTIMEOUT)
                     throw new TimeoutException($"攻撃アニメーションの進行が停止しました: {_stateFullPath}");
-                await UniTask.NextFrame(cancellationToken);
+                await UniTask.NextFrame(execution.Token);
             }
 
             // AnimationEventの終了通知を受け取った時刻
@@ -110,11 +110,11 @@ public class PlayerAttackAction : SkillAction
             // 攻撃StateがCurrent Stateでなくなるまで待機
             while (animator.GetCurrentAnimatorStateInfo(0).fullPathHash == stateHash)
             {
-                cancellationToken.ThrowIfCancellationRequested();
+                execution.Token.ThrowIfCancellationRequested();
                 ValidateAnimator(animator);
                 if (Time.time - finishedAt >= STATEENTRYTIMEOUT)
                     throw new TimeoutException($"攻撃終了後にStateを離れませんでした: {_stateFullPath}");
-                await UniTask.NextFrame(cancellationToken);
+                await UniTask.NextFrame(execution.Token);
             }
         }
         finally

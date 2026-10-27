@@ -113,7 +113,7 @@ public class SkillSystem : ISkillSystem, IDisposable
                 {
                     throw new InvalidOperationException($"スキルが設定されていない   {execution.Definition.SkillName}");
                 }
-                await action.ExecuteAsync(_skillContext, execution.Token, execution.Direction);
+                await action.ExecuteAsync(_skillContext, execution);
             }
         }
         //プレイヤーが死んだ時とか
