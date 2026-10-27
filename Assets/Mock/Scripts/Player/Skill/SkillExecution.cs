@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using System;
 using System.Threading;
 using UnityEngine;
@@ -11,12 +12,14 @@ public enum SkillInputPhase
 public class SkillExecution : IDisposable
 {
     public CancellationToken Token => _cts.Token;
+    public UniTask Commpletion => _completionSource.Task;
     public SkillDefinition Definition { get; }
     public Vector3 Direction { get; }
     public bool IsHeld { get; private set; }
     public int PressCount { get; private set; }
 
     private readonly CancellationTokenSource _cts = new();
+    private readonly UniTaskCompletionSource _completionSource = new();
     private bool _disposed;
 
     public SkillExecution(SkillDefinition definition, Vector3 direction)
@@ -76,4 +79,8 @@ public class SkillExecution : IDisposable
         _disposed = true;
     }
 
+    internal void NotifyCompleted()
+    {
+        _completionSource.TrySetResult();
+    }
 }

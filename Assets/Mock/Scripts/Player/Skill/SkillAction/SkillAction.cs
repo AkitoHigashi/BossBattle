@@ -13,5 +13,5 @@ public abstract class SkillAction : ScriptableObject
     /// <param name="context"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public abstract UniTask ExecuteAsync(SkillContext context,SkillExecution　execution);
+    public abstract UniTask ExecuteAsync(SkillContext context, SkillExecution execution);
 }

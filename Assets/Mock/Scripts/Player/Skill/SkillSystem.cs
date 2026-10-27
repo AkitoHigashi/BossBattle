@@ -143,6 +143,7 @@ public class SkillSystem : ISkillSystem, IDisposable
                     if (!_disposed)
                         _isExecuting.Value = false;
                 }
+                execution.NotifyCompleted();
             }
         }
     }
