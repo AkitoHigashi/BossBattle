@@ -133,17 +133,23 @@ public class SkillSystem : ISkillSystem, IDisposable
             }
             finally
             {
-                if (execution.Definition.CooldownPolicy == CooldownStartPolicy.OnEnd)
-                    _nextUsableTimes[execution.Definition] = Time.time + execution.Definition.Cooldown;
-                execution.Dispose();
-                if (ReferenceEquals(_currentExecution, execution))
+                try
                 {
-                    _currentExecution = null;
+                    if (execution.Definition.CooldownPolicy == CooldownStartPolicy.OnEnd)
+                        _nextUsableTimes[execution.Definition] = Time.time + execution.Definition.Cooldown;
+                    execution.Dispose();
+                    if (ReferenceEquals(_currentExecution, execution))
+                    {
+                        _currentExecution = null;
 
-                    if (!_disposed)
-                        _isExecuting.Value = false;
+                        if (!_disposed)
+                            _isExecuting.Value = false;
+                    }
                 }
-                execution.NotifyCompleted();
+                finally
+                {
+                    execution.NotifyCompleted();
+                }
             }
         }
     }

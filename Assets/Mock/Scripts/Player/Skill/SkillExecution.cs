@@ -12,7 +12,7 @@ public enum SkillInputPhase
 public class SkillExecution : IDisposable
 {
     public CancellationToken Token => _cts.Token;
-    public UniTask Commpletion => _completionSource.Task;
+    public UniTask Completion => _completionSource.Task;
     public SkillDefinition Definition { get; }
     public Vector3 Direction { get; }
     public bool IsHeld { get; private set; }
@@ -38,7 +38,7 @@ public class SkillExecution : IDisposable
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     public void ReceiveInput(SkillInputPhase phase)
     {
-        if (_disposed)
+        if (_disposed || _cts.IsCancellationRequested)
             return;
 
         switch (phase)
