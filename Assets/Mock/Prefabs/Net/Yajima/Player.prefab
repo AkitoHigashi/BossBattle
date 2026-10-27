@@ -16,7 +16,6 @@ GameObject:
   - component: {fileID: 2508719783060195972}
   - component: {fileID: 8019766654423068343}
   - component: {fileID: 1342494878331446347}
-  - component: {fileID: 3462219561531898277}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -266,22 +265,3 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 80
   m_CollisionDetection: 0
---- !u!114 &3462219561531898277
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1982283643353118406}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2cd7087c2f514c58ad53460983438a0d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: NetworkTest_Yajima::NetworkTest_Yajima.SyncMethodComparison
-  _componentIndexCache: 255
-  _addedNetworkObject: {fileID: 2508719783060195972}
-  _networkObjectCache: {fileID: 0}
-  speed: 3
-  automaticInput: 1
-  tamperSpeed: 0
-  tamperMultiplier: 4
