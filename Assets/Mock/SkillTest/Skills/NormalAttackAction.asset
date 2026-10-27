@@ -14,4 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAttackAction
   _triggerName: NormalAttack
   _stateFullPath: Base Layer.NormalAttack
+  _interruptTriggerName: InterruptNormalAttack
   _damage: 10

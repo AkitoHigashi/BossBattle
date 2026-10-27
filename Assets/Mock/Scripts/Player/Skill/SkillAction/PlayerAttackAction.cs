@@ -144,11 +144,11 @@ public class PlayerAttackAction : SkillAction
             return;
 
         AnimatorStateInfo current = animator.GetCurrentAnimatorStateInfo(0);
-        // すでに別Stateへ移動しているなら何もしない
-        if (current.fullPathHash != attackHash)
-            return;
-        // 他StateへのTransitionが始まっているなら介入しない
-        if (animator.IsInTransition(0))
+        bool isInTransition = animator.IsInTransition(0);
+        bool isEnteringAttack = isInTransition
+            && animator.GetNextAnimatorStateInfo(0).fullPathHash == attackHash;
+        // 攻撃への遷移中も中断する。攻撃から離れる遷移には介入しない。
+        if (!isEnteringAttack && (current.fullPathHash != attackHash || isInTransition))
             return;
 
         // 中断用Triggerが存在するか確認
