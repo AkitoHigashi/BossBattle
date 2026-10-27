@@ -1,4 +1,6 @@
+using Cysharp.Threading.Tasks;
 using System;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -25,6 +27,7 @@ public class PlayerController : MonoBehaviour
     private CharacterMotor _motor;
     private CharacterData _characterData;
     private SkillSystem _skillSystem;
+    private CancellationTokenSource _skillRequestCts;
     private bool _initialized;
     private bool _subscribed;
 
@@ -91,6 +94,8 @@ public class PlayerController : MonoBehaviour
     {
         if (_initialized)
             Subscribe();
+
+        _skillRequestCts = new CancellationTokenSource();
     }
 
     private void Subscribe()
@@ -138,6 +143,9 @@ public class PlayerController : MonoBehaviour
             }
             _subscribed = false;
         }
+        _skillRequestCts?.Cancel();
+        _skillRequestCts?.Dispose();
+        _skillRequestCts = null;
         _motor?.ClearAimFacingDirection();
         _character?.Move(new MovementData(Vector3.zero));
         _skillSystem?.CancelActiveSkill();
@@ -174,7 +182,9 @@ public class PlayerController : MonoBehaviour
         if (direction.sqrMagnitude <= 0.001f)
             direction = transform.forward;
         direction.y = 0f;
-        UseSkill(_dodge, direction.normalized);
+
+        _skillSystem.TryUseSkillAsync(_dodge, direction.normalized,_skillRequestCts.Token)
+            .Forget(ex=>Debug.LogException(ex,this));
     }
 
     private void UseSkill(SkillDefinition definition, Vector3 direction)

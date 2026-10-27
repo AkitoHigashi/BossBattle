@@ -92,8 +92,10 @@ public class SkillSystem : ISkillSystem, IDisposable
     /// <param name="definition"></param>
     /// <param name="direction"></param>
     /// <returns></returns>
-    public async UniTask<bool> TryUseSkillAsync(SkillDefinition definition, Vector3 direction)
+    public async UniTask<bool> TryUseSkillAsync(SkillDefinition definition, Vector3 direction, CancellationToken requestToken)
     {
+        if (requestToken.IsCancellationRequested)
+            return false;
         if (_isInterrupting || !CanUseSkill(definition))
             return false;
 
@@ -109,9 +111,11 @@ public class SkillSystem : ISkillSystem, IDisposable
                 SkillExecution oldExecution = _currentExecution;
                 oldExecution.Cancel();
                 await oldExecution.Completion;
+                if (requestToken.IsCancellationRequested)
+                    return false;
                 if (!CanUseSkill(definition) || _currentExecution != null || _isExecuting.Value)
                     return false;
-                
+
                 StartSkill(definition, direction);
                 return true;
             }
