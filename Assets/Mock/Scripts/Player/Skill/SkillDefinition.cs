@@ -1,5 +1,11 @@
 using UnityEngine;
 
+public enum CooldownStartPolicy
+{
+    OnStart,
+    OnEnd
+}
+
 /// <summary>
 /// スキルごとの設定データ。
 /// </summary>
@@ -19,7 +25,13 @@ public class SkillDefinition : ScriptableObject
     /// </summary>
     public SkillAction[] Actions => _actions;
 
+    /// <summary>
+    /// クールダウンの開始タイミング。
+    /// </summary>
+    public CooldownStartPolicy CooldownPolicy => _cooldownPolicy;
+
     [SerializeField] private string _skillName;
     [SerializeField, Min(0f)] private float _cooldown;
     [SerializeField] private SkillAction[] _actions;
+    [SerializeField] private CooldownStartPolicy _cooldownPolicy;
 }

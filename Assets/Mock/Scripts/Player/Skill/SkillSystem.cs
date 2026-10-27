@@ -12,9 +12,9 @@ public class SkillSystem : ISkillSystem, IDisposable
     /// </summary>
     public Observable<bool> IsExecuting => _isExecuting;
     private readonly SkillContext _skillContext;
-    private readonly Dictionary<SkillDefinition, float> _nestUsableTimes = new Dictionary<SkillDefinition, float>();
+    private readonly Dictionary<SkillDefinition, float> _nextUsableTimes = new Dictionary<SkillDefinition, float>();
     private readonly ReactiveProperty<bool> _isExecuting = new ReactiveProperty<bool>(false);
-    private CancellationTokenSource _cts;
+    private SkillExecution _currentExecution;
     private bool _disposed;
 
     public SkillSystem(SkillContext skillContext)
@@ -35,16 +35,52 @@ public class SkillSystem : ISkillSystem, IDisposable
             return false;
         }
         //クールダウン中なら使用不可。
-        if (_nestUsableTimes.TryGetValue(definition, out float nextUsableTime) && Time.time < nextUsableTime)
+        if (_nextUsableTimes.TryGetValue(definition, out float nextUsableTime) && Time.time < nextUsableTime)
         {
             return false;
         }
 
+        var execution = new SkillExecution(definition, direction);
+        execution.ReceiveInput(SkillInputPhase.Pressed);
+        _currentExecution = execution;
+        if (definition.CooldownPolicy == CooldownStartPolicy.OnStart)
+            _nextUsableTimes[definition] = Time.time + definition.Cooldown;
         _isExecuting.Value = true;
-        _nestUsableTimes[definition] = Time.time + definition.Cooldown;
-        CancellationTokenSource cst = new CancellationTokenSource();
-        _cts = cst;
-        ExecutAsync(definition, cst, cst.Token, direction).Forget();
+        ExecutAsync(execution).Forget();
+        return true;
+    }
+
+    /// <summary>
+    /// スキルの入力を処理する。
+    /// 実行中なら現在のSkillExecutionへ入力を通知
+    /// 未実行ならPressedを新規発動要求として扱う。
+    /// </summary>
+    /// <param name="definition"></param>
+    /// <param name="phase"></param>
+    /// <param name="direction"></param>
+    /// <returns></returns>
+    public bool HandleSkillInput(SkillDefinition definition, SkillInputPhase phase, Vector3 direction)
+    {
+        if (_disposed || definition == null)
+            return false;
+
+        if (_currentExecution != null)
+        {
+            // 同じスキルへの入力なら通知する
+            if (_currentExecution.Definition == definition)
+                _currentExecution.ReceiveInput(phase);
+            else
+                return false;
+        }
+        else
+        {
+            // Pressedの場合は新規発動を試みる
+            if (phase == SkillInputPhase.Released)
+                return false;
+
+            return TryUseSkill(definition, direction);
+        }
+
         return true;
     }
 
@@ -55,7 +91,7 @@ public class SkillSystem : ISkillSystem, IDisposable
     /// <returns></returns>
     public float GetCooldownRemaing(SkillDefinition definition)
     {
-        if (definition == null || !_nestUsableTimes.TryGetValue(definition, out float nextUsableTime))
+        if (definition == null || !_nextUsableTimes.TryGetValue(definition, out float nextUsableTime))
         {
             return 0f;
         }
@@ -65,31 +101,29 @@ public class SkillSystem : ISkillSystem, IDisposable
     /// <summary>
     /// スキルの実行を非同期で行います。
     /// </summary>
-    /// <param name="skill"></param>
-    /// <param name="cts"></param>
     /// <returns></returns>
-    private async UniTask ExecutAsync(SkillDefinition skill, CancellationTokenSource cts, CancellationToken token, Vector3 direction)
+    private async UniTask ExecutAsync(SkillExecution execution)
     {
         try
         {
-            foreach (var action in skill.Actions)
+            foreach (var action in execution.Definition.Actions)
             {
-                token.ThrowIfCancellationRequested();
+                execution.Token.ThrowIfCancellationRequested();
                 if (action == null)
                 {
-                    throw new InvalidOperationException($"スキルが設定されていない   {skill.SkillName}");
+                    throw new InvalidOperationException($"スキルが設定されていない   {execution.Definition.SkillName}");
                 }
-                await action.ExecuteAsync(_skillContext, token, direction);
+                await action.ExecuteAsync(_skillContext, execution.Token, execution.Direction);
             }
         }
         //プレイヤーが死んだ時とか
         catch (OperationCanceledException)
         {
-            Debug.Log($"スキルの実行がキャンセルされました。{skill.SkillName}");
+            Debug.Log($"スキルの実行がキャンセルされました。{execution.Definition.SkillName}");
         }
         catch (Exception ex)
         {
-            Debug.LogError($"スキルの実行中にエラーが発生しました。{skill.SkillName} {ex}");
+            Debug.LogError($"スキルの実行中にエラーが発生しました。{execution.Definition.SkillName} {ex}");
         }
         finally
         {
@@ -99,9 +133,16 @@ public class SkillSystem : ISkillSystem, IDisposable
             }
             finally
             {
-                if (ReferenceEquals(_cts, cts)) _cts = null;
-                cts.Dispose();
-                if (!_disposed) _isExecuting.Value = false;
+                if (execution.Definition.CooldownPolicy == CooldownStartPolicy.OnEnd)
+                    _nextUsableTimes[execution.Definition] = Time.time + execution.Definition.Cooldown;
+                execution.Dispose();
+                if (ReferenceEquals(_currentExecution, execution))
+                {
+                    _currentExecution = null;
+
+                    if (!_disposed)
+                        _isExecuting.Value = false;
+                }
             }
         }
     }
@@ -116,7 +157,7 @@ public class SkillSystem : ISkillSystem, IDisposable
 
         try
         {
-            _cts?.Cancel();
+            _currentExecution?.Cancel();
         }
         finally
         {
@@ -128,11 +169,9 @@ public class SkillSystem : ISkillSystem, IDisposable
     {
         if (_disposed) return;
         _disposed = true;
-        var cts = _cts;
-        _cts = null;
         try
         {
-            cts?.Cancel();
+            _currentExecution?.Cancel();
         }
         finally
         {

@@ -60,7 +60,7 @@ public class PlayerController : MonoBehaviour
         _initialized = true;
 
         if (isActiveAndEnabled)
-            SubscribeToMove();
+            Subscribe();
     }
 
     private void Update()
@@ -90,10 +90,10 @@ public class PlayerController : MonoBehaviour
     private void OnEnable()
     {
         if (_initialized)
-            SubscribeToMove();
+            Subscribe();
     }
 
-    private void SubscribeToMove()
+    private void Subscribe()
     {
         if (_subscribed)
             return;
@@ -103,7 +103,10 @@ public class PlayerController : MonoBehaviour
         if (_skillSystem != null)
         {
             if (_normalAttack != null)
-                _attackAction.started += OnAttack;
+            {
+                _attackAction.performed += OnAttackPerformed;
+                _attackAction.canceled += OnAttackCanceled;
+            }
             if (_skill1 != null)
                 _skill1Action.started += OnSkill1;
             if (_skillDodge != null)
@@ -124,7 +127,10 @@ public class PlayerController : MonoBehaviour
             if (_skillSystem != null)
             {
                 if (_normalAttack != null)
-                    _attackAction.started -= OnAttack;
+                {
+                    _attackAction.performed -= OnAttackPerformed;
+                    _attackAction.canceled -= OnAttackCanceled;
+                }
                 if (_skill1 != null)
                     _skill1Action.started -= OnSkill1;
                 if (_skillDodge != null)
@@ -143,14 +149,22 @@ public class PlayerController : MonoBehaviour
         _character.Move(new MovementData(new Vector3(input.x, 0f, input.y)));
     }
 
-    private void OnAttack(InputAction.CallbackContext context)
+    private void OnAttackPerformed(InputAction.CallbackContext context)
     {
-        UseSkill(_normalAttack);
+        Vector3 direction = TryGetMouseDirection(out var mouseDirectoin) ? mouseDirectoin : transform.forward;
+        _skillSystem.HandleSkillInput(_normalAttack, SkillInputPhase.Pressed, direction);
+    }
+
+    private void OnAttackCanceled(InputAction.CallbackContext context)
+    {
+        Vector3 direction = TryGetMouseDirection(out var mouseDirectoin) ? mouseDirectoin : transform.forward;
+        _skillSystem.HandleSkillInput(_normalAttack, SkillInputPhase.Released, direction);
     }
 
     private void OnSkill1(InputAction.CallbackContext context)
     {
-        UseSkill(_skill1);
+        Vector3 direction = TryGetMouseDirection(out var mouseDirectoin) ? mouseDirectoin : transform.forward;
+        UseSkill(_skill1, direction);
     }
 
     private void OnDodge(InputAction.CallbackContext context)
@@ -161,15 +175,6 @@ public class PlayerController : MonoBehaviour
             direction = transform.forward;
         direction.y = 0f;
         UseSkill(_dodge, direction.normalized);
-    }
-
-    /// <summary>
-    /// SkillSystemへスキルの実行を要求する。
-    /// </summary>
-    private void UseSkill(SkillDefinition definition)
-    {
-        Vector3 direction = TryGetMouseDirection(out var mouseDirectoin) ? mouseDirectoin : transform.forward;
-        UseSkill(definition, direction);
     }
 
     private void UseSkill(SkillDefinition definition, Vector3 direction)
