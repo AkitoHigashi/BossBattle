@@ -3,7 +3,7 @@ using UnityEngine;
 namespace NCG.Player.Spawn
 {
     /// <summary>プレイヤーキャラクターの生成を管理するクラス</summary>
-    public class PlayerSpawner : MonoBehaviour
+    public sealed class PlayerSpawner : MonoBehaviour
     {
         [SerializeField, Tooltip("キャラクターのリスト")] CharacterDataList _characterDataList;
 

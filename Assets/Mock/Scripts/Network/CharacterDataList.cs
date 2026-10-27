@@ -7,7 +7,7 @@ namespace NCG.Player.Spawn
 {
     /// <summary>キャラクタープレハブのデータを格納するSO</summary>
     [CreateAssetMenu(fileName = "CharacterDataList", menuName = "NCG/Player/CharacterDataList")]
-    public class CharacterDataList : ScriptableObject
+    public sealed class CharacterDataList : ScriptableObject
     {
         [SerializeField] CharacterData[] _characterDataArray;
 

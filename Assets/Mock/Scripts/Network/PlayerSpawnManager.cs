@@ -6,7 +6,7 @@ using UnityEngine.Events;
 namespace NCG.Player.Spawn
 {
     /// <summary>プレイヤーの生成に関するクラス</summary>
-    public class PlayerSpawnManager : MonoBehaviour
+    public sealed class PlayerSpawnManager : MonoBehaviour
     {
         [SerializeField, Tooltip("プレイヤーキャラクターの生成イベント")] UnityEvent<PlayerInfo> OnSpawnPlayer;
 
