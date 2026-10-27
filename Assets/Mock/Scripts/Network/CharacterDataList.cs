@@ -15,10 +15,12 @@ namespace NCG.Player.Spawn
         /// 選択したキャラクターの種類に応じたプレイヤーのプレハブを取得するメソッド
         /// </summary>
         /// <param name="characterType">選択したキャラクターの種類</param>
-        /// <returns>プレイヤーのプレハブ</returns>
-        public NetworkObject GetPlayerPrefab(CharacterType characterType)
+        /// <param name="prefab">プレイヤーのプレハブ</param>
+        /// <returns>プレイヤーのプレハブを取得できたか</returns>
+        public bool TryGetPlayerPrefab(CharacterType characterType, out NetworkObject prefab)
         {
-            return _characterDataArray.FirstOrDefault(c => c.CharacterType == characterType).PlayerPrefab;
+            prefab = _characterDataArray.FirstOrDefault(c => c.CharacterType == characterType)?.PlayerPrefab;
+            return prefab != null;
         }
 
         [Serializable]

@@ -13,8 +13,17 @@ namespace NCG.Player.Spawn
         /// <param name="playerInfo">プレイヤーの情報</param>
         public void SpawnPlayer(PlayerInfo playerInfo)
         {
-            // プレハブ取得
-            var prefab = _characterDataList?.GetPlayerPrefab(playerInfo.CharacterType);
+            if (_characterDataList == null)
+            {
+                Debug.LogError("SOがアサインされていません");
+                return;
+            }
+
+            if (!_characterDataList.TryGetPlayerPrefab(playerInfo.CharacterType, out var prefab))
+            {
+                Debug.LogError("プレハブを取得できませんでした");
+                return;
+            }
         }
     }
 }
