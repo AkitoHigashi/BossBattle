@@ -16,6 +16,7 @@ public class SkillSystem : ISkillSystem, IDisposable
     private readonly ReactiveProperty<bool> _isExecuting = new ReactiveProperty<bool>(false);
     private SkillExecution _currentExecution;
     private bool _disposed;
+    private bool _isInterrupting;
 
     public SkillSystem(SkillContext skillContext)
     {
@@ -23,32 +24,19 @@ public class SkillSystem : ISkillSystem, IDisposable
     }
 
     /// <summary>
-    /// スキルの実行を試す。
+    /// 使用条件に加え、現在ほかのスキルを実行していないか
     /// </summary>
     /// <param name="definition"></param>
     /// <returns></returns>
     public bool TryUseSkill(SkillDefinition definition, Vector3 direction)
     {
-        //未定義、実行中、破棄済みの場合は使用不可。
-        if (_disposed || _isExecuting.Value || definition == null || definition.Actions == null || definition.Actions.Length == 0)
-        {
+        if (!CanUseSkill(definition) || _isExecuting.Value || _isInterrupting)
             return false;
-        }
-        //クールダウン中なら使用不可。
-        if (_nextUsableTimes.TryGetValue(definition, out float nextUsableTime) && Time.time < nextUsableTime)
-        {
-            return false;
-        }
-
-        var execution = new SkillExecution(definition, direction);
-        execution.ReceiveInput(SkillInputPhase.Pressed);
-        _currentExecution = execution;
-        if (definition.CooldownPolicy == CooldownStartPolicy.OnStart)
-            _nextUsableTimes[definition] = Time.time + definition.Cooldown;
-        _isExecuting.Value = true;
-        ExecutAsync(execution).Forget();
+        StartSkill(definition, direction);
         return true;
     }
+
+    
 
     /// <summary>
     /// スキルの入力を処理する。
@@ -96,6 +84,43 @@ public class SkillSystem : ISkillSystem, IDisposable
             return 0f;
         }
         return Mathf.Max(0f, nextUsableTime - Time.time);
+    }
+
+    /// <summary>
+    /// スキルの実行を開始し、必要に応じてクールダウンを設定します。
+    /// </summary>
+    /// <param name="definition">実行するスキルの定義。</param>
+    /// <param name="direction">スキルの発動方向。</param>
+    private void StartSkill(SkillDefinition definition, Vector3 direction)
+    {
+        var execution = new SkillExecution(definition, direction);
+        execution.ReceiveInput(SkillInputPhase.Pressed);
+        _currentExecution = execution;
+        if (definition.CooldownPolicy == CooldownStartPolicy.OnStart)
+            _nextUsableTimes[definition] = Time.time + definition.Cooldown;
+        _isExecuting.Value = true;
+        ExecutAsync(execution).Forget();
+    }
+
+    /// <summary>
+    /// スキルの設定・Cooldownなどの使用条件
+    /// </summary>
+    /// <param name="definition"></param>
+    /// <returns></returns>
+    private bool CanUseSkill(SkillDefinition definition)
+    {
+        //未定義、実行中、破棄済みの場合は使用不可。
+        if (_disposed || definition == null || definition.Actions == null || definition.Actions.Length == 0)
+        {
+            return false;
+        }
+        //クールダウン中なら使用不可。
+        if (_nextUsableTimes.TryGetValue(definition, out float nextUsableTime) && Time.time < nextUsableTime)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     /// <summary>

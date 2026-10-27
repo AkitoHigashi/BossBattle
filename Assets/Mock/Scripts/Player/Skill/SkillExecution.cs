@@ -79,7 +79,7 @@ public class SkillExecution : IDisposable
         _disposed = true;
     }
 
-    internal void NotifyCompleted()
+    public void NotifyCompleted()
     {
         _completionSource.TrySetResult();
     }
