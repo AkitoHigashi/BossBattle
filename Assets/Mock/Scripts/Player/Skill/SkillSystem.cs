@@ -36,7 +36,7 @@ public class SkillSystem : ISkillSystem, IDisposable
         return true;
     }
 
-    
+
 
     /// <summary>
     /// スキルの入力を処理する。
@@ -49,7 +49,7 @@ public class SkillSystem : ISkillSystem, IDisposable
     /// <returns></returns>
     public bool HandleSkillInput(SkillDefinition definition, SkillInputPhase phase, Vector3 direction)
     {
-        if (_disposed || definition == null)
+        if (_disposed || definition == null || _isInterrupting)
             return false;
 
         if (_currentExecution != null)
@@ -87,6 +87,44 @@ public class SkillSystem : ISkillSystem, IDisposable
     }
 
     /// <summary>
+    /// 現在のスキルと次のスキルを比較し、割り込みを制御する
+    /// </summary>
+    /// <param name="definition"></param>
+    /// <param name="direction"></param>
+    /// <returns></returns>
+    public async UniTask<bool> TryUseSkillAsync(SkillDefinition definition, Vector3 direction)
+    {
+        if (_isInterrupting || !CanUseSkill(definition))
+            return false;
+
+        if (_currentExecution == null)
+        {
+            return TryUseSkill(definition, direction);
+        }
+        else if (CanInterrupt(definition, _currentExecution) && !_isInterrupting)
+        {
+            try
+            {
+                _isInterrupting = true;
+                SkillExecution oldExecution = _currentExecution;
+                oldExecution.Cancel();
+                await oldExecution.Completion;
+                if (!CanUseSkill(definition) || _currentExecution != null || _isExecuting.Value)
+                    return false;
+                
+                StartSkill(definition, direction);
+                return true;
+            }
+            finally
+            {
+                _isInterrupting = false;
+            }
+        }
+        else
+            return false;
+    }
+
+    /// <summary>
     /// スキルの実行を開始し、必要に応じてクールダウンを設定します。
     /// </summary>
     /// <param name="definition">実行するスキルの定義。</param>
@@ -121,6 +159,20 @@ public class SkillSystem : ISkillSystem, IDisposable
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// 割り込みが可能か。
+    /// </summary>
+    /// <param name="nextSkill"></param>
+    /// <param name="currentExecution"></param>
+    /// <returns></returns>
+    private bool CanInterrupt(SkillDefinition nextSkill, SkillExecution currentExecution)
+    {
+        if (nextSkill == null || currentExecution == null)
+            return false;
+
+        return nextSkill.CanInterruptOthers && currentExecution.Definition.CanBeInterrupted;
     }
 
     /// <summary>
