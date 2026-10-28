@@ -36,7 +36,7 @@ namespace NCG.Player.Spawn
             // 参加したシーンがこのゲームオブジェクトとは異なったらreturn
             if (args.Scene != gameObject.scene) return;
 
-            // サーバーが立ち上がっていなければreturn
+            // サーバーが立ち上がっていなければ（自分がサーバーじゃなければ）return
             if (!InstanceFinder.ServerManager.Started) return;
 
             // プレイヤー情報の生成
