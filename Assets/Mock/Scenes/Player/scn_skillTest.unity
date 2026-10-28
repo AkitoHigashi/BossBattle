@@ -1277,7 +1277,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   _normalAttack: {fileID: 11400000, guid: 3c19a281ce72aef49b9eac948a05c769, type: 2}
-  _skill1: {fileID: 11400000, guid: 096a31444b1d06f4f98fe9437ff3e8f4, type: 2}
+  _skill1: {fileID: 11400000, guid: 17ddd7b4a1f940a09df9b4a6288c4738, type: 2}
+  _skill2: {fileID: 11400000, guid: 096a31444b1d06f4f98fe9437ff3e8f4, type: 2}
   _dodge: {fileID: 11400000, guid: 2f4631abf1352e943b694d3aad355fa6, type: 2}
   _faceMouseCursor: 1
   _camera: {fileID: 2089607611}
