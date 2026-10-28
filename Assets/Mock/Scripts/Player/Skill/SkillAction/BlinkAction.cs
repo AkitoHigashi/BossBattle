@@ -18,9 +18,9 @@ public class BlinkAction : SkillAction
     [SerializeField] private float _duration = 0.05f;
     [SerializeField] private float _aimRotationSpeed = 9000f;
 
-    public override async UniTask ExecuteAsync(SkillContext context, CancellationToken cancellationToken, Vector3 direction)
+    public override async UniTask ExecuteAsync(SkillContext context, SkillExecution execution)
     {
-        cancellationToken.ThrowIfCancellationRequested();
+        execution.Token.ThrowIfCancellationRequested();
         CharacterMotor motor = context.CharacterMotor;
         // 発動時点の向きを取得
         Vector3 forward = motor.transform.forward;
@@ -30,9 +30,9 @@ public class BlinkAction : SkillAction
         Vector3 moveDirection = _direction switch
         {
             MoveDirectionMode.Forward => forward,
-            MoveDirectionMode.AimDirection => direction,
+            MoveDirectionMode.AimDirection => execution.Direction,
             MoveDirectionMode.Back => -forward,
-            MoveDirectionMode.InputDirection => direction,
+            MoveDirectionMode.InputDirection => execution.Direction,
             _ => Vector3.zero
         };
 
@@ -57,14 +57,16 @@ public class BlinkAction : SkillAction
             float elapsed = 0f;
             while (elapsed < _duration)
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                await UniTask.Yield(PlayerLoopTiming.FixedUpdate, cancellationToken);
+                execution.Token.ThrowIfCancellationRequested();
+                await UniTask.Yield(PlayerLoopTiming.FixedUpdate, execution.Token);
                 elapsed += Time.fixedDeltaTime;
             }
 
         }
         finally
         {
+            // 正常終了・回避の中断・例外のいずれでも、強制移動と向き固定を解除する。
+            // 解除しないと Action 終了後も通常の移動・回転へ戻れなくなる。
             motor.ClearOverrideVelocity();
             motor.ClearOverrideFacingDirection();
         }

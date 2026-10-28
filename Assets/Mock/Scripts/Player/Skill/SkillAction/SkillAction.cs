@@ -1,5 +1,4 @@
 using Cysharp.Threading.Tasks;
-using System.Threading;
 using UnityEngine;
 
 /// <summary>
@@ -13,5 +12,5 @@ public abstract class SkillAction : ScriptableObject
     /// <param name="context"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public abstract UniTask ExecuteAsync(SkillContext context, CancellationToken cancellationToken,Vector3 direction);
+    public abstract UniTask ExecuteAsync(SkillContext context, SkillExecution execution);
 }

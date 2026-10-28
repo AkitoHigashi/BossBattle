@@ -3,6 +3,10 @@
 [DisallowMultipleComponent]
 public class AttackAnimationEvents : MonoBehaviour
 {
+    /// <summary>
+    /// PrepareAttack から終了・中断までの攻撃イベント受付状態。
+    /// Animator の再生中フラグではなく、攻撃判定が開いているかとも別。
+    /// </summary>
     public bool IsPlaying { get; private set; } = false;
     private AttackHitbox _hitbox;
     private int _damage;
@@ -44,6 +48,9 @@ public class AttackAnimationEvents : MonoBehaviour
     /// </summary>
     public void OnAttackFinished()
     {
+        // 中断済みなら終了イベントは無視する。
+        // 攻撃の識別はしないため、古いアニメーションから次の攻撃へイベントが届かないよう
+        // PlayerAttackAction と Controller 側でも退出・中断遷移を管理する必要がある。
         if (!IsPlaying) return;
         _hitbox.EndHit();
         IsPlaying = false;
@@ -54,6 +61,7 @@ public class AttackAnimationEvents : MonoBehaviour
     /// </summary>
     public void CancelAttack()
     {
+        // 通常終了時の最終命中チェックは行わず、中断時点で判定を閉じる。
         if(_hitbox != null) _hitbox.AbortHit();
         IsPlaying = false;
     }
