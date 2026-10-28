@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NCG.Player.CharacterDataList
   _characterDataArray:
   - _characterType: 0
-    _playerPrefab: {fileID: 0}
+    _playerPrefab: {fileID: 2508719783060195972, guid: 4fdc478051b3f2641896e517ae86b589, type: 3}
