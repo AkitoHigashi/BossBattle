@@ -1,7 +1,8 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-/// <summary>当たり判定を行わず、確定した円・扇形と進行度だけを表示する。</summary>
+/// <summary>円・扇形・ドーナツ型の予兆を独立して表示する。当たり判定は行わない。</summary>
 [DisallowMultipleComponent]
 public sealed class AttackPredictionView : MonoBehaviour
 {
@@ -11,117 +12,268 @@ public sealed class AttackPredictionView : MonoBehaviour
     [SerializeField] private Color _outlineColor = new Color(1f, 0.8f, 0.1f, 1f);
     [SerializeField] private Color _fillColor = new Color(1f, 0.15f, 0.05f, 0.35f);
 
-    private GameObject _viewRoot;
-    private Transform _fillTransform;
-    private Mesh _fillMesh;
-    private LineRenderer _outline;
-
-    public bool IsVisible => _viewRoot != null && _viewRoot.activeSelf;
-    public float Progress { get; private set; }
-
-    public bool Show(SectorRange range, AttackPose pose)
+    /// <summary>
+    /// 予兆を出すのに必要な情報
+    /// </summary>
+    private sealed class PredictionVisual
     {
+        public GameObject Root;
+        public Transform FillTransform;
+        public Mesh FillMesh;
+        public LineRenderer Outline;
+        public LineRenderer InnerOutline;
+        public MeshRenderer FillRenderer;
+        public Vector3[] Directions;
+        public Vector3[] FillVertices;
+        public float InnerRadius;
+        public float OuterRadius;
+        public float Progress;
+    }
+
+    private readonly object _defaultKey = new object();
+    private readonly Dictionary<object, PredictionVisual> _visible = new Dictionary<object, PredictionVisual>();
+    private readonly Stack<PredictionVisual> _pool = new Stack<PredictionVisual>();
+    private readonly List<PredictionVisual> _visuals = new List<PredictionVisual>();
+
+    public bool IsVisible => _visible.Count > 0;
+    public int VisibleCount => _visible.Count;
+    public bool IsVisibleFor(object predictionKey) => _visible.ContainsKey(predictionKey ?? _defaultKey);
+    public float Progress => GetProgress();
+
+    /// <summary>
+    /// 範囲を表示する関数
+    /// </summary>
+    /// <param name="range">範囲</param>
+    /// <param name="pose">攻撃するポジション</param>
+    /// <param name="telegraphKey">どの攻撃なのかの識別子</param>
+    /// <returns></returns>
+    public bool Show(SectorRange range, AttackPose pose, object telegraphKey = null)
+    {
+        if (!isActiveAndEnabled)
+            return false;
         if (_material == null)
         {
             Debug.LogError("AttackPredictionViewに予測表示用のMaterialを設定してください。", this);
             return false;
         }
 
-        EnsureRenderers();
-        // 敵の子にはしない。落下中も地上の確定地点に表示を残す。
-        _viewRoot.transform.SetPositionAndRotation(
+        object key = telegraphKey ?? _defaultKey;
+        if (!_visible.TryGetValue(key, out var visual))
+        {
+            visual = _pool.Count > 0 ? _pool.Pop() : CreateRenderers();
+            _visible.Add(key, visual);
+        }
+
+        // 表示全体の位置と向きを決める
+        visual.Root.transform.SetPositionAndRotation(
             pose.Origin + Vector3.up * _surfaceOffset,
             Quaternion.LookRotation(pose.Forward, Vector3.up));
 
+        //曲線を何分割するか
         int segments = Mathf.Max(1, Mathf.CeilToInt(range.Angle / 5f));
+
         var arc = new Vector3[segments + 1];
+        var innerArc = new Vector3[segments + 1];
+        visual.Directions = new Vector3[segments + 1];
+        visual.InnerRadius = range.InnerRadius;
+        visual.OuterRadius = range.Radius;
+
+        //内周と外周の点を作るループ
         for (int i = 0; i <= segments; i++)
         {
             float yaw = -range.Angle * 0.5f + range.Angle * i / segments;
-            arc[i] = Quaternion.AngleAxis(yaw, Vector3.up) * Vector3.forward * range.Radius;
+            var direction = Quaternion.AngleAxis(yaw, Vector3.up) * Vector3.forward;
+            visual.Directions[i] = direction;
+            arc[i] = direction * range.Radius;
+            innerArc[i] = direction * range.InnerRadius;
         }
 
         bool isCircle = range.Angle >= 360f;
         var outline = new Vector3[arc.Length + (isCircle ? 0 : 2)];
         System.Array.Copy(arc, 0, outline, isCircle ? 0 : 1, arc.Length);
-        _outline.positionCount = outline.Length;
-        _outline.SetPositions(outline);
-        _outline.widthMultiplier = Mathf.Max(0.01f, _lineWidth);
-        _outline.startColor = _outlineColor;
-        _outline.endColor = _outlineColor;
-        _outline.sharedMaterial = _material;
 
-        var vertices = new Vector3[segments + 2];
-        var colors = new Color[vertices.Length];
-        var triangles = new int[segments * 3];
-        System.Array.Copy(arc, 0, vertices, 1, arc.Length);
-        for (int i = 0; i < colors.Length; i++)
-            colors[i] = _fillColor;
-        for (int i = 0; i < segments; i++)
+        if (!isCircle)
         {
-            triangles[i * 3] = 0;
-            triangles[i * 3 + 1] = i + 1;
-            triangles[i * 3 + 2] = i + 2;
+            outline[0] = innerArc[0];
+            outline[outline.Length - 1] = innerArc[innerArc.Length - 1];
         }
 
-        _fillMesh.Clear();
-        _fillMesh.vertices = vertices;
-        _fillMesh.colors = colors;
-        _fillMesh.triangles = triangles;
-        _fillMesh.RecalculateBounds();
-        _fillTransform.GetComponent<MeshRenderer>().sharedMaterial = _material;
-        SetProgress(0f);
-        _viewRoot.SetActive(true);
+        //輪郭線の描画
+        visual.Outline.positionCount = outline.Length;
+        visual.Outline.SetPositions(outline);
+
+        ConfigureOutline(visual.Outline);
+
+        visual.InnerOutline.gameObject.SetActive(range.InnerRadius > 0f);
+        visual.InnerOutline.positionCount = innerArc.Length;
+        visual.InnerOutline.SetPositions(innerArc);
+        ConfigureOutline(visual.InnerOutline);
+
+        var vertices = new Vector3[(segments + 1) * 2];
+        var colors = new Color[vertices.Length];
+        var triangles = new int[segments * 6];
+
+        for (int i = 0; i <= segments; i++)
+        {
+            vertices[i * 2] = innerArc[i];
+            vertices[i * 2 + 1] = arc[i];
+        }
+
+        for (int i = 0; i < colors.Length; i++)
+            colors[i] = _fillColor;
+
+        //使用する頂点番号を設定する
+        for (int i = 0; i < segments; i++)
+        {
+            //使用する頂点の配列番号
+            int vertex = i * 2;
+            int triangle = i * 6;
+
+            triangles[triangle] = vertex;
+            triangles[triangle + 1] = vertex + 1;
+            triangles[triangle + 2] = vertex + 3;
+
+            triangles[triangle + 3] = vertex;
+            triangles[triangle + 4] = vertex + 3;
+            triangles[triangle + 5] = vertex + 2;
+        }
+
+        visual.FillVertices = vertices;
+        visual.FillTransform.localScale = Vector3.one;
+
+        //塗り用メッシュに頂点・色・三角形の構成を設定する
+        visual.FillMesh.Clear();
+        visual.FillMesh.vertices = vertices;
+        visual.FillMesh.colors = colors;
+        visual.FillMesh.triangles = triangles;
+        visual.FillMesh.RecalculateBounds();
+
+        visual.FillRenderer.sharedMaterial = _material;
+
+        //塗りの外周を内周まで戻して
+        //まだ広がっていない状態にしてる
+        SetProgress(0f, key);
+
+        visual.Root.SetActive(true);
         return true;
     }
 
-    public void SetProgress(float progress)
+    /// <summary>
+    /// 現在の進行度を取得する関数
+    /// </summary>
+    /// <param name="telegraphKey">どの攻撃なのかの識別子</param>
+    /// <returns></returns>
+    public float GetProgress(object telegraphKey = null)
     {
-        Progress = Mathf.Clamp01(progress);
-        if (_fillTransform != null)
-            _fillTransform.localScale = new Vector3(Progress, 1f, Progress);
+        return _visible.TryGetValue(
+            telegraphKey ?? _defaultKey, out var visual) 
+            ? visual.Progress : 0f;
     }
 
-    public void Hide()
+    /// <summary>
+    /// 進行度に合わせて塗る関数
+    /// </summary>
+    /// <param name="progress"></param>
+    /// <param name="telegraphKey"></param>
+    public void SetProgress(float progress, object telegraphKey = null)
     {
-        if (_viewRoot != null)
-            _viewRoot.SetActive(false);
-        Progress = 0f;
-    }
-
-    private void EnsureRenderers()
-    {
-        if (_viewRoot != null)
+        if (!_visible.TryGetValue(telegraphKey ?? _defaultKey, out var visual))
             return;
 
-        _viewRoot = new GameObject($"Attack Prediction ({name})");
-        _viewRoot.layer = gameObject.layer;
-        _viewRoot.SetActive(false);
-        _outline = _viewRoot.AddComponent<LineRenderer>();
-        _outline.useWorldSpace = false;
+        visual.Progress = Mathf.Clamp01(progress);
+        float radius = Mathf.Lerp(visual.InnerRadius, visual.OuterRadius, visual.Progress);
+        for (int i = 0; i < visual.Directions.Length; i++)
+            visual.FillVertices[i * 2 + 1] = visual.Directions[i] * radius;
+        visual.FillMesh.vertices = visual.FillVertices;
+        visual.FillMesh.RecalculateBounds();
+    }
+
+    /// <summary>指定した予兆だけを消す</summary>
+    public void Hide(object telegraphKey = null)
+    {
+        object key = telegraphKey ?? _defaultKey;
+        if (!_visible.TryGetValue(key, out var visual))
+            return;
+
+        _visible.Remove(key);
+        Recycle(visual);
+    }
+
+    /// <summary>この敵の全ての予兆を消す</summary>
+    public void HideAll()
+    {
+        foreach (var visual in _visible.Values)
+            Recycle(visual);
+        _visible.Clear();
+    }
+
+    private void Recycle(PredictionVisual visual)
+    {
+        visual.Root.SetActive(false);
+        visual.Progress = 0f;
+        _pool.Push(visual);
+    }
+
+    /// <summary>
+    /// 予兆一つ分の表示を作る
+    /// </summary>
+    /// <returns></returns>
+    private PredictionVisual CreateRenderers()
+    {
+        var visual = new PredictionVisual();
+        visual.Root = new GameObject($"Attack Prediction ({name})");
+        visual.Root.layer = gameObject.layer;
+        visual.Root.SetActive(false);
+        visual.Outline = visual.Root.AddComponent<LineRenderer>();
+        visual.Outline.useWorldSpace = false;
         // 俯瞰・斜め視点のどちらでも輪郭を確認できる。
-        _outline.alignment = LineAlignment.View;
-        _outline.shadowCastingMode = ShadowCastingMode.Off;
-        _outline.receiveShadows = false;
+        visual.Outline.alignment = LineAlignment.View;
+        visual.Outline.shadowCastingMode = ShadowCastingMode.Off;
+        visual.Outline.receiveShadows = false;
+
+        var innerOutline = new GameObject("Inner Outline", typeof(LineRenderer));
+        innerOutline.layer = gameObject.layer;
+        innerOutline.transform.SetParent(visual.Root.transform, false);
+        visual.InnerOutline = innerOutline.GetComponent<LineRenderer>();
+        visual.InnerOutline.useWorldSpace = false;
+        visual.InnerOutline.alignment = LineAlignment.View;
+        visual.InnerOutline.shadowCastingMode = ShadowCastingMode.Off;
+        visual.InnerOutline.receiveShadows = false;
 
         var fill = new GameObject("Progress Fill", typeof(MeshFilter), typeof(MeshRenderer));
         fill.layer = gameObject.layer;
-        fill.transform.SetParent(_viewRoot.transform, false);
-        _fillTransform = fill.transform;
-        _fillMesh = new Mesh { name = "Attack Prediction Fill" };
-        fill.GetComponent<MeshFilter>().sharedMesh = _fillMesh;
-        var renderer = fill.GetComponent<MeshRenderer>();
-        renderer.shadowCastingMode = ShadowCastingMode.Off;
-        renderer.receiveShadows = false;
+        fill.transform.SetParent(visual.Root.transform, false);
+        visual.FillTransform = fill.transform;
+        visual.FillMesh = new Mesh { name = "Attack Prediction Fill" };
+        fill.GetComponent<MeshFilter>().sharedMesh = visual.FillMesh;
+        visual.FillRenderer = fill.GetComponent<MeshRenderer>();
+        visual.FillRenderer.shadowCastingMode = ShadowCastingMode.Off;
+        visual.FillRenderer.receiveShadows = false;
+        _visuals.Add(visual);
+        return visual;
     }
 
-    private void OnDisable() => Hide();
+    private void ConfigureOutline(LineRenderer outline)
+    {
+        outline.widthMultiplier = Mathf.Max(0.01f, _lineWidth);
+        outline.startColor = _outlineColor;
+        outline.endColor = _outlineColor;
+        outline.sharedMaterial = _material;
+    }
+
+    private void OnDisable() => HideAll();
 
     private void OnDestroy()
     {
-        if (_viewRoot != null)
-            Destroy(_viewRoot);
-        if (_fillMesh != null)
-            Destroy(_fillMesh);
+        foreach (var visual in _visuals)
+        {
+            if (visual.Root != null)
+                Destroy(visual.Root);
+            if (visual.FillMesh != null)
+                Destroy(visual.FillMesh);
+        }
+        _visible.Clear();
+        _pool.Clear();
+        _visuals.Clear();
     }
 }
