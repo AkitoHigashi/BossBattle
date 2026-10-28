@@ -10,6 +10,7 @@ public class PlayerController : MonoBehaviour
     [Header("Skill")]
     [SerializeField] private SkillDefinition _normalAttack;
     [SerializeField] private SkillDefinition _skill1;
+    [SerializeField] private SkillDefinition _skill2;
     [SerializeField] private SkillDefinition _dodge;
 
     [Tooltip("ON: マウス方向を向く / OFF: 移動方向を向く")]
@@ -22,6 +23,7 @@ public class PlayerController : MonoBehaviour
     private InputAction _moveAction;
     private InputAction _attackAction;
     private InputAction _skill1Action;
+    private InputAction _skill2Action;
     private InputAction _skillDodge;
     private Character _character;
     private CharacterMotor _motor;
@@ -59,6 +61,7 @@ public class PlayerController : MonoBehaviour
         _moveAction = inputBuffer.MoveAction;
         _attackAction = inputBuffer.AttackAction;
         _skill1Action = inputBuffer.Skill1Action;
+        _skill2Action = inputBuffer.Skill2Action;
         _skillDodge = inputBuffer.DodgeAction;
         _initialized = true;
 
@@ -114,6 +117,8 @@ public class PlayerController : MonoBehaviour
             }
             if (_skill1 != null)
                 _skill1Action.started += OnSkill1;
+            if (_skill2 != null)
+                _skill2Action.started += OnSkill2;
             if (_skillDodge != null)
                 _skillDodge.started += OnDodge;
         }
@@ -138,6 +143,8 @@ public class PlayerController : MonoBehaviour
                 }
                 if (_skill1 != null)
                     _skill1Action.started -= OnSkill1;
+                if (_skill2 != null)
+                    _skill2Action.started -= OnSkill2;
                 if (_skillDodge != null)
                     _skillDodge.started -= OnDodge;
             }
@@ -175,6 +182,12 @@ public class PlayerController : MonoBehaviour
         UseSkill(_skill1, direction);
     }
 
+    private void OnSkill2(InputAction.CallbackContext context)
+    {
+        Vector3 direction = TryGetMouseDirection(out var mouseDirectoin) ? mouseDirectoin : transform.forward;
+        UseSkill(_skill2, direction);
+    }
+
     private void OnDodge(InputAction.CallbackContext context)
     {
         Vector2 input = _moveAction.ReadValue<Vector2>();
@@ -183,8 +196,8 @@ public class PlayerController : MonoBehaviour
             direction = transform.forward;
         direction.y = 0f;
 
-        _skillSystem.TryUseSkillAsync(_dodge, direction.normalized,_skillRequestCts.Token)
-            .Forget(ex=>Debug.LogException(ex,this));
+        _skillSystem.TryUseSkillAsync(_dodge, direction.normalized, _skillRequestCts.Token)
+            .Forget(ex => Debug.LogException(ex, this));
     }
 
     private void UseSkill(SkillDefinition definition, Vector3 direction)
