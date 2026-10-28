@@ -116,7 +116,10 @@ public class PlayerController : MonoBehaviour
                 _attackAction.canceled += OnAttackCanceled;
             }
             if (_skill1 != null)
-                _skill1Action.started += OnSkill1;
+            {
+                _skill1Action.performed += OnSkill1Performed;
+                _skill1Action.canceled += OnSkill1Canceled;
+            }
             if (_skill2 != null)
                 _skill2Action.started += OnSkill2;
             if (_skillDodge != null)
@@ -142,7 +145,10 @@ public class PlayerController : MonoBehaviour
                     _attackAction.canceled -= OnAttackCanceled;
                 }
                 if (_skill1 != null)
-                    _skill1Action.started -= OnSkill1;
+                {
+                    _skill1Action.performed -= OnSkill1Performed;
+                    _skill1Action.canceled -= OnSkill1Canceled;
+                }
                 if (_skill2 != null)
                     _skill2Action.started -= OnSkill2;
                 if (_skillDodge != null)
@@ -176,10 +182,17 @@ public class PlayerController : MonoBehaviour
         _skillSystem.HandleSkillInput(_normalAttack, SkillInputPhase.Released, direction);
     }
 
-    private void OnSkill1(InputAction.CallbackContext context)
+    private void OnSkill1Performed(InputAction.CallbackContext context)
     {
-        Vector3 direction = TryGetMouseDirection(out var mouseDirectoin) ? mouseDirectoin : transform.forward;
-        UseSkill(_skill1, direction);
+        Vector3 direction = TryGetMouseDirection(out var mouseDirection)
+            ? mouseDirection : transform.forward;
+
+        _skillSystem.HandleSkillInput(_skill1, SkillInputPhase.Pressed, direction);
+    }
+
+    private void OnSkill1Canceled(InputAction.CallbackContext context)
+    {
+        _skillSystem.HandleSkillInput(_skill1, SkillInputPhase.Released, transform.forward);
     }
 
     private void OnSkill2(InputAction.CallbackContext context)
