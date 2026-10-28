@@ -6,6 +6,7 @@ using UnityEngine;
 public class ComboAttackAction : SkillAction
 {
     [SerializeField] private PlayerAttackAction[] _attacks;
+    // 各段の攻撃終了後に追加入力を待つ最大時間。攻撃中に受け取った入力も有効。
     [Tooltip("次の連撃を発動するための追加入力を待つ時間")]
     [SerializeField, Min(0f)] private float _followUpWindow = 1f;
 
@@ -22,7 +23,7 @@ public class ComboAttackAction : SkillAction
             if (attack == null)
                 throw new InvalidOperationException($"連撃{stage + 1}段目が未設定です。");
 
-            // 各段の攻撃アニメーション・判定を実行
+            // 判定の終了だけでなく、攻撃ステートを退出するまで待って次の段へ進む。
             await attack.ExecuteAsync(context, execution);
 
             // 最終段なら終了
@@ -32,8 +33,11 @@ public class ComboAttackAction : SkillAction
             // 初回入力を1回目として数えるため、
             // 次の段には stage + 2 回の入力が必要
             int requiredPressCount = stage + 2;
+            // 猶予の計測は各段の終了後から開始する（攻撃中の再生時間は含めない）。
             float waitStartedAt = Time.time;
 
+            // PressCount は連撃全体で累積する。入力済みなら待たずに次の段へ進む。
+            // 例：1段目の間に合計3回押すと、2・3段目の両方が予約される。
             while (execution.PressCount < requiredPressCount)
             {
                 execution.Token.ThrowIfCancellationRequested();

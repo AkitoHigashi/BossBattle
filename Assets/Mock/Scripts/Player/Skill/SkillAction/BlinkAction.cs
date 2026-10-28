@@ -65,6 +65,8 @@ public class BlinkAction : SkillAction
         }
         finally
         {
+            // 正常終了・回避の中断・例外のいずれでも、強制移動と向き固定を解除する。
+            // 解除しないと Action 終了後も通常の移動・回転へ戻れなくなる。
             motor.ClearOverrideVelocity();
             motor.ClearOverrideFacingDirection();
         }

@@ -26,7 +26,7 @@ public class PlayerAttackAction : SkillAction
     /// </summary>
     [SerializeField, Min(0)] private int _damage = 10;
     /// <summary>
-    /// アニメーションの再生進行度が変化しない場合、異常停止と判断するまでの時間。
+    /// 攻撃ステートへの進入、または終了通知後の退出を待つ最大時間。
     /// </summary>
     private const float STATEENTRYTIMEOUT = 1f;
     /// <summary>
@@ -107,7 +107,8 @@ public class PlayerAttackAction : SkillAction
 
             // AnimationEventの終了通知を受け取った時刻
             float finishedAt = Time.time;
-            // 攻撃StateがCurrent Stateでなくなるまで待機
+            // 終了イベントが届いても、Animator はまだ攻撃ステートを再生している場合がある。
+            // 退出を待ち、古い攻撃が Current State のまま次の攻撃を準備するのを避ける。
             while (animator.GetCurrentAnimatorStateInfo(0).fullPathHash == stateHash)
             {
                 execution.Token.ThrowIfCancellationRequested();
@@ -119,12 +120,14 @@ public class PlayerAttackAction : SkillAction
         }
         finally
         {
-            // 攻撃判定を解除する
+            // 正常終了・中断・例外のいずれでも、攻撃判定とイベント受付を閉じる。
             receiver.CancelAttack();
             if (animator != null)
             {
                 // 未消費のTriggerを解除
                 animator.ResetTrigger(_triggerName);
+                // 処理の中断だけではアニメーションは止まらないため、中断遷移も要求する。
+                // Controller 側に、この Trigger で攻撃から退出する遷移の設定が必要。
                 TryRecoverAnimator(animator, stateHash);
             }
         }

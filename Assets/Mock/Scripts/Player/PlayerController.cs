@@ -110,6 +110,8 @@ public class PlayerController : MonoBehaviour
         _moveAction.canceled += OnMove;
         if (_skillSystem != null)
         {
+            // 通常攻撃と Skill1（連撃）は、再押下・長押し状態を実行中のスキルへ伝える。
+            // そのため押下だけでなく解放も購読する。解放の通知自体はスキルを中断しない。
             if (_normalAttack != null)
             {
                 _attackAction.performed += OnAttackPerformed;
@@ -156,6 +158,7 @@ public class PlayerController : MonoBehaviour
             }
             _subscribed = false;
         }
+        // 中断完了を待っている発動要求も取り消し、無効化後に回避が始まるのを防ぐ。
         _skillRequestCts?.Cancel();
         _skillRequestCts?.Dispose();
         _skillRequestCts = null;
@@ -198,6 +201,7 @@ public class PlayerController : MonoBehaviour
     private void OnSkill2(InputAction.CallbackContext context)
     {
         Vector3 direction = TryGetMouseDirection(out var mouseDirectoin) ? mouseDirectoin : transform.forward;
+        // Skill2 は単発の発動要求として扱い、実行中のスキルへの追加入力は送らない。
         UseSkill(_skill2, direction);
     }
 
@@ -209,6 +213,8 @@ public class PlayerController : MonoBehaviour
             direction = transform.forward;
         direction.y = 0f;
 
+        // 回避は割り込み要求。実行中の攻撃の後片付けを待ってから開始する。
+        // 入力コールバックでは待機せず、非同期処理の例外だけをログへ渡す。
         _skillSystem.TryUseSkillAsync(_dodge, direction.normalized, _skillRequestCts.Token)
             .Forget(ex => Debug.LogException(ex, this));
     }
