@@ -9,12 +9,11 @@ namespace NCG.Player.Spawn
     public sealed class PlayerSpawnManager : MonoBehaviour
     {
         [SerializeField, Tooltip("キャラクターのリスト")] CharacterDataList _characterDataList;
-        PlayerSpawner _spawner;
+        [SerializeField, Tooltip("スポナー")] PlayerSpawner _spawner;
         readonly HashSet<int> _spawnedClients = new();
 
         private void Awake()
         {
-            _spawner = GetComponentInChildren<PlayerSpawner>();
             InstanceFinder.SceneManager.OnClientPresenceChangeEnd += OnClientPresenceChangeEnd;
         }
 
