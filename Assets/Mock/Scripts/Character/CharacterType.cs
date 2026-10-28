@@ -7,5 +7,8 @@ namespace NCG.Player.Spawn
     {
         [InspectorName("不正値")] Invalid = -1,
         [InspectorName("キャラクターA")] CharacterA = 0,
+        [InspectorName("キャラクターB")] CharacterB = 1,
+        [InspectorName("キャラクターC")] CharacterC = 2,
+        [InspectorName("キャラクターD")] CharacterD = 3,
     }
 }
