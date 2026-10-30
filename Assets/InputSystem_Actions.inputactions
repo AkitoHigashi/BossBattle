@@ -618,7 +618,7 @@
                 {
                     "name": "",
                     "id": "c17d97c7-08c2-44ae-a366-fe4a171aa7c4",
-                    "path": "<Keyboard>/q",
+                    "path": "<Mouse>/rightButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -629,7 +629,7 @@
                 {
                     "name": "",
                     "id": "fc384e59-7cb0-4f1d-9eec-ad81e56e03af",
-                    "path": "",
+                    "path": "<Keyboard>/q",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

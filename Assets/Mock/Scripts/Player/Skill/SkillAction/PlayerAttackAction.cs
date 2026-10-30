@@ -26,7 +26,7 @@ public class PlayerAttackAction : SkillAction
     /// </summary>
     [SerializeField, Min(0)] private int _damage = 10;
     /// <summary>
-    /// アニメーションの再生進行度が変化しない場合、異常停止と判断するまでの時間。
+    /// 攻撃ステートへの進入、または終了通知後の退出を待つ最大時間。
     /// </summary>
     private const float STATEENTRYTIMEOUT = 1f;
     /// <summary>
@@ -34,11 +34,11 @@ public class PlayerAttackAction : SkillAction
     /// </summary>
     private const float NOPROGRESSTIMEOUT = 1f;
 
-    public override async UniTask ExecuteAsync(SkillContext context, CancellationToken cancellationToken,Vector3 direction)
+    public override async UniTask ExecuteAsync(SkillContext context, SkillExecution execution)
     {
         Animator animator = context.Animator;
         AttackAnimationEvents receiver = context.AnimationEvents;
-        cancellationToken.ThrowIfCancellationRequested();
+        execution.Token.ThrowIfCancellationRequested();
         ValidateAnimator(animator);
 
         if (receiver == null)
@@ -64,7 +64,7 @@ public class PlayerAttackAction : SkillAction
             AnimatorStateInfo stateInfo;
             while (true)
             {
-                cancellationToken.ThrowIfCancellationRequested();
+                execution.Token.ThrowIfCancellationRequested();
                 ValidateAnimator(animator);
                 stateInfo = animator.GetCurrentAnimatorStateInfo(0);
                 // 目的のStateに入り、Transitionも完了していれば終了
@@ -73,7 +73,7 @@ public class PlayerAttackAction : SkillAction
                 // 指定時間以内に遷移できなければ異常終了
                 if (Time.time - entryStartedAt >= STATEENTRYTIMEOUT)
                     throw new TimeoutException($"攻撃Stateへの遷移に失敗しました: {_stateFullPath}");
-                await UniTask.NextFrame(cancellationToken);
+                await UniTask.NextFrame(execution.Token);
             }
 
             // 現在のアニメーション再生進行度
@@ -83,7 +83,7 @@ public class PlayerAttackAction : SkillAction
             // AnimationEventの終了通知が届くまで待つ
             while (receiver.IsPlaying)
             {
-                cancellationToken.ThrowIfCancellationRequested();
+                execution.Token.ThrowIfCancellationRequested();
                 ValidateAnimator(animator);
                 stateInfo = animator.GetCurrentAnimatorStateInfo(0);
                 // 終了イベント前に別Stateへ移動していたら異常
@@ -102,29 +102,32 @@ public class PlayerAttackAction : SkillAction
                 // 一定時間アニメーションが進まなかった場合
                 if (Time.time - lastProgressAt >= NOPROGRESSTIMEOUT)
                     throw new TimeoutException($"攻撃アニメーションの進行が停止しました: {_stateFullPath}");
-                await UniTask.NextFrame(cancellationToken);
+                await UniTask.NextFrame(execution.Token);
             }
 
             // AnimationEventの終了通知を受け取った時刻
             float finishedAt = Time.time;
-            // 攻撃StateがCurrent Stateでなくなるまで待機
+            // 終了イベントが届いても、Animator はまだ攻撃ステートを再生している場合がある。
+            // 退出を待ち、古い攻撃が Current State のまま次の攻撃を準備するのを避ける。
             while (animator.GetCurrentAnimatorStateInfo(0).fullPathHash == stateHash)
             {
-                cancellationToken.ThrowIfCancellationRequested();
+                execution.Token.ThrowIfCancellationRequested();
                 ValidateAnimator(animator);
                 if (Time.time - finishedAt >= STATEENTRYTIMEOUT)
                     throw new TimeoutException($"攻撃終了後にStateを離れませんでした: {_stateFullPath}");
-                await UniTask.NextFrame(cancellationToken);
+                await UniTask.NextFrame(execution.Token);
             }
         }
         finally
         {
-            // 攻撃判定を解除する
+            // 正常終了・中断・例外のいずれでも、攻撃判定とイベント受付を閉じる。
             receiver.CancelAttack();
             if (animator != null)
             {
                 // 未消費のTriggerを解除
                 animator.ResetTrigger(_triggerName);
+                // 処理の中断だけではアニメーションは止まらないため、中断遷移も要求する。
+                // Controller 側に、この Trigger で攻撃から退出する遷移の設定が必要。
                 TryRecoverAnimator(animator, stateHash);
             }
         }
@@ -144,11 +147,11 @@ public class PlayerAttackAction : SkillAction
             return;
 
         AnimatorStateInfo current = animator.GetCurrentAnimatorStateInfo(0);
-        // すでに別Stateへ移動しているなら何もしない
-        if (current.fullPathHash != attackHash)
-            return;
-        // 他StateへのTransitionが始まっているなら介入しない
-        if (animator.IsInTransition(0))
+        bool isInTransition = animator.IsInTransition(0);
+        bool isEnteringAttack = isInTransition
+            && animator.GetNextAnimatorStateInfo(0).fullPathHash == attackHash;
+        // 攻撃への遷移中も中断する。攻撃から離れる遷移には介入しない。
+        if (!isEnteringAttack && (current.fullPathHash != attackHash || isInTransition))
             return;
 
         // 中断用Triggerが存在するか確認
