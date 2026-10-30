@@ -2,6 +2,7 @@ using FishNet;
 using FishNet.Managing.Scened;
 using System.Collections.Generic;
 using UnityEngine;
+using NCG.Character;
 
 namespace NCG.Player.Spawn
 {
@@ -9,11 +10,12 @@ namespace NCG.Player.Spawn
     public sealed class PlayerSpawnManager : MonoBehaviour
     {
         [SerializeField, Tooltip("キャラクターのリスト")] CharacterDataList _characterDataList;
-        [SerializeField, Tooltip("スポナー")] PlayerSpawner _spawner;
+        INetworkObjectSpawnable _spawner;
         readonly HashSet<int> _spawnedClients = new();
 
         private void Awake()
         {
+            _spawner = GetComponentInChildren<INetworkObjectSpawnable>();
             InstanceFinder.SceneManager.OnClientPresenceChangeEnd += OnClientPresenceChangeEnd;
         }
 

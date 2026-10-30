@@ -1,4 +1,5 @@
 using FishNet.Connection;
+using NCG.Character;
 
 namespace NCG.Player.Spawn
 {

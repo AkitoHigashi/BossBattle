@@ -2,6 +2,7 @@ using FishNet.Object;
 using System;
 using System.Linq;
 using UnityEngine;
+using NCG.Character;
 
 namespace NCG.Player.Spawn
 {
