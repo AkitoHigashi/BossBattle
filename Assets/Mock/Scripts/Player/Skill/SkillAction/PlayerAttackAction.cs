@@ -26,6 +26,11 @@ public class PlayerAttackAction : SkillAction
     /// </summary>
     [SerializeField, Min(0)] private int _damage = 10;
     /// <summary>
+    /// この攻撃が1回命中したときに与えるブレイク値。
+    /// 「3連全ヒットでブレイク値①」なら各段に 1/3 ずつ設定する。
+    /// </summary>
+    [SerializeField, Min(0f)] private float _breakValue = 0f;
+    /// <summary>
     /// 攻撃ステートへの進入、または終了通知後の退出を待つ最大時間。
     /// </summary>
     private const float STATEENTRYTIMEOUT = 1f;
@@ -58,7 +63,8 @@ public class PlayerAttackAction : SkillAction
 
         try
         {
-            receiver.PrepareAttack(_damage);
+            // 倍率は通常 1。溜め攻撃では ChargeAction が溜め結果に応じて設定する。
+            receiver.PrepareAttack(execution.ApplyMultipliers(new AttackData(_damage, _breakValue)));
             animator.SetTrigger(_triggerName);
             float entryStartedAt = Time.time;
             AnimatorStateInfo stateInfo;

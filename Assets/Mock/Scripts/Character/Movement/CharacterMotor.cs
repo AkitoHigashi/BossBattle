@@ -37,14 +37,29 @@ public class CharacterMotor : MonoBehaviour
     /// </summary>
     private float _overrideRotationSpeed;
     /// <summary>
-    /// スキル実行中の回転速度。
+    /// スキルによる回転方向の上書きが有効か。
     /// </summary>
     private bool _hasOverrideFacingDirection;
 
+    /// <summary>
+    /// マウス照準で向く方向。スキルの上書きより優先度が低く、通常移動より高い。
+    /// </summary>
     private Vector3 _aimFacingDirection;
+    /// <summary>
+    /// マウス照準へ向くときの回転速度（度/秒）。
+    /// </summary>
     private float _aimRotationSpeed;
+    /// <summary>
+    /// マウス照準による回転が有効か。
+    /// </summary>
     private bool _hasAimFacingDirection;
+    /// <summary>
+    /// 通常移動の向きへ回転するときの速度（度/秒）。
+    /// </summary>
     private float _rotationSpeed;
+    /// <summary>
+    /// 時間制限付き速度Overrideの残り秒数。負の値は「時間制限なし（解除されるまで続く）」を表す。
+    /// </summary>
     private float _overrideVelocityRemaining = -1f;
 
     private void Awake()
