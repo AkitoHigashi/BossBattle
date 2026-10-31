@@ -154,7 +154,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BtAgent
   _healthValue: 100
-  _behaviorTree: {fileID: 11400000, guid: 7de300e744d6bfe4cbe4d85c271fb012, type: 2}
+  _behaviorTree: {fileID: 11400000, guid: 06465a1b35bd433d9044e431ce25ebd3, type: 2}
   _attackRange: 3
   _attackDamage: 10
   _target: {fileID: 1713203485}
