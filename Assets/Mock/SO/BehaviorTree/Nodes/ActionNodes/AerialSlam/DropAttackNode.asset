@@ -12,5 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8bbe2f344191d3df035aff13e3dd264, type: 3}
   m_Name: DropAttackNode
   m_EditorClassIdentifier: Assembly-CSharp::DropActionNode
-  _fallSpeed: 24
+  _guid: 896e8e0473a59214fab5c5b2961d3331
+  _graphPosition: {x: 600, y: 480}
   _attackMultiplier: 1.5
+  _fallSpeed: 24

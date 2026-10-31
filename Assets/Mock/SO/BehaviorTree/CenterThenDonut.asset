@@ -13,6 +13,12 @@ MonoBehaviour:
   m_Name: CenterThenDonut
   m_EditorClassIdentifier: Assembly-CSharp::BehaviorTree
   _rootNode: {fileID: 11400001}
+  _nodes:
+  - {fileID: 11400001}
+  - {fileID: 11400002}
+  - {fileID: 11400003}
+  - {fileID: 11400004}
+  - {fileID: 11400005}
 --- !u!114 &11400001
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -25,6 +31,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 769c7c8dcd3799a449e453e603a71cbf, type: 3}
   m_Name: Root
   m_EditorClassIdentifier: Assembly-CSharp::RootNode
+  _guid: bc9161806e1bb0145b9c4e66e456c8fb
+  _graphPosition: {x: 100, y: 0}
   _childNode: {fileID: 11400002}
 --- !u!114 &11400002
 MonoBehaviour:
@@ -38,6 +46,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b84f03a55bd645f0ad3cefa0413547e9, type: 3}
   m_Name: Attack Group
   m_EditorClassIdentifier: Assembly-CSharp::ParallelNode
+  _guid: da5cc5b199f7af348a9ea30c3da29d28
+  _graphPosition: {x: 100, y: 240}
   _childNodes:
   - {fileID: 11400003}
   - {fileID: 11400004}
@@ -53,6 +63,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37a7b8498dc34268b119a20dbed4b9c5, type: 3}
   m_Name: Center Attack
   m_EditorClassIdentifier: Assembly-CSharp::RangeAttackNode
+  _guid: ddb9175369523c344af796f354546b9f
+  _graphPosition: {x: 0, y: 480}
   _attackMultiplier: 1.5
   _range: {fileID: 11400006}
   _predictionDuration: 2
@@ -71,6 +83,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d9980fe35e2421ea26352b161ba14ca, type: 3}
   m_Name: Donut Delay
   m_EditorClassIdentifier: Assembly-CSharp::DelayNode
+  _guid: 7112e189c0b7165409dbaca037206394
+  _graphPosition: {x: 200, y: 480}
   _childNode: {fileID: 11400005}
   _duration: 1.5
 --- !u!114 &11400005
@@ -85,6 +99,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37a7b8498dc34268b119a20dbed4b9c5, type: 3}
   m_Name: Donut Attack
   m_EditorClassIdentifier: Assembly-CSharp::RangeAttackNode
+  _guid: 022a70d86fcaf3e4c988c4af6bababe2
+  _graphPosition: {x: 200, y: 720}
   _attackMultiplier: 1.5
   _range: {fileID: 11400007}
   _predictionDuration: 1

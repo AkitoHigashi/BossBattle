@@ -12,4 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 769c7c8dcd3799a449e453e603a71cbf, type: 3}
   m_Name: RootNode
   m_EditorClassIdentifier: Assembly-CSharp::RootNode
+  _guid: 4aaeece5f8af78747a0e0e9ef508983c
+  _graphPosition: {x: 300, y: 0}
   _childNode: {fileID: 11400000, guid: 7994fddb7b93b0c4aacf3c7d08a89654, type: 2}

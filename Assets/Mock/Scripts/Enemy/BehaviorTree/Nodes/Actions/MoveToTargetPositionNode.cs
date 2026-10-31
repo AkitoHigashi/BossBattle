@@ -72,6 +72,7 @@ public sealed class MoveToTargetPositionNode : ActionNode
 
     protected override void OnSuccess() => StopAndRestore();
     protected override void OnFailure() => StopAndRestore();
+    protected override void OnAbort() => StopAndRestore();
 
     private void StopAndRestore()
     {

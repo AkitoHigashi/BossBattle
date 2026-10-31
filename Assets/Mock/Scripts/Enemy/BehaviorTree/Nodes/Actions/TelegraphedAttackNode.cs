@@ -40,6 +40,7 @@ public sealed class TelegraphedAttackNode : AttackNode
 
     protected override void OnSuccess() => FinishAttack();
     protected override void OnFailure() => FinishAttack();
+    protected override void OnAbort() => FinishAttack();
 
     protected override NodeStatus OnUpdate()
     {

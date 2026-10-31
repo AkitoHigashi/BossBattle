@@ -1,3 +1,17 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <BTree.EditorTools.BehaviorTreeGraph style="flex-grow: 1;"/>
+    <Style src="BehaviorTreeEditor.uss"/>
+    <!-- 左: BlackBoard / 中央: グラフ / 右: Node Inspector -->
+    <ui:TwoPaneSplitView fixed-pane-index="0" fixed-pane-initial-dimension="260" orientation="Horizontal" style="flex-grow: 1;">
+        <ui:VisualElement name="blackboard-panel" class="bt-panel bt-side-panel">
+            <ui:Label text="BlackBoard" class="bt-panel__header"/>
+            <BTree.EditorTools.BlackboardView style="flex-grow: 1;"/>
+        </ui:VisualElement>
+        <ui:TwoPaneSplitView fixed-pane-index="1" fixed-pane-initial-dimension="300" orientation="Horizontal">
+            <BTree.EditorTools.BehaviorTreeGraph style="flex-grow: 1;"/>
+            <ui:VisualElement name="inspector-panel" class="bt-panel bt-side-panel">
+                <ui:Label text="Node Inspector" class="bt-panel__header"/>
+                <BTree.EditorTools.NodeInspectorView style="flex-grow: 1;"/>
+            </ui:VisualElement>
+        </ui:TwoPaneSplitView>
+    </ui:TwoPaneSplitView>
 </ui:UXML>

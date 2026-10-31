@@ -9,6 +9,14 @@ public class BehaviorTree : ScriptableObject
     [NonSerialized] private BlackBoard _blackBoard;
     [NonSerialized] private List<BtNode> _clonedNodes = new List<BtNode>();
 
+    // グラフエディタに並ぶ全Node。Rootから辿れない未接続のNodeも保持する
+    [SerializeField, HideInInspector] private List<BtNode> _nodes = new List<BtNode>();
+
+    /// <summary>
+    /// Clone()で複製した実行用Node。エディタのデバッグ表示に使う
+    /// </summary>
+    public IReadOnlyList<BtNode> ClonedNodes => _clonedNodes;
+
     /// <summary>
     /// 実行用のツリーを複製する
     /// エージェントごとにNodeの状態を独立させるため、実行前に必ず通す
@@ -54,6 +62,31 @@ public class BehaviorTree : ScriptableObject
         }
 
         _rootNode.Evaluate();
+
+        // Runningだったのに今フレーム評価されなかったNodeは、親が途中で呼ぶのをやめたNode
+        // 条件が外れた等で中断されたので、途中の状態を捨てさせる
+        var frame = Time.frameCount;
+        foreach (var node in _clonedNodes)
+        {
+            if (node != null && node.IsRunning && node.LastEvaluatedFrame != frame)
+            {
+                node.Abort();
+            }
+        }
+    }
+
+    /// <summary>
+    /// 実行途中の全Nodeを中断する。エージェントを止める時に呼ぶ
+    /// </summary>
+    public void AbortAll()
+    {
+        foreach (var node in _clonedNodes)
+        {
+            if (node != null)
+            {
+                node.Abort();
+            }
+        }
     }
 
     private void OnDestroy()

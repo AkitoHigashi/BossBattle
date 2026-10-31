@@ -1,0 +1,111 @@
+/* ===== 左右パネル共通 ===== */
+.bt-side-panel {
+    min-width: 200px;
+    background-color: rgb(40, 40, 40);
+}
+
+.bt-panel {
+    flex-grow: 1;
+    min-height: 80px;
+}
+
+.bt-panel__header {
+    -unity-font-style: bold;
+    padding: 4px 8px;
+    background-color: rgb(30, 30, 30);
+    border-bottom-width: 1px;
+    border-color: rgb(20, 20, 20);
+}
+
+.bt-panel__content {
+    flex-grow: 1;
+}
+
+.bt-message {
+    white-space: normal;
+    color: rgb(150, 150, 150);
+    padding: 6px 8px;
+}
+
+/* ===== BlackBoard ===== */
+.bt-blackboard__row {
+    flex-direction: row;
+    align-items: center;
+    padding: 3px 8px;
+    border-bottom-width: 1px;
+    border-color: rgb(50, 50, 50);
+}
+
+.bt-blackboard__row:hover {
+    background-color: rgb(55, 55, 55);
+}
+
+.bt-blackboard__name-column {
+    width: 55%;
+}
+
+.bt-blackboard__name {
+    -unity-font-style: bold;
+}
+
+.bt-blackboard__type {
+    font-size: 10px;
+    color: rgb(130, 130, 130);
+}
+
+.bt-blackboard__value {
+    flex-grow: 1;
+    flex-shrink: 1;
+    -unity-text-align: middle-right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: rgb(140, 200, 255);
+}
+
+.bt-blackboard__group {
+    margin-left: 4px;
+}
+
+/* ===== Node Inspector ===== */
+.bt-inspector__header {
+    padding: 6px 8px;
+    border-bottom-width: 1px;
+    border-color: rgb(25, 25, 25);
+}
+
+.bt-inspector__kind {
+    align-self: flex-start;
+    font-size: 10px;
+    color: white;
+    padding: 1px 6px;
+    border-radius: 3px;
+    background-color: rgb(80, 80, 80);
+}
+
+/* ノードのタイトルと同じ色 */
+.bt-inspector__kind.action    { background-color: rgb(60, 110, 70); }
+.bt-inspector__kind.composite { background-color: rgb(140, 100, 40); }
+.bt-inspector__kind.decorator { background-color: rgb(70, 90, 150); }
+.bt-inspector__kind.condition { background-color: rgb(110, 60, 130); }
+.bt-inspector__kind.root      { background-color: rgb(140, 50, 50); }
+
+.bt-inspector__title {
+    font-size: 14px;
+    -unity-font-style: bold;
+    margin-top: 4px;
+}
+
+.bt-inspector__buttons {
+    flex-direction: row;
+    margin-top: 4px;
+}
+
+.bt-inspector__fields {
+    padding: 6px 4px;
+}
+
+/* ===== 警告（読み取り専用の理由・構造の問題） ===== */
+.bt-warning-area > HelpBox {
+    margin: 2px 4px;
+    white-space: normal;
+}

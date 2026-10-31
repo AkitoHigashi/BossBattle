@@ -77,4 +77,7 @@ public sealed class AttackPredictionNode : ActionNode
         }
         _blackBoard?.PredictionView?.Hide();
     }
+
+    // 予兆の途中で中断されたら、表示と確定データを片付ける
+    protected override void OnAbort() => OnFailure();
 }

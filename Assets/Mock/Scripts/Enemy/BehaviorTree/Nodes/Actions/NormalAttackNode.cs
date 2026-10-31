@@ -36,4 +36,7 @@ public sealed class NormalAttackNode : AttackNode
         _isWaiting = false;
         return NodeStatus.Success;
     }
+
+    // 攻撃後の待ち時間の途中で中断されたら、次は攻撃からやり直す
+    protected override void OnAbort() => _isWaiting = false;
 }

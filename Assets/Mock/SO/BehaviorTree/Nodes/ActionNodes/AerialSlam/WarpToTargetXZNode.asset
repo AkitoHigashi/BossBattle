@@ -12,4 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28c08bce39814b7c8edf4270f51a6302, type: 3}
   m_Name: WarpToTargetXZNode
   m_EditorClassIdentifier: Assembly-CSharp::WarpToTargetXZNode
+  _guid: dcb07a97cb1b14e42a8088b0f255b796
+  _graphPosition: {x: 200, y: 480}
   _sampleRadius: 2

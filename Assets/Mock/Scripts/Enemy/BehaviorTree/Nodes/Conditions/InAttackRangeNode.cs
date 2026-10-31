@@ -79,4 +79,11 @@ public sealed class InAttackRangeNode : ConditionNode
         _isChildRunning = status == NodeStatus.Running;
         return status;
     }
+
+    // 予兆の途中で中断されたら、次に範囲へ入った時は予兆からやり直す
+    protected override void OnAbort()
+    {
+        _isTelegraphing = false;
+        _isChildRunning = false;
+    }
 }

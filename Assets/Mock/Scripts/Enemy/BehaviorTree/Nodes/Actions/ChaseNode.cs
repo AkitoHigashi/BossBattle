@@ -37,4 +37,16 @@ public sealed class ChaseNode : ActionNode
         agent.isStopped = false;
         return agent.SetDestination(targetPosition) ? NodeStatus.Running : NodeStatus.Failure;
     }
+
+    // 追跡の途中で中断されたら、最後の目的地へ歩き続けないように止める
+    protected override void OnAbort()
+    {
+        var agent = _blackBoard?.NavMeshAgent;
+        if (agent == null || !agent.isActiveAndEnabled || !agent.isOnNavMesh)
+            return;
+
+        agent.ResetPath();
+        agent.isStopped = true;
+        agent.velocity = Vector3.zero;
+    }
 }

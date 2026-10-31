@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aefcc002a437a4f48ab196345602a76c, type: 3}
   m_Name: SequenceNode
   m_EditorClassIdentifier: Assembly-CSharp::SequenceNode
+  _guid: fcc0c92f3acf91b41a17a6a670cce0f4
+  _graphPosition: {x: 300, y: 240}
   _childNodes:
   - {fileID: 11400000, guid: 81d891538011a2342958191097595419, type: 2}
   - {fileID: 11400000, guid: b6ad94a8f2b64a2fa7f6965ec975018e, type: 2}

@@ -6,7 +6,7 @@ public abstract class ConditionNode : BtNode
     public override BtNode Clone(List<BtNode> clones)
     {
         var clone = (ConditionNode)base.Clone(clones);
-        clone._childNode = _childNode.Clone(clones);
+        clone._childNode = _childNode != null ? _childNode.Clone(clones) : null;
         return clone;
     }
 

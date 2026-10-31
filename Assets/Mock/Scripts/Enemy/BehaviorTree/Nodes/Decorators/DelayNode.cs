@@ -49,4 +49,6 @@ public sealed class DelayNode : DecoratorNode
         _childStarted = false;
         _startTime = 0f;
     }
+
+    protected override void OnAbort() => ResetDelay();
 }

@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9a44f65a07eefcb30cb2077ef5e5b02, type: 3}
   m_Name: AttackPredictionNode
   m_EditorClassIdentifier: Assembly-CSharp::AttackPredictionNode
+  _guid: 09618dacc77a2d14894c8755e668e431
+  _graphPosition: {x: 400, y: 480}
   _range: {fileID: 11400000, guid: fd3771dfb725af94fae8bc094620c508, type: 2}
   _duration: 2
   _sampleRadius: 2

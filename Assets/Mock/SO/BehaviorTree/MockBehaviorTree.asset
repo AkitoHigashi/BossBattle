@@ -13,3 +13,10 @@ MonoBehaviour:
   m_Name: MockBehaviorTree
   m_EditorClassIdentifier: Assembly-CSharp::BehaviorTree
   _rootNode: {fileID: 11400000, guid: 28f34c5d494a898488ddbce82bc0a25e, type: 2}
+  _nodes:
+  - {fileID: 11400000, guid: 28f34c5d494a898488ddbce82bc0a25e, type: 2}
+  - {fileID: 11400000, guid: 7994fddb7b93b0c4aacf3c7d08a89654, type: 2}
+  - {fileID: 11400000, guid: 81d891538011a2342958191097595419, type: 2}
+  - {fileID: 11400000, guid: b6ad94a8f2b64a2fa7f6965ec975018e, type: 2}
+  - {fileID: 11400000, guid: aa9ad9230ed9e09e342472bdd7b48a5f, type: 2}
+  - {fileID: 11400000, guid: a5ee7c3302dfea33b10d7f918b5601eb, type: 2}

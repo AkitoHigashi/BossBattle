@@ -61,6 +61,7 @@ public sealed class DropActionNode : AttackNode
 
     protected override void OnSuccess() => HidePrediction();
     protected override void OnFailure() => HidePrediction();
+    protected override void OnAbort() => HidePrediction();
 
     private void HidePrediction()
     {

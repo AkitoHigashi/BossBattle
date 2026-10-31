@@ -50,4 +50,6 @@ public class ParallelNode : CompositeNode
         _isRunning = false;
         return hasFailure ? NodeStatus.Failure : NodeStatus.Success;
     }
+
+    protected override void OnAbort() => _isRunning = false;
 }

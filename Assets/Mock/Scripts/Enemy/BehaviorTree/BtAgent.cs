@@ -17,6 +17,16 @@ public class BtAgent : MonoBehaviour
     private BehaviorTree _runtimeTree;
     private BlackBoard _blackBoard;
     private AttackPredictionView _predictionView;
+
+    /// <summary>設定されている元のツリーアセット</summary>
+    public BehaviorTree SourceTree => _behaviorTree;
+
+    /// <summary>このエージェント専用に複製した実行中のツリー</summary>
+    public BehaviorTree RuntimeTree => _runtimeTree;
+
+    /// <summary>実行中のツリーに配っている黒板。Start前は null</summary>
+    public BlackBoard BlackBoard => _blackBoard;
+
     private void Awake()
     {
         if (_behaviorTree == null)
@@ -42,6 +52,15 @@ public class BtAgent : MonoBehaviour
     private void Update()
     {
         _runtimeTree.Update();
+    }
+
+    private void OnDisable()
+    {
+        // 無効化中に追跡などが動き続けないよう、途中の処理を止める。再び有効になったら最初から評価する
+        if (_runtimeTree != null)
+        {
+            _runtimeTree.AbortAll();
+        }
     }
 
     private void OnDestroy()

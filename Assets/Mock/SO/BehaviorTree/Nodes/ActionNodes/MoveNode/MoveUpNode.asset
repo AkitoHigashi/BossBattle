@@ -12,5 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03bbf281f5b44074886f5d6a919dc3d8, type: 3}
   m_Name: MoveUpNode
   m_EditorClassIdentifier: Assembly-CSharp::MoveUpNode
+  _guid: 12c5a48ea296d3e4289ba1b8837d7f02
+  _graphPosition: {x: 0, y: 480}
   _moveDistance: 12
   _moveSpeed: 12

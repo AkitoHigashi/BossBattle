@@ -59,5 +59,10 @@
 .action    #title { background-color: rgb(60, 110, 70); }
 .composite #title { background-color: rgb(140, 100, 40); }
 .decorator #title { background-color: rgb(70, 90, 150); }
+.condition #title { background-color: rgb(110, 60, 130); }
 .root      #title { background-color: rgb(140, 50, 50); }
+
+/* Play中の実行状態（直近フレームで評価されたNodeのみ） */
 .running   #node-border { border-color: rgb(255, 200, 0); border-width: 2px; }
+.success   #node-border { border-color: rgb(80, 220, 100); border-width: 2px; }
+.failure   #node-border { border-color: rgb(230, 70, 70); border-width: 2px; }
