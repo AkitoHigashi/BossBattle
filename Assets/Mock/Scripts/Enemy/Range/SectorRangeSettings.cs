@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// 円・扇形の設定、範囲判定、のデバッグ描画を持つScriptableObject。
+/// 円・扇形・ドーナツ型の設定、範囲判定、デバッグ描画を持つScriptableObject。
 /// </summary>
 [CreateAssetMenu(
     fileName = "SectorRangeSettings",
@@ -25,12 +25,12 @@ public class SectorRangeSettings : ScriptableObject
         return _range.Contains(origin, forward, targetPosition);
     }
 
-    /// <summary>最大範囲の外枠と、進行度に応じて中心から広がる塗りを描画する。</summary>
+    /// <summary>内外の輪郭と、内半径から外側へ広がる塗りを描画する。</summary>
     public void DrawDebug(Vector3 origin, Vector3 forward, float progress)
     {
         forward = SectorRange.GetHorizontalForward(forward);
         DrawSector(origin, forward);
-        DrawFilledSector(origin, forward, _range.Radius * Mathf.Clamp01(progress));
+        DrawFilledSector(origin, forward, Mathf.Lerp(_range.InnerRadius, _range.Radius, Mathf.Clamp01(progress)));
     }
 
     /// <summary>
@@ -42,12 +42,24 @@ public class SectorRangeSettings : ScriptableObject
     {
         float angle = _range.Angle;
         float radius = _range.Radius;
-        int segments = Mathf.Max(1, Mathf.CeilToInt(angle / OutlineStepDegrees));
+        float innerRadius = _range.InnerRadius;
+        DrawArc(origin, forward, radius, angle);
+        if (innerRadius > 0f)
+            DrawArc(origin, forward, innerRadius, angle);
 
-        Vector3 previous = GetArcPoint(origin, forward, radius, -angle * 0.5f);
         if (angle < FullCircleDegrees)
-            Debug.DrawLine(origin, previous, Color.yellow);
+        {
+            Debug.DrawLine(GetArcPoint(origin, forward, innerRadius, -angle * 0.5f),
+                GetArcPoint(origin, forward, radius, -angle * 0.5f), Color.yellow);
+            Debug.DrawLine(GetArcPoint(origin, forward, innerRadius, angle * 0.5f),
+                GetArcPoint(origin, forward, radius, angle * 0.5f), Color.yellow);
+        }
+    }
 
+    private static void DrawArc(Vector3 origin, Vector3 forward, float radius, float angle)
+    {
+        int segments = Mathf.Max(1, Mathf.CeilToInt(angle / OutlineStepDegrees));
+        Vector3 previous = GetArcPoint(origin, forward, radius, -angle * 0.5f);
         for (int i = 1; i <= segments; i++)
         {
             float yaw = -angle * 0.5f + angle * i / segments;
@@ -55,21 +67,20 @@ public class SectorRangeSettings : ScriptableObject
             Debug.DrawLine(previous, next, Color.yellow);
             previous = next;
         }
-
-        if (angle < FullCircleDegrees)
-            Debug.DrawLine(origin, previous, Color.yellow);
     }
 
     private void DrawFilledSector(Vector3 origin, Vector3 forward, float radius)
     {
-        if (radius <= 0f) return;
+        float innerRadius = _range.InnerRadius;
+        if (radius <= innerRadius) return;
 
         float angle = _range.Angle;
         int segments = Mathf.Max(1, Mathf.CeilToInt(angle / FillStepDegrees));
         for (int i = 0; i <= segments; i++)
         {
             float yaw = -angle * 0.5f + angle * i / segments;
-            Debug.DrawLine(origin, GetArcPoint(origin, forward, radius, yaw), Color.red);
+            Debug.DrawLine(GetArcPoint(origin, forward, innerRadius, yaw),
+                GetArcPoint(origin, forward, radius, yaw), Color.red);
         }
     }
 
