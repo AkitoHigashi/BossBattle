@@ -2,7 +2,7 @@ using FishNet;
 using FishNet.Managing.Scened;
 using System.Collections.Generic;
 using UnityEngine;
-using NCG.Character;
+using NCG.Character.Selection;
 
 namespace NCG.Player.Spawn
 {
@@ -11,11 +11,13 @@ namespace NCG.Player.Spawn
     {
         [SerializeField, Tooltip("キャラクターのリスト")] CharacterDataList _characterDataList;
         INetworkObjectSpawnable _spawner;
+        CharacterSelectionManager _selectionManager;
         readonly HashSet<int> _spawnedClients = new();
 
         private void Awake()
         {
             _spawner = GetComponentInChildren<INetworkObjectSpawnable>();
+            _selectionManager = FindAnyObjectByType<CharacterSelectionManager>();
             InstanceFinder.SceneManager.OnClientPresenceChangeEnd += OnClientPresenceChangeEnd;
         }
 
@@ -41,7 +43,7 @@ namespace NCG.Player.Spawn
             if (!InstanceFinder.ServerManager.Started) return;
 
             // プレイヤー情報の生成
-            var playerInfo = new PlayerInfo(args.Connection, CharacterType.CharacterA);
+            var playerInfo = new PlayerInfo(args.Connection);
             SpawnPlayer(playerInfo);
         }
 
@@ -56,13 +58,17 @@ namespace NCG.Player.Spawn
             // プレイヤーに対するキャラクターをすでに生成していたらreturn
             if (_spawnedClients.Contains(networkConnection.ClientId)) return;
 
+            if (_selectionManager == null 
+                || !_selectionManager.TryGetCharacterType(networkConnection.ClientId, out var characterType)) 
+                return;
+
             if (_characterDataList == null)
             {
                 Debug.LogError("SOがアサインされていません");
                 return;
             }
 
-            if (!_characterDataList.TryGetPlayerPrefab(playerInfo.CharacterType, out var prefab))
+            if (!_characterDataList.TryGetPlayerPrefab(characterType, out var prefab))
             {
                 Debug.LogError("プレハブを取得できませんでした");
                 return;

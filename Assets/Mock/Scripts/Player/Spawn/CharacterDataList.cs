@@ -1,8 +1,7 @@
 using FishNet.Object;
-using System;
-using System.Linq;
 using UnityEngine;
 using NCG.Character;
+using System.Collections.Generic;
 
 namespace NCG.Player.Spawn
 {
@@ -10,7 +9,7 @@ namespace NCG.Player.Spawn
     [CreateAssetMenu(fileName = "CharacterDataList", menuName = "NCG/Player/CharacterDataList")]
     public sealed class CharacterDataList : ScriptableObject
     {
-        [SerializeField] CharacterData[] _characterDataArray;
+        [SerializeField] Dictionary<CharacterType, NetworkObject> _characterDataDict;
 
         /// <summary>
         /// 選択したキャラクターの種類に応じたプレイヤーのプレハブを取得するメソッド
@@ -20,18 +19,7 @@ namespace NCG.Player.Spawn
         /// <returns>プレイヤーのプレハブを取得できたか</returns>
         public bool TryGetPlayerPrefab(CharacterType characterType, out NetworkObject prefab)
         {
-            prefab = _characterDataArray.FirstOrDefault(c => c.CharacterType == characterType)?.PlayerPrefab;
-            return prefab != null;
-        }
-
-        [Serializable]
-        class CharacterData
-        {
-            [SerializeField, Tooltip("キャラクターの種類")] CharacterType _characterType;
-            [SerializeField, Tooltip("プレハブ")] NetworkObject _playerPrefab;
-
-            public CharacterType CharacterType => _characterType;
-            public NetworkObject PlayerPrefab => _playerPrefab;
+            return _characterDataDict.TryGetValue(characterType, out prefab);
         }
     }
 }

@@ -1,5 +1,4 @@
 using FishNet.Connection;
-using NCG.Character;
 
 namespace NCG.Player.Spawn
 {
@@ -9,14 +8,9 @@ namespace NCG.Player.Spawn
         /// <summary>接続のアクションを行ったプレイヤーのデータ</summary>
         public readonly NetworkConnection NetworkConnection;
 
-        /// <summary>操作するキャラクターの種類</summary>
-        public readonly CharacterType CharacterType;
-
-        public PlayerInfo(NetworkConnection networkConnection
-            , CharacterType characterType)
+        public PlayerInfo(NetworkConnection networkConnection)
         {
             NetworkConnection = networkConnection;
-            CharacterType = characterType;
         }
     }
 }
