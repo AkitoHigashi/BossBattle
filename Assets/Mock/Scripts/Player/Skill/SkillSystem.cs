@@ -37,6 +37,14 @@ public class SkillSystem : ISkillSystem, IDisposable
         return true;
     }
 
+    public void UpdateAimDirection(Vector3 direction)
+    {
+        if (_disposed)
+            return;
+
+        _currentExecution?.SetAimDirection(direction);
+    }
+
     /// <summary>
     /// スキルの入力を処理する。
     /// 実行中なら現在のSkillExecutionへ入力を通知
@@ -56,7 +64,7 @@ public class SkillSystem : ISkillSystem, IDisposable
             // 同じスキルへの入力は再発動せず、実行中の押下状態・押下回数に反映する。
             // 別スキルによる割り込みは TryUseSkillAsync で扱う。
             if (_currentExecution.Definition == definition)
-                _currentExecution.ReceiveInput(phase);
+                _currentExecution.ReceiveInput(phase, direction);
             else
                 return false;
         }
@@ -142,7 +150,7 @@ public class SkillSystem : ISkillSystem, IDisposable
     {
         var execution = new SkillExecution(definition, direction);
         // 発動のきっかけとなった最初の押下も、この実行の入力として数える。
-        execution.ReceiveInput(SkillInputPhase.Pressed);
+        execution.ReceiveInput(SkillInputPhase.Pressed, direction);
         _currentExecution = execution;
         if (definition.CooldownPolicy == CooldownStartPolicy.OnStart)
             _nextUsableTimes[definition] = Time.time + definition.Cooldown;
@@ -160,14 +168,12 @@ public class SkillSystem : ISkillSystem, IDisposable
         // 破棄済み、定義なし、実行する Action なしの場合は使用不可。
         // 実行中かどうかは呼び出し元で判断する（割り込み可否と区別するため）。
         if (_disposed || definition == null || definition.Actions == null || definition.Actions.Length == 0)
-        {
             return false;
-        }
+
         //クールダウン中なら使用不可。
         if (_nextUsableTimes.TryGetValue(definition, out float nextUsableTime) && Time.time < nextUsableTime)
-        {
             return false;
-        }
+
 
         return true;
     }
@@ -279,9 +285,10 @@ public class SkillSystem : ISkillSystem, IDisposable
     /// </summary>
     public void Dispose()
     {
-        if (_disposed) return;
+        if (_disposed)
+            return;
         // 中断に伴う処理が動く前に破棄済みにし、新規発動や終了時の実行状態通知を抑止する。
-            _disposed = true;
+        _disposed = true;
         try
         {
             _currentExecution?.Cancel();

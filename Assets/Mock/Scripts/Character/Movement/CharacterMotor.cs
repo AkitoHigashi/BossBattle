@@ -45,6 +45,7 @@ public class CharacterMotor : MonoBehaviour
     private float _aimRotationSpeed;
     private bool _hasAimFacingDirection;
     private float _rotationSpeed;
+    private float _overrideVelocityRemaining = -1f;
 
     private void Awake()
     {
@@ -133,6 +134,26 @@ public class CharacterMotor : MonoBehaviour
         velocity.y = 0f;
         _overrideVelocity = velocity;
         _hasOverrideVelocity = true;
+        _overrideVelocityRemaining = -1f;
+    }
+
+    /// <summary>
+    /// 指定時間だけ移動速度を上書きする。
+    /// durationは秒単位。
+    /// </summary>
+    public void SetOverrideVelocity(Vector3 velocity, float duration)
+    {
+        if (float.IsNaN(duration) || float.IsInfinity(duration) || duration < 0f)
+            throw new ArgumentOutOfRangeException(nameof(duration));
+
+        if (duration == 0f)
+        {
+            ClearOverrideVelocity();
+            return;
+        }
+
+        SetOverrideVelocity(velocity);
+        _overrideVelocityRemaining = duration;
     }
 
     /// <summary>
@@ -142,6 +163,7 @@ public class CharacterMotor : MonoBehaviour
     {
         _overrideVelocity = Vector3.zero;
         _hasOverrideVelocity = false;
+        _overrideVelocityRemaining = -1f;
     }
 
     /// <summary>
@@ -173,6 +195,16 @@ public class CharacterMotor : MonoBehaviour
     {
         Vector3 horizontal = (_hasOverrideVelocity ? _overrideVelocity : _locomotionVelocity) + _externalVelocity;
         Vector3 velocity = _rigidbody.linearVelocity;
+        // 時間制限付きOverrideの残り時間を更新
+        if (_hasOverrideVelocity && _overrideVelocityRemaining >= 0f)
+        {
+            _overrideVelocityRemaining -= Time.fixedDeltaTime;
+
+            if (_overrideVelocityRemaining <= 0f)
+            {
+                ClearOverrideVelocity();
+            }
+        }
         velocity.x = horizontal.x;
         velocity.z = horizontal.z;
         velocity.y += _pendingExternalY;

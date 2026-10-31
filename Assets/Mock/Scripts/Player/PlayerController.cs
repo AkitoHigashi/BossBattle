@@ -83,6 +83,8 @@ public class PlayerController : MonoBehaviour
 
         if (TryGetMouseDirection(out Vector3 direction))
         {
+            // 実行中のスキルに最新のマウス方向を渡す
+            _skillSystem?.UpdateAimDirection(direction);
             // 回転速度はCharacterDataから取得
             _motor.SetAimFactingDirection(direction, _characterData.MouseRotationSpeed);
         }

@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
@@ -15,7 +16,14 @@ public class SkillExecution : IDisposable
     // Cancel の呼び出し時ではなく、SkillSystem の終了処理で NotifyCompleted が呼ばれると完了する。
     public UniTask Completion => _completionSource.Task;
     public SkillDefinition Definition { get; }
+    /// <summary>
+    /// スキル発動時の方向
+    /// </summary>
     public Vector3 Direction { get; }
+    /// <summary>
+    /// 現在のマウス方向
+    /// </summary>
+    public Vector3 CurrentAimDirection { get; private set; }
     // この1回の実行中に受け取った入力状態。実際の溜め・派生の判断は各 Action 側で行う。
     public bool IsHeld { get; private set; }
     // 最初の発動入力を含む押下回数。新しい SkillExecution では 0 から数え直す。
@@ -23,6 +31,7 @@ public class SkillExecution : IDisposable
 
     private readonly CancellationTokenSource _cts = new();
     private readonly UniTaskCompletionSource _completionSource = new();
+    private readonly List<Vector3> _pressDirection = new();
     private bool _disposed;
 
     public SkillExecution(SkillDefinition definition, Vector3 direction)
@@ -32,14 +41,23 @@ public class SkillExecution : IDisposable
 
         Definition = definition;
         Direction = direction;
+        CurrentAimDirection = direction.normalized;
     }
 
-    /// <summary>
-    /// 入力の通知と保持。
-    /// </summary>
-    /// <param name="phase"></param>
-    /// <exception cref="ArgumentOutOfRangeException"></exception>
-    public void ReceiveInput(SkillInputPhase phase)
+    public void SetAimDirection(Vector3 direction)
+    {
+        if (_disposed)
+            return;
+
+        direction.y = 0f;
+
+        if (direction.sqrMagnitude <= 0.0001f)
+            return;
+
+        CurrentAimDirection = direction.normalized;
+    }
+
+    public void ReceiveInput(SkillInputPhase phase, Vector3 direction)
     {
         if (_disposed || _cts.IsCancellationRequested)
             return;
@@ -47,26 +65,27 @@ public class SkillExecution : IDisposable
         switch (phase)
         {
             case SkillInputPhase.Pressed:
-                // 押しっぱなしで同じ通知が来ても、離して再度押すまでは回数を増やさない。
                 if (IsHeld)
                     return;
 
                 IsHeld = true;
                 PressCount++;
+                direction.y = 0f;
+                _pressDirection.Add(direction.sqrMagnitude > 0.001f ? direction.normalized : Direction);
                 break;
 
             case SkillInputPhase.Released:
-                // 入力状態を更新するだけで、スキルの実行自体はキャンセルしない。
-                if (!IsHeld)
-                    return;
-
                 IsHeld = false;
                 break;
 
             default:
                 throw new ArgumentOutOfRangeException(nameof(phase));
         }
+    }
 
+    public Vector3 GetPressDirection(int index)
+    {
+        return _pressDirection[index];
     }
 
     public void Cancel()
