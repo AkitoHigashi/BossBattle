@@ -74,25 +74,20 @@ public class PlayerController : MonoBehaviour
         if (!_initialized)
             return;
 
-        // マウス方向を向かない設定なら通常移動の回転処理へ戻す
-        if (!_faceMouseCursor)
+        bool hasAim = TryGetMouseDirection(out Vector3 direction);
+
+        //スキル用の照準方向
+        if (hasAim)
+            _skillSystem?.UpdateAimDirection(direction);
+
+        // 通常回転にマウス方向を使用するか
+        if (!_faceMouseCursor || !hasAim)
         {
             _motor.ClearAimFacingDirection();
             return;
         }
 
-        if (TryGetMouseDirection(out Vector3 direction))
-        {
-            // 実行中のスキルに最新のマウス方向を渡す
-            _skillSystem?.UpdateAimDirection(direction);
-            // 回転速度はCharacterDataから取得
-            _motor.SetAimFactingDirection(direction, _characterData.MouseRotationSpeed);
-        }
-        else
-        {
-            // カメラやマウスが利用できないとき
-            _motor.ClearAimFacingDirection();
-        }
+        _motor.SetAimFactingDirection(direction, _characterData.MouseRotationSpeed);
     }
 
     private void OnEnable()

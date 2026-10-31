@@ -214,17 +214,17 @@ public class CharacterMotor : MonoBehaviour
         Vector3 facingDirection;
         float rotationSpeed;
 
-        // 優先度1：マウス照準
-        if (_hasAimFacingDirection)
-        {
-            facingDirection = _aimFacingDirection;
-            rotationSpeed = _aimRotationSpeed;
-        }
-        // 優先度2：スキル
-        else if (_hasOverrideFacingDirection)
+        // 優先度1：スキル
+        if (_hasOverrideFacingDirection)
         {
             facingDirection = _overrideFacingDirection;
             rotationSpeed = _overrideRotationSpeed;
+        }
+        // 優先度2：マウス照準
+        else if(_hasAimFacingDirection)
+        {
+            facingDirection = _aimFacingDirection;
+            rotationSpeed = _aimRotationSpeed;
         }
         // 優先度3：通常移動
         else

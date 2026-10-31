@@ -57,7 +57,7 @@ public class SkillExecution : IDisposable
         CurrentAimDirection = direction.normalized;
     }
 
-    public void ReceiveInput(SkillInputPhase phase, Vector3 direction)
+    public void ReceiveInput(SkillInputPhase phase)
     {
         if (_disposed || _cts.IsCancellationRequested)
             return;
@@ -70,8 +70,6 @@ public class SkillExecution : IDisposable
 
                 IsHeld = true;
                 PressCount++;
-                direction.y = 0f;
-                _pressDirection.Add(direction.sqrMagnitude > 0.001f ? direction.normalized : Direction);
                 break;
 
             case SkillInputPhase.Released:
