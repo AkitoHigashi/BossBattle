@@ -640,7 +640,7 @@
                 {
                     "name": "",
                     "id": "c8f0deba-a558-4567-8c0d-9b0ee34f4111",
-                    "path": "",
+                    "path": "<Keyboard>/e",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -649,37 +649,103 @@
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "",
-                    "id": "b8e7c5ae-3d19-43f9-8297-f305547f3d84",
-                    "path": "",
+                    "name": "Shift+Key",
+                    "id": "494c40a8-c24b-4f0b-b5bd-25cbb2fcbf4e",
+                    "path": "OneModifier",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Skill4",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "modifier",
+                    "id": "77249356-ce36-4124-a71b-bbc1b8825dee",
+                    "path": "<Keyboard>/shift",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Skill4",
                     "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "binding",
+                    "id": "b8e7c5ae-3d19-43f9-8297-f305547f3d84",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Skill4",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "Shift+Key",
+                    "id": "f0ff8e4f-3a50-4d90-b606-a52cea283b5f",
+                    "path": "OneModifier",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Skill5",
+                    "isComposite": true,
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "",
-                    "id": "1a95fadf-53be-4990-8f37-27436a77a694",
-                    "path": "",
+                    "name": "modifier",
+                    "id": "ea572e3a-e123-469f-b2ec-02c6a6990175",
+                    "path": "<Keyboard>/shift",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Skill5",
                     "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "binding",
+                    "id": "1a95fadf-53be-4990-8f37-27436a77a694",
+                    "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Skill5",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "Shift+Key",
+                    "id": "09473e62-3e49-48e5-aab4-4007b7c06ac5",
+                    "path": "OneModifier",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Skill6",
+                    "isComposite": true,
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "",
-                    "id": "c0c41ad5-82a0-44eb-b20e-332125aeec87",
-                    "path": "",
+                    "name": "modifier",
+                    "id": "59d71797-7b44-4423-9455-2a59ebcb153e",
+                    "path": "<Keyboard>/shift",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Skill6",
                     "isComposite": false,
-                    "isPartOfComposite": false
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "binding",
+                    "id": "c0c41ad5-82a0-44eb-b20e-332125aeec87",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Skill6",
+                    "isComposite": false,
+                    "isPartOfComposite": true
                 },
                 {
                     "name": "",

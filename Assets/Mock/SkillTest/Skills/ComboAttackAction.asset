@@ -13,7 +13,10 @@ MonoBehaviour:
   m_Name: ComboAttackAction
   m_EditorClassIdentifier: Assembly-CSharp::ComboAttackAction
   _attacks:
-  - {fileID: 11400000, guid: 7954ed7a4d430504987152e2fcfb554e, type: 2}
+  - {fileID: 11400000, guid: 9cba8afc57bd7643e37084527a05d7ad, type: 2}
   - {fileID: 11400000, guid: 94e84c2f24f24c379b880acfeaa7efed, type: 2}
   - {fileID: 11400000, guid: d7269247addd42f1aadd4b9df87b4304, type: 2}
   _followUpWindow: 1
+  _forwardSpeed: 2
+  _duration: 0.3
+  _direction: 1

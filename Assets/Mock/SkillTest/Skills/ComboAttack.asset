@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: ComboAttack
   m_EditorClassIdentifier: Assembly-CSharp::SkillDefinition
   _skillName: ComboAttack
-  _cooldown: 0.5
+  _cooldown: 7
   _actions:
   - {fileID: 11400000, guid: 14331f757f2b4953bb998789d18a1f98, type: 2}
   _cooldownPolicy: 1

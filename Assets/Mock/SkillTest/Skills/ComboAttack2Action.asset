@@ -16,3 +16,4 @@ MonoBehaviour:
   _stateFullPath: Base Layer.ComboAttack2
   _interruptTriggerName: InterruptComboAttack
   _damage: 10
+  _breakValue: 0.3333
