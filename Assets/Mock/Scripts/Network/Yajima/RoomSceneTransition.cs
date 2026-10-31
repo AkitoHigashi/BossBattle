@@ -16,14 +16,37 @@ namespace NetworkTest_Yajima
         [SerializeField] private GameObject _connectionUI;
         private NetworkManager _network;
         private RoomManager _rooms;
+        private RoomClient _client;
+        private bool _switching;
+        public const string LobbyPath = "Assets/Mock/Scenes/Net/Yajima/RoomLobby.unity";
+        public const string BrowserPath = "Assets/Mock/Scenes/Net/Yajima/NetTest.unity";
 
         private void Start()
         {
             _network = GetComponent<NetworkManager>();
             _rooms = GetComponent<RoomManager>();
             _rooms.RoomStarted += OnRoomStarted;
+            _client = GetComponent<RoomClient>();
+            _client.StateChanged += Navigate;
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded += SceneLoaded;
             _network.SceneManager.OnLoadEnd += OnLoadEnd;
             _network.ClientManager.OnClientConnectionState += OnClientState;
+        }
+
+        private void SceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode mode)
+        {
+            _switching = false;
+            if (_connectionUI != null) _connectionUI.SetActive(scene.path == BrowserPath);
+        }
+
+        private void Navigate()
+        {
+            if (_switching || (_client.HasRoom && _client.CurrentRoom.HasStarted)) return;
+            string current = UnityEngine.SceneManagement.SceneManager.GetActiveScene().path;
+            string target = _client.HasRoom ? LobbyPath : BrowserPath;
+            if (current == target || (!_client.HasRoom && current != LobbyPath)) return;
+            _switching = true;
+            UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(target);
         }
 
         private void OnRoomStarted(RoomInfo room)
@@ -59,9 +82,12 @@ namespace NetworkTest_Yajima
         private void OnDestroy()
         {
             if (_rooms != null) _rooms.RoomStarted -= OnRoomStarted;
+            if (_client != null) _client.StateChanged -= Navigate;
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded -= SceneLoaded;
             if (_network == null || !_network.Initialized) return;
             _network.SceneManager.OnLoadEnd -= OnLoadEnd;
             _network.ClientManager.OnClientConnectionState -= OnClientState;
         }
     }
 }
+

@@ -2,7 +2,7 @@ using FishNet.Broadcast;
 
 namespace NetworkTest_Yajima
 {
-    public enum RoomOperation : byte { List, Create, Join, Leave, SetReady, Start }
+    public enum RoomOperation : byte { List, Create, Join, Leave, SetReady, Start, SelectCharacter }
 
     // Broadcast用DTO。RoomIdはサーバー内でのみ有効です。
     public struct RoomRequest : IBroadcast
@@ -12,12 +12,14 @@ namespace NetworkTest_Yajima
         public string Name;
         public int Capacity;
         public bool Ready;
+        public int Character;
     }
 
     public struct RoomMember
     {
         public int ClientId;
         public bool IsReady;
+        public int Character;
     }
 
     public struct RoomInfo
@@ -41,3 +43,4 @@ namespace NetworkTest_Yajima
     // HasRoom=falseは退出または所属なし。開始後の更新もこのメッセージで通知します。
     public struct RoomState : IBroadcast { public bool HasRoom; public RoomInfo Room; }
 }
+

@@ -24,6 +24,17 @@ namespace NetworkTest_Yajima
         /// <summary>サーバーで発火。ゲーム開始・シーンロード等を購読側で行います。</summary>
         public event Action<RoomInfo> RoomStarted;
 
+        public bool CanSelectCharacter(int clientId) => _membership.TryGetValue(clientId, out Room room) && !room.Started;
+        public event Action<int> MemberLeft;
+        public void ApplyCharacterSelection(int clientId, int character)
+        {
+            if (!CanSelectCharacter(clientId) || character < 0 || character > 3) return;
+            Room room = _membership[clientId];
+            room.Characters[clientId] = character;
+            room.Ready.Remove(clientId);
+            Publish(room);
+        }
+
         private sealed class Room
         {
             public string Id;
@@ -32,6 +43,7 @@ namespace NetworkTest_Yajima
             public int Owner;
             public bool Started;
             public readonly List<NetworkConnection> Members = new List<NetworkConnection>();
+            public readonly Dictionary<int, int> Characters = new Dictionary<int, int>();
             public readonly HashSet<int> Ready = new HashSet<int>();
         }
 
@@ -98,6 +110,13 @@ namespace NetworkTest_Yajima
                     else room.Ready.Remove(connection.ClientId);
                     Publish(room);
                     break;
+                case RoomOperation.SelectCharacter:
+                    if (room == null || room.Started || request.Character < 0 || request.Character > 2)
+                    { error = "選択できません。"; break; }
+                    room.Characters[connection.ClientId] = request.Character;
+                    room.Ready.Remove(connection.ClientId);
+                    Publish(room);
+                    break;
                 case RoomOperation.Start:
                     if (room == null || room.Owner != connection.ClientId || room.Started)
                     { error = "待機中のルーム所有者のみ開始できます。"; break; }
@@ -119,8 +138,10 @@ namespace NetworkTest_Yajima
         {
             if (!_membership.TryGetValue(connection.ClientId, out Room room)) return;
             _membership.Remove(connection.ClientId);
+            MemberLeft?.Invoke(connection.ClientId);
             room.Members.RemoveAll(member => member.ClientId == connection.ClientId);
             room.Ready.Remove(connection.ClientId);
+            room.Characters.Remove(connection.ClientId);
             if (room.Members.Count == 0) { _rooms.Remove(room.Id); return; }
             if (room.Owner == connection.ClientId) room.Owner = room.Members[0].ClientId;
             Publish(room);
@@ -151,9 +172,10 @@ namespace NetworkTest_Yajima
             for (int i = 0; i < members.Length; i++)
             {
                 int id = room.Members[i].ClientId;
-                members[i] = new RoomMember { ClientId = id, IsReady = room.Ready.Contains(id) };
+                members[i] = new RoomMember { ClientId = id, IsReady = room.Ready.Contains(id), Character = room.Characters.TryGetValue(id, out int character) ? character : 0 };
             }
             return new RoomInfo { Id = room.Id, Name = room.Name, Capacity = room.Capacity, OwnerId = room.Owner, HasStarted = room.Started, Members = members };
         }
     }
 }
+

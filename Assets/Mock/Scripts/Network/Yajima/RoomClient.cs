@@ -51,6 +51,7 @@ namespace NetworkTest_Yajima
         public void JoinRoom(string roomId) => Send(new RoomRequest { Operation = RoomOperation.Join, RoomId = roomId });
         public void LeaveRoom() => Send(new RoomRequest { Operation = RoomOperation.Leave });
         public void SetReady(bool ready) => Send(new RoomRequest { Operation = RoomOperation.SetReady, Ready = ready });
+        public void SelectCharacter(int character) => Send(new RoomRequest { Operation = RoomOperation.SelectCharacter, Character = character });
         public void StartRoom() => Send(new RoomRequest { Operation = RoomOperation.Start });
 
         private void Send(RoomRequest request)
@@ -82,3 +83,4 @@ namespace NetworkTest_Yajima
         }
     }
 }
+

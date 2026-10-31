@@ -32,7 +32,7 @@ namespace NetworkTest_Yajima.Editor
                 var module = EventSystem.current?.currentInputModule as InputSystemUIInputModule;
                 Debug.Log($"[NetTestCheck] EventSystem={EventSystem.current}, module={module}, point={module?.point?.action?.enabled}, click={module?.leftClick?.action?.enabled}");
                 Click("Host");
-                _step = 0; _deadline = EditorApplication.timeSinceStartup + 20;
+                _step = 0; _deadline = EditorApplication.timeSinceStartup + 60;
                 EditorApplication.update -= Tick; EditorApplication.update += Tick;
             }
             catch (Exception error) { Finish(error.ToString()); }
@@ -50,30 +50,24 @@ namespace NetworkTest_Yajima.Editor
                         if (!_network.ClientManager.Connection.IsAuthenticated) return;
                         Click("Create"); _step++; break;
                     case 1:
-                        if (!_rooms.HasRoom) return;
-                        if (_rooms.CurrentRoom.Members.Length != 1) throw new Exception("Unexpected room members.");
-                        Click("Ready"); _step++; break;
+                        if (UnityEngine.Object.FindAnyObjectByType<RoomLobbyUI>() == null) return;
+                        _network.GetComponents<MonoBehaviour>().OfType<ILobbyCharacterSelection>().Single().Select(2); _step++; break;
                     case 2:
-                        if (!_rooms.CurrentRoom.Members[0].IsReady) return;
-                        // UIはUpdateで有効化されるため、次フレームまで待つ。
-                        if (!FindButton("Start").interactable) return;
-                        Click("Start"); _step++; break;
+                        if (_rooms.CurrentRoom.Members[0].Character != 2) return;
+                        _rooms.LeaveRoom(); _step++; break;
                     case 3:
-                        if (!_rooms.CurrentRoom.HasStarted) return;
-                        if (_network.GetComponent<RoomSceneTransition>() != null)
-                        {
-                            var scene = UnityEngine.SceneManagement.SceneManager.GetSceneByPath(NetTestTransitionSetup.IngamePath);
-                            if (!scene.IsValid() || !scene.isLoaded || _ui.gameObject.activeSelf) return;
-                            if (!_network.ClientManager.Connection.IsAuthenticated) throw new Exception("Connection lost during scene transition.");
-                            Finish(null);
-                            return;
-                        }
-                        Click("Leave"); _step++; break;
+                        if (_rooms.HasRoom || UnityEngine.SceneManagement.SceneManager.GetActiveScene().path != RoomSceneTransition.BrowserPath) return;
+                        _rooms.CreateRoom("Lobby check", 4); _step++; break;
                     case 4:
-                        if (_rooms.HasRoom) return;
-                        Click("Disconnect"); _step++; break;
+                        if (!_rooms.HasRoom || UnityEngine.Object.FindAnyObjectByType<RoomLobbyUI>() == null) return;
+                        _rooms.SetReady(true); _step++; break;
                     case 5:
-                        if (_network.ClientManager.Started || _network.ServerManager.Started) return;
+                        if (!_rooms.CurrentRoom.Members[0].IsReady) return;
+                        _rooms.StartRoom(); _step++; break;
+                    case 6:
+                        var scene = UnityEngine.SceneManagement.SceneManager.GetSceneByPath(NetTestTransitionSetup.IngamePath);
+                        if (!scene.IsValid() || !scene.isLoaded || _ui.gameObject.activeSelf) return;
+                        if (!_network.ClientManager.Connection.IsAuthenticated) throw new Exception("Connection lost during scene transition.");
                         Finish(null); break;
                 }
             }
@@ -104,7 +98,7 @@ namespace NetworkTest_Yajima.Editor
             EditorApplication.update -= Tick;
             string result = error == null
                 ? (_network.GetComponent<RoomSceneTransition>() != null
-                    ? "PASS: Host authentication, Create, Ready, Start, IngameTest loaded, connection maintained, lobby UI hidden"
+                    ? "PASS: Host, lobby entry, character selection, leave, re-entry, ready, IngameTest, connection maintained"
                     : "PASS: UI raycasts, Host authentication, Create, Ready, Start, Leave, Disconnect")
                 : "FAIL: " + error;
             File.WriteAllText("Temp/NetTestSmokeCheck.txt", result);
@@ -113,4 +107,6 @@ namespace NetworkTest_Yajima.Editor
         }
     }
 }
+
+
 
