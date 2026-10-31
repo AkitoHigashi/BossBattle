@@ -1,21 +1,44 @@
+using Cysharp.Threading.Tasks;
 using System;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(CharacterMotor))]
 public class PlayerController : MonoBehaviour
 {
+    [Header("Skill")]
+    [SerializeField] private SkillDefinition _normalAttack;
+    [SerializeField] private SkillDefinition _skill1;
+    [SerializeField] private SkillDefinition _skill2;
+    [SerializeField] private SkillDefinition _dodge;
+
+    [Tooltip("ON: マウス方向を向く / OFF: 移動方向を向く")]
+    [SerializeField] private bool _faceMouseCursor = true;
+
+    [SerializeField] private Camera _camera;
+
+    [SerializeField, Header("スキルの受付結果をConsoleに表示するか")] private bool _logSkillResults = false;
     private InputBuffer _inputBuffer;
     private InputAction _moveAction;
+    private InputAction _attackAction;
+    private InputAction _skill1Action;
+    private InputAction _skill2Action;
+    private InputAction _skillDodge;
     private Character _character;
+    private CharacterMotor _motor;
+    private CharacterData _characterData;
+    private SkillSystem _skillSystem;
+    private CancellationTokenSource _skillRequestCts;
     private bool _initialized;
     private bool _subscribed;
 
-    public void Initialize(InputBuffer inputBuffer, Character character)
+    public void Initialize(InputBuffer inputBuffer, Character character, CharacterData data, SkillSystem skillSystem = null)
     {
         if (_initialized)
         {
-            if (_inputBuffer != inputBuffer || _character != character)
-                throw new InvalidOperationException("PlayerControllerは異なる依存関係で再初期化できません。");
+            if (_inputBuffer != inputBuffer || _character != character || _characterData != data || !ReferenceEquals(_skillSystem, skillSystem))
+                throw new InvalidOperationException("PlayerControllerを異なる依存関係で再初期化できません。");
             return;
         }
 
@@ -23,31 +46,87 @@ public class PlayerController : MonoBehaviour
             throw new ArgumentNullException(nameof(inputBuffer));
         if (character == null)
             throw new ArgumentNullException(nameof(character));
+        if (data == null)
+            throw new ArgumentNullException(nameof(data));
         if (!inputBuffer.IsInitialized || inputBuffer.MoveAction == null)
             throw new InvalidOperationException("PlayerControllerより先にInputBufferを初期化してください。");
 
+        if (TryGetComponent<CharacterMotor>(out var motr))
+            _motor = motr;
+
         _inputBuffer = inputBuffer;
         _character = character;
+        _characterData = data;
+        _skillSystem = skillSystem;
         _moveAction = inputBuffer.MoveAction;
+        _attackAction = inputBuffer.AttackAction;
+        _skill1Action = inputBuffer.Skill1Action;
+        _skill2Action = inputBuffer.Skill2Action;
+        _skillDodge = inputBuffer.DodgeAction;
         _initialized = true;
 
         if (isActiveAndEnabled)
-            SubscribeToMove();
+            Subscribe();
+    }
+
+    private void Update()
+    {
+        if (!_initialized)
+            return;
+
+        // マウス方向を向かない設定なら通常移動の回転処理へ戻す
+        if (!_faceMouseCursor)
+        {
+            _motor.ClearAimFacingDirection();
+            return;
+        }
+
+        if (TryGetMouseDirection(out Vector3 direction))
+        {
+            // 回転速度はCharacterDataから取得
+            _motor.SetAimFactingDirection(direction, _characterData.MouseRotationSpeed);
+        }
+        else
+        {
+            // カメラやマウスが利用できないとき
+            _motor.ClearAimFacingDirection();
+        }
     }
 
     private void OnEnable()
     {
         if (_initialized)
-            SubscribeToMove();
+            Subscribe();
+
+        _skillRequestCts = new CancellationTokenSource();
     }
 
-    private void SubscribeToMove()
+    private void Subscribe()
     {
         if (_subscribed)
             return;
 
         _moveAction.performed += OnMove;
         _moveAction.canceled += OnMove;
+        if (_skillSystem != null)
+        {
+            // 通常攻撃と Skill1（連撃）は、再押下・長押し状態を実行中のスキルへ伝える。
+            // そのため押下だけでなく解放も購読する。解放の通知自体はスキルを中断しない。
+            if (_normalAttack != null)
+            {
+                _attackAction.performed += OnAttackPerformed;
+                _attackAction.canceled += OnAttackCanceled;
+            }
+            if (_skill1 != null)
+            {
+                _skill1Action.performed += OnSkill1Performed;
+                _skill1Action.canceled += OnSkill1Canceled;
+            }
+            if (_skill2 != null)
+                _skill2Action.started += OnSkill2;
+            if (_skillDodge != null)
+                _skillDodge.started += OnDodge;
+        }
         _subscribed = true;
 
         Vector2 input = _moveAction.ReadValue<Vector2>();
@@ -60,15 +139,135 @@ public class PlayerController : MonoBehaviour
         {
             _moveAction.performed -= OnMove;
             _moveAction.canceled -= OnMove;
+            if (_skillSystem != null)
+            {
+                if (_normalAttack != null)
+                {
+                    _attackAction.performed -= OnAttackPerformed;
+                    _attackAction.canceled -= OnAttackCanceled;
+                }
+                if (_skill1 != null)
+                {
+                    _skill1Action.performed -= OnSkill1Performed;
+                    _skill1Action.canceled -= OnSkill1Canceled;
+                }
+                if (_skill2 != null)
+                    _skill2Action.started -= OnSkill2;
+                if (_skillDodge != null)
+                    _skillDodge.started -= OnDodge;
+            }
             _subscribed = false;
         }
-
+        // 中断完了を待っている発動要求も取り消し、無効化後に回避が始まるのを防ぐ。
+        _skillRequestCts?.Cancel();
+        _skillRequestCts?.Dispose();
+        _skillRequestCts = null;
+        _motor?.ClearAimFacingDirection();
         _character?.Move(new MovementData(Vector3.zero));
+        _skillSystem?.CancelActiveSkill();
     }
 
     private void OnMove(InputAction.CallbackContext context)
     {
         Vector2 input = context.canceled ? Vector2.zero : context.ReadValue<Vector2>();
         _character.Move(new MovementData(new Vector3(input.x, 0f, input.y)));
+    }
+
+    private void OnAttackPerformed(InputAction.CallbackContext context)
+    {
+        Vector3 direction = TryGetMouseDirection(out var mouseDirectoin) ? mouseDirectoin : transform.forward;
+        _skillSystem.HandleSkillInput(_normalAttack, SkillInputPhase.Pressed, direction);
+    }
+
+    private void OnAttackCanceled(InputAction.CallbackContext context)
+    {
+        Vector3 direction = TryGetMouseDirection(out var mouseDirectoin) ? mouseDirectoin : transform.forward;
+        _skillSystem.HandleSkillInput(_normalAttack, SkillInputPhase.Released, direction);
+    }
+
+    private void OnSkill1Performed(InputAction.CallbackContext context)
+    {
+        Vector3 direction = TryGetMouseDirection(out var mouseDirection)
+            ? mouseDirection : transform.forward;
+
+        _skillSystem.HandleSkillInput(_skill1, SkillInputPhase.Pressed, direction);
+    }
+
+    private void OnSkill1Canceled(InputAction.CallbackContext context)
+    {
+        _skillSystem.HandleSkillInput(_skill1, SkillInputPhase.Released, transform.forward);
+    }
+
+    private void OnSkill2(InputAction.CallbackContext context)
+    {
+        Vector3 direction = TryGetMouseDirection(out var mouseDirectoin) ? mouseDirectoin : transform.forward;
+        // Skill2 は単発の発動要求として扱い、実行中のスキルへの追加入力は送らない。
+        UseSkill(_skill2, direction);
+    }
+
+    private void OnDodge(InputAction.CallbackContext context)
+    {
+        Vector2 input = _moveAction.ReadValue<Vector2>();
+        Vector3 direction = new Vector3(input.x, 0f, input.y);
+        if (direction.sqrMagnitude <= 0.001f)
+            direction = transform.forward;
+        direction.y = 0f;
+
+        // 回避は割り込み要求。実行中の攻撃の後片付けを待ってから開始する。
+        // 入力コールバックでは待機せず、非同期処理の例外だけをログへ渡す。
+        _skillSystem.TryUseSkillAsync(_dodge, direction.normalized, _skillRequestCts.Token)
+            .Forget(ex => Debug.LogException(ex, this));
+    }
+
+    private void UseSkill(SkillDefinition definition, Vector3 direction)
+    {
+        if (_skillSystem == null || definition == null)
+            return;
+
+        // スキルの実行を要求
+        bool accepted = _skillSystem.TryUseSkill(definition, direction);
+
+        // テスト時のみ結果をログ出力
+        if (_logSkillResults)
+        {
+            float cooldown = _skillSystem.GetCooldownRemaing(definition);
+
+            Debug.Log(
+                $"[PlayerController] {definition.SkillName}: " +
+                $"accepted={accepted}, cooldown={cooldown:0.00}s",
+                this
+            );
+        }
+    }
+
+    /// <summary>
+    /// マウスカーソルが指すワールド方向を取得する
+    /// </summary>
+    /// <returns></returns>
+    private bool TryGetMouseDirection(out Vector3 direction)
+    {
+        direction = Vector3.zero;
+
+        Camera camera = _camera != null ? _camera : Camera.main;
+
+        if (camera == null || Mouse.current == null)
+            return false;
+
+        Vector2 mousePosition = Mouse.current.position.ReadValue();
+        Ray ray = camera.ScreenPointToRay(mousePosition);
+        Plane plane = new Plane(Vector3.up, transform.position);
+
+        if (!plane.Raycast(ray, out float distance))
+            return false;
+
+        Vector3 targetPoint = ray.GetPoint(distance);
+        direction = targetPoint - transform.position;
+        direction.y = 0f;
+
+        if (direction.sqrMagnitude < 0.0001f)
+            return false;
+
+        direction.Normalize();
+        return true;
     }
 }
