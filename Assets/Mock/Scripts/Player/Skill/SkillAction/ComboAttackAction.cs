@@ -40,14 +40,17 @@ public class ComboAttackAction : SkillAction
                     MoveDirectionMode.Forward => forward,
                     MoveDirectionMode.AimDirection => execution.CurrentAimDirection,
                     MoveDirectionMode.Back => -forward,
-                    MoveDirectionMode.InputDirection => execution.GetPressDirection(stage),
-                    _ => Vector3.zero
+                    // WASD方向を取得する仕組みは未実装
+                    MoveDirectionMode.InputDirection =>
+                        throw new NotSupportedException("ComboAttackActionではInputDirectionは未対応です。"),
+
+                    _ => throw new ArgumentOutOfRangeException(nameof(_direction))
                 };
 
                 moveDirection.y = 0f;
                 //スキル発動時の前進。
                 if(moveDirection.sqrMagnitude>0.001f)
-                motor.SetOverrideVelocity(moveDirection * _forwardSpeed, _duration);
+                    motor.SetOverrideVelocity(moveDirection * _forwardSpeed, _duration);
 
                 // 判定の終了だけでなく、攻撃ステートを退出するまで待って次の段へ進む。
                 await attack.ExecuteAsync(context, execution);

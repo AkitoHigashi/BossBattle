@@ -1,6 +1,5 @@
 using Cysharp.Threading.Tasks;
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
@@ -31,7 +30,6 @@ public class SkillExecution : IDisposable
 
     private readonly CancellationTokenSource _cts = new();
     private readonly UniTaskCompletionSource _completionSource = new();
-    private readonly List<Vector3> _pressDirection = new();
     private bool _disposed;
 
     public SkillExecution(SkillDefinition definition, Vector3 direction)
@@ -79,11 +77,6 @@ public class SkillExecution : IDisposable
             default:
                 throw new ArgumentOutOfRangeException(nameof(phase));
         }
-    }
-
-    public Vector3 GetPressDirection(int index)
-    {
-        return _pressDirection[index];
     }
 
     public void Cancel()

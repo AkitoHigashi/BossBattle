@@ -64,7 +64,7 @@ public class SkillSystem : ISkillSystem, IDisposable
             // 同じスキルへの入力は再発動せず、実行中の押下状態・押下回数に反映する。
             // 別スキルによる割り込みは TryUseSkillAsync で扱う。
             if (_currentExecution.Definition == definition)
-                _currentExecution.ReceiveInput(phase, direction);
+                _currentExecution.ReceiveInput(phase);
             else
                 return false;
         }
@@ -150,7 +150,7 @@ public class SkillSystem : ISkillSystem, IDisposable
     {
         var execution = new SkillExecution(definition, direction);
         // 発動のきっかけとなった最初の押下も、この実行の入力として数える。
-        execution.ReceiveInput(SkillInputPhase.Pressed, direction);
+        execution.ReceiveInput(SkillInputPhase.Pressed);
         _currentExecution = execution;
         if (definition.CooldownPolicy == CooldownStartPolicy.OnStart)
             _nextUsableTimes[definition] = Time.time + definition.Cooldown;
