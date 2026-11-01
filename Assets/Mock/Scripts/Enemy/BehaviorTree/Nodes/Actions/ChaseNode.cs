@@ -3,9 +3,12 @@ using UnityEngine;
 /// <summary>
 /// ターゲットを追跡するアクションノード
 /// </summary>
-[CreateAssetMenu(fileName = "ChaseNode", menuName = "Behavior Tree/Mock/Nodes/Action Nodes/ChaseNode")]
 public sealed class ChaseNode : ActionNode
 {
+    public override string Description => DescriptionText;
+    private const string DescriptionText =
+        "NavMeshでターゲットを追いかける。Arrival Distance以内まで近づいたら止まってSuccess。";
+
     [SerializeField, Min(0.01f), Tooltip("ターゲットからこの距離以内まで近づいたら完了します。")]
     private float _arrivalDistance = 1.5f;
 

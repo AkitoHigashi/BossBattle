@@ -1,7 +1,9 @@
-using UnityEngine;
-[CreateAssetMenu(fileName = "SelectorNode", menuName = "Behavior Tree/Mock/Nodes/Composite Nodes/Selector Node")]
 public sealed class SelectorNode : CompositeNode
 {
+    public override string Description => DescriptionText;
+    private const string DescriptionText =
+        "子ノードを左から順に試し、最初に成功した子の結果を返す。\n全ての子が失敗したらFailure。";
+
     protected override NodeStatus OnUpdate()
     {
         while (_index < _childNodes.Length)

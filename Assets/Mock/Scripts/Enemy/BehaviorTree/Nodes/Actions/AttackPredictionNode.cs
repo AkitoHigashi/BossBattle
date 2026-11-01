@@ -2,9 +2,12 @@ using UnityEngine;
 using UnityEngine.AI;
 
 /// <summary>地面に出す予測表示の時間を管理する</summary>
-[CreateAssetMenu(fileName = "AttackPredictionNode", menuName = "Behavior Tree/Mock/Nodes/Action Nodes/AttackPredictionNode")]
 public sealed class AttackPredictionNode : ActionNode
 {
+    public override string Description => DescriptionText;
+    private const string DescriptionText =
+        "足元の地面に攻撃範囲の予兆を表示し、Durationの時間が経つまで待つ。\n確定した位置と範囲は黒板に残し、後のDropAttackNodeが当たり判定に使う。";
+
     [SerializeField] private SectorRangeSettings _range;
     [SerializeField, Min(0f)] private float _duration = 2f;
     [SerializeField, Min(0.01f)] private float _sampleRadius = 2f;

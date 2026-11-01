@@ -3,11 +3,12 @@ using UnityEngine;
 /// <summary>
 /// 攻撃が可能な範囲にターゲットがいるかを判定する条件ノード
 /// </summary>
-[CreateAssetMenu(
-    fileName = "InAttackRangeNode",
-    menuName = "Behavior Tree/Mock/Nodes/Condition Nodes/InAttackRangeNode")]
 public sealed class InAttackRangeNode : ConditionNode
 {
+    public override string Description => DescriptionText;
+    private const string DescriptionText =
+        "ターゲットが攻撃範囲（Range）内にいるか判定する。\n範囲内ならTelegraph Timeの間予兆を描画し、終わった時もまだ範囲内なら子ノードを実行する。範囲外ならFailure。";
+
     [SerializeField]
     private SectorRangeSettings _range;
 

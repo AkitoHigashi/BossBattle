@@ -19,6 +19,12 @@ public abstract class BtNode : ScriptableObject
     public string Guid => _guid;
 
     /// <summary>
+    /// Nodeの説明文。グラフエディタの詳細パネルに表示する
+    /// 種類ごとに固定なので、各Nodeクラスの const で書く
+    /// </summary>
+    public abstract string Description { get; }
+
+    /// <summary>
     /// 前回の評価でRunningを返し、まだ処理の途中かどうか
     /// </summary>
     public bool IsRunning { get; private set; }

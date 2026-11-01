@@ -1,9 +1,12 @@
 using UnityEngine;
 
 /// <summary>下降し、着地時に範囲攻撃を行って予測表示を消す。</summary>
-[CreateAssetMenu(fileName = "DropAttackNode", menuName = "Behavior Tree/Mock/Nodes/Action Nodes/DropAttackNode")]
 public sealed class DropActionNode : AttackNode
 {
+    public override string Description => DescriptionText;
+    private const string DescriptionText =
+        "地面の高さまで落下し、着地した瞬間に予兆の範囲内にいるターゲットへダメージを与える。\n先にAttackPredictionNodeで予兆を出しておく必要がある。終了時に予兆表示を消す。";
+
     [SerializeField, Min(0.01f)] private float _fallSpeed = 24f;
 
     protected override NodeStatus OnUpdate()

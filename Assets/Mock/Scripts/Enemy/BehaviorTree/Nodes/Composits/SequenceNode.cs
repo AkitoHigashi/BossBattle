@@ -1,8 +1,9 @@
-using UnityEngine;
-
-[CreateAssetMenu(fileName = "SequenceNode", menuName = "Behavior Tree/Mock/Nodes/Composite Nodes/Sequence Node")]
 public sealed class SequenceNode : CompositeNode
 {
+    public override string Description => DescriptionText;
+    private const string DescriptionText =
+        "子ノードを左から順に実行していくノード。\n1つでも失敗したらFailure、全て成功したらSuccess。";
+
     protected override NodeStatus OnUpdate()
     {
         while (_index < _childNodes.Length)
