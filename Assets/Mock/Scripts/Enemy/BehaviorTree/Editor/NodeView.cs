@@ -42,10 +42,10 @@ namespace BTree.EditorTools
                 inputContainer.Add(InputPort);
             }
 
-            // Action は末端なので子を持たない
-            if (kind != NodeKind.Action)
+            // Action と Condition は末端なので子を持たない
+            if (kind != NodeKind.Action && kind != NodeKind.Condition)
             {
-                // 子を複数持てるのは Composite のみ。Decorator / Condition / Root は1つだけ
+                // 子を複数持てるのは Composite のみ。Decorator / Root は1つだけ
                 var capacity = kind == NodeKind.Composite ? Port.Capacity.Multi : Port.Capacity.Single;
                 OutputPort = CreatePort(Direction.Output, capacity);
                 outputContainer.Add(OutputPort);

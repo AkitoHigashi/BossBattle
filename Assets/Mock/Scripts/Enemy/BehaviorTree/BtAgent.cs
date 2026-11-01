@@ -17,7 +17,6 @@ public class BtAgent : MonoBehaviour
 
     [SerializeField] private float _healthValue = 100f;
     [SerializeField] private BehaviorTree _behaviorTree;
-    [SerializeField] private float _attackRange = 1.5f;
     [SerializeField] private int _attackDamage = 10;
     [SerializeField] private CharacterMotor _target;
 
@@ -47,7 +46,7 @@ public class BtAgent : MonoBehaviour
     private void Start()
     {
         _health = new ReactiveProperty<float>(_healthValue);
-        _blackBoard = new BlackBoard(_target, _health, _attackRange, _attackDamage, _navMeshAgent, _animator, transform, _predictionView);
+        _blackBoard = new BlackBoard(_target, _health, _attackDamage, _navMeshAgent, _animator, transform, _predictionView);
         _runtimeTree.Initialize(_blackBoard);
     }
 

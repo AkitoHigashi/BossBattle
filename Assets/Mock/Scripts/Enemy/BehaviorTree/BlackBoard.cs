@@ -5,8 +5,7 @@ using UnityEngine.AI;
 public class BlackBoard
 {
     public BlackBoard(CharacterMotor target,
-        ReactiveProperty<float> health, 
-        float attackRange,
+        ReactiveProperty<float> health,
         int attackDamage,
         NavMeshAgent navMeshAgent,
         Animator animator,
@@ -15,7 +14,6 @@ public class BlackBoard
     {
         _target = target;
         _health = health;
-        _attackRange = attackRange;
         _attackDamage = attackDamage;
         _navMeshAgent = navMeshAgent;
         _animator = animator;
@@ -26,18 +24,15 @@ public class BlackBoard
     public CharacterMotor Target => _target;
     // ノードからValueを書き換えられないよう、読み取り専用の型で公開する
     public ReadOnlyReactiveProperty<float> Health => _health;
-    public float AttackRange => _attackRange;
     public int AttackDamage => _attackDamage;
     public NavMeshAgent NavMeshAgent => _navMeshAgent;
     public Animator Animator => _animator;
     public Transform Transform => _transform;
     public AttackPredictionView PredictionView { get; }
     public float GroundBaseOffset { get; }
-    public AttackContext Attack { get; } = new AttackContext();
 
     private CharacterMotor _target;
     private ReadOnlyReactiveProperty<float> _health;
-    private float _attackRange;
     private int _attackDamage;
     private NavMeshAgent _navMeshAgent;
     private Animator _animator;

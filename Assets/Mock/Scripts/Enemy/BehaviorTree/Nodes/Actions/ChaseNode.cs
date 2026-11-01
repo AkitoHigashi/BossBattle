@@ -19,11 +19,7 @@ public sealed class ChaseNode : ActionNode
             return NodeStatus.Failure;
 
         if (_blackBoard.Target == null)
-        {
-            agent.ResetPath();
-            agent.isStopped = true;
             return NodeStatus.Failure;
-        }
 
         Vector3 targetPosition = _blackBoard.Target.transform.position;
 
@@ -32,20 +28,15 @@ public sealed class ChaseNode : ActionNode
         offset.y = 0f;
         float arrivalDistance = Mathf.Max(0.01f, _arrivalDistance);
         if (offset.sqrMagnitude < arrivalDistance * arrivalDistance)
-        {
-            agent.ResetPath();
-            agent.isStopped = true;
-            agent.velocity = Vector3.zero;
             return NodeStatus.Success;
-        }
 
         // 親から評価されている間だけ近づく
         agent.isStopped = false;
         return agent.SetDestination(targetPosition) ? NodeStatus.Running : NodeStatus.Failure;
     }
 
-    // 追跡の途中で中断されたら、最後の目的地へ歩き続けないように止める
-    protected override void OnAbort()
+    // 到着・失敗・中断のどれでも、最後の目的地へ歩き続けないように止める
+    protected override void OnEnd()
     {
         var agent = _blackBoard?.NavMeshAgent;
         if (agent == null || !agent.isActiveAndEnabled || !agent.isOnNavMesh)

@@ -62,7 +62,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 37a7b8498dc34268b119a20dbed4b9c5, type: 3}
   m_Name: Center Attack
-  m_EditorClassIdentifier: Assembly-CSharp::RangeAttackNode
+  m_EditorClassIdentifier: Assembly-CSharp::AreaAttackNode
   _guid: ddb9175369523c344af796f354546b9f
   _graphPosition: {x: 0, y: 480}
   _attackMultiplier: 1.5
@@ -98,7 +98,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 37a7b8498dc34268b119a20dbed4b9c5, type: 3}
   m_Name: Donut Attack
-  m_EditorClassIdentifier: Assembly-CSharp::RangeAttackNode
+  m_EditorClassIdentifier: Assembly-CSharp::AreaAttackNode
   _guid: 022a70d86fcaf3e4c988c4af6bababe2
   _graphPosition: {x: 200, y: 720}
   _attackMultiplier: 1.5

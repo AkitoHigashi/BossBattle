@@ -12,12 +12,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aefcc002a437a4f48ab196345602a76c, type: 3}
   m_Name: SequenceNode
   m_EditorClassIdentifier: Assembly-CSharp::SequenceNode
-  _description: 
   _guid: 6f1d5b335f22a77428b43640e7c68393
-  _graphPosition: {x: 110, y: 225}
+  _graphPosition: {x: 450, y: 240}
   _childNodes:
-  - {fileID: -4664037579331798385}
-  - {fileID: 1006830939558596924}
+  - {fileID: -5340775030629352122}
+--- !u!114 &-5340775030629352122
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 833dfa14f5a606148b07e08fe2b5287b, type: 3}
+  m_Name: PatrolNode
+  m_EditorClassIdentifier: Assembly-CSharp::PatrolNode
+  _guid: de35d72f9fc61074aaba9f76bfa9b47f
+  _graphPosition: {x: 800, y: 480}
+  _patrolRadius: 5
+  _patrolDuration: 10
 --- !u!114 &-4664037579331798385
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -30,12 +44,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0997927a830a7e64ba96a98102176975, type: 3}
   m_Name: InAttackRangeNode
   m_EditorClassIdentifier: Assembly-CSharp::InAttackRangeNode
-  _description: 
   _guid: 0af3fd52e1ff8f8449cce78738aed20c
-  _graphPosition: {x: -262, y: 468}
-  _childNode: {fileID: 0}
+  _graphPosition: {x: 0, y: 720}
   _range: {fileID: 0}
-  _telegraphTime: 1
+--- !u!114 &-551833040610638705
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aefcc002a437a4f48ab196345602a76c, type: 3}
+  m_Name: SequenceNode
+  m_EditorClassIdentifier: Assembly-CSharp::SequenceNode
+  _guid: 62e832da4fa22c7458d9d413548e2aff
+  _graphPosition: {x: 100, y: 480}
+  _childNodes:
+  - {fileID: -4664037579331798385}
+  - {fileID: 8782425140697016413}
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -54,6 +82,30 @@ MonoBehaviour:
   - {fileID: -6596975643237484278}
   - {fileID: 1006830939558596924}
   - {fileID: -4664037579331798385}
+  - {fileID: 8782425140697016413}
+  - {fileID: 103367942237844191}
+  - {fileID: -551833040610638705}
+  - {fileID: 6754796842420280201}
+  - {fileID: -5340775030629352122}
+--- !u!114 &103367942237844191
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fc0142d0f4ff4477fc0a5ef8a0e083d, type: 3}
+  m_Name: MoveToTargetPositionNode
+  m_EditorClassIdentifier: Assembly-CSharp::MoveToTargetPositionNode
+  _guid: cb09afc457515874a95616f98e30c303
+  _graphPosition: {x: 600, y: 720}
+  _moveSpeed: 12
+  _arrivalDistance: 0.3
+  _sampleRadius: 2
+  _timeout: 10
+  _repathInterval: 0.1
 --- !u!114 &1006830939558596924
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -66,10 +118,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 689d7f5d849e97540a453dd65e07522f, type: 3}
   m_Name: NearByPlayerNode
   m_EditorClassIdentifier: Assembly-CSharp::NearByPlayerNode
-  _description: 
   _guid: 179af47e766f6c04ab360a13bcabfe5b
-  _graphPosition: {x: -62, y: 468}
-  _childNode: {fileID: 0}
+  _graphPosition: {x: 400, y: 720}
+  _detectDistance: 5
 --- !u!114 &2094587108836020744
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -82,7 +133,43 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 769c7c8dcd3799a449e453e603a71cbf, type: 3}
   m_Name: RootNode
   m_EditorClassIdentifier: Assembly-CSharp::RootNode
-  _description: 
   _guid: 6ae534e338f35a043993ef767a92b8df
-  _graphPosition: {x: 118, y: 16}
+  _graphPosition: {x: 450, y: 0}
   _childNode: {fileID: -6596975643237484278}
+--- !u!114 &6754796842420280201
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aefcc002a437a4f48ab196345602a76c, type: 3}
+  m_Name: SequenceNode
+  m_EditorClassIdentifier: Assembly-CSharp::SequenceNode
+  _guid: e20b7ddc03d905a4db0c6306686a16c6
+  _graphPosition: {x: 500, y: 480}
+  _childNodes:
+  - {fileID: 1006830939558596924}
+  - {fileID: 103367942237844191}
+--- !u!114 &8782425140697016413
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37a7b8498dc34268b119a20dbed4b9c5, type: 3}
+  m_Name: AreaAttackNode
+  m_EditorClassIdentifier: Assembly-CSharp::AreaAttackNode
+  _guid: 909818d7aa125274e9846aa760f8b430
+  _graphPosition: {x: 218, y: 736}
+  _attackMultiplier: 1.5
+  _timeToAttack: 0
+  _warningArea: {fileID: 0}
+  _groundSearchRadius: 2
+  _recoveryTime: 0
+  _effectPrefab: {fileID: 0}
