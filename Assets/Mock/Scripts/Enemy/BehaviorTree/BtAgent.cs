@@ -1,10 +1,20 @@
-using R3;
+﻿using R3;
 using UnityEngine;
 using UnityEngine.AI;
 
 [RequireComponent(typeof(NavMeshAgent), typeof(AttackPredictionView)), DisallowMultipleComponent]
 public class BtAgent : MonoBehaviour
 {
+
+    /// <summary>設定されている元のツリーアセット</summary>
+    public BehaviorTree SourceTree => _behaviorTree;
+
+    /// <summary>このエージェント専用に複製した実行中のツリー</summary>
+    public BehaviorTree RuntimeTree => _runtimeTree;
+
+    /// <summary>実行中のツリーに配っている黒板。Start前は null</summary>
+    public BlackBoard BlackBoard => _blackBoard;
+
     [SerializeField] private float _healthValue = 100f;
     [SerializeField] private BehaviorTree _behaviorTree;
     [SerializeField] private float _attackRange = 1.5f;
@@ -18,14 +28,6 @@ public class BtAgent : MonoBehaviour
     private BlackBoard _blackBoard;
     private AttackPredictionView _predictionView;
 
-    /// <summary>設定されている元のツリーアセット</summary>
-    public BehaviorTree SourceTree => _behaviorTree;
-
-    /// <summary>このエージェント専用に複製した実行中のツリー</summary>
-    public BehaviorTree RuntimeTree => _runtimeTree;
-
-    /// <summary>実行中のツリーに配っている黒板。Start前は null</summary>
-    public BlackBoard BlackBoard => _blackBoard;
 
     private void Awake()
     {
