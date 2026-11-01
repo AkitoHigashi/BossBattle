@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// 攻撃が可能な範囲にターゲットがいるかを判定する条件ノード
@@ -12,7 +12,7 @@ public sealed class InAttackRangeNode : ConditionNode
     [SerializeField]
     private SectorRangeSettings _range;
 
-    [SerializeField, Min(0f)]
+    [SerializeField, Min(0f), Tooltip("予兆時間")]
     private float _telegraphTime = 1f;
 
     private bool _isTelegraphing;
