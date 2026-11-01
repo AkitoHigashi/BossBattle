@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Serialization;
 
@@ -21,7 +21,7 @@ public abstract class AttackNode : ActionNode
     private float _timeToAttack;
 
     [FormerlySerializedAs("_range")]
-    [SerializeField, Tooltip("予兆の範囲。そのまま当たり判定になる。未設定なら予兆を出さず、ターゲットに必ず当たる")]
+    [SerializeField, Tooltip("予兆の範囲。そのまま当たり判定になる。未設定なら予兆を出さず、即時攻撃になる")]
     private SectorRangeSettings _warningArea;
 
     [FormerlySerializedAs("_sampleRadius")]
