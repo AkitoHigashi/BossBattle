@@ -55,8 +55,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RangeAttackNode
   _attackMultiplier: 1.5
   _range: {fileID: 11400006}
-  _predictionDuration: 2
-  _attackDuration: 1.5
+  _predictionDuration: 1.5
+  _attackDuration: 1
   _sampleRadius: 2
   _effectPrefab: {fileID: 0}
 --- !u!114 &11400004
@@ -87,7 +87,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RangeAttackNode
   _attackMultiplier: 1.5
   _range: {fileID: 11400007}
-  _predictionDuration: 1
+  _predictionDuration: 0.8
   _attackDuration: 1
   _sampleRadius: 2
   _effectPrefab: {fileID: 0}
