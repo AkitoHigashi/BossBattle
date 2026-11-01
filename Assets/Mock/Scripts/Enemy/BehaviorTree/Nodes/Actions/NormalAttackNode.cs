@@ -25,12 +25,13 @@ public sealed class NormalAttackNode : AttackNode
             if (character == null || character.Health.CurrentValue <= 0)
                 return NodeStatus.Failure;
 
-            int damage = (int)Damage;
-            character.TakeDamage(damage);
-            Debug.Log($"{damage}ダメージ", target);
-
+            // TakeDamageの通知から再評価されても二重に当たらないよう先に立てる。
             _finishTime = Time.time + Mathf.Max(0f, _attackInterval);
             _isWaiting = true;
+
+            int damage = Mathf.RoundToInt(Damage);
+            character.TakeDamage(damage);
+            Debug.Log($"{damage}ダメージ", target);
         }
 
         if (Time.time < _finishTime)
