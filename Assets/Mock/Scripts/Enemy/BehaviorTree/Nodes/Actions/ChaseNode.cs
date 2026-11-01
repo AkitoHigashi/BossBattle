@@ -3,9 +3,12 @@ using UnityEngine;
 /// <summary>
 /// ターゲットを追跡するアクションノード
 /// </summary>
-[CreateAssetMenu(fileName = "ChaseNode", menuName = "Behavior Tree/Mock/Nodes/Action Nodes/ChaseNode")]
 public sealed class ChaseNode : ActionNode
 {
+    public override string Description => DescriptionText;
+    private const string DescriptionText =
+        "NavMeshでターゲットを追いかける。Arrival Distance以内まで近づいたら止まってSuccess。";
+
     [SerializeField, Min(0.01f), Tooltip("ターゲットからこの距離以内まで近づいたら完了します。")]
     private float _arrivalDistance = 1.5f;
 
@@ -36,5 +39,17 @@ public sealed class ChaseNode : ActionNode
         // 親から評価されている間だけ近づく
         agent.isStopped = false;
         return agent.SetDestination(targetPosition) ? NodeStatus.Running : NodeStatus.Failure;
+    }
+
+    // 追跡の途中で中断されたら、最後の目的地へ歩き続けないように止める
+    protected override void OnAbort()
+    {
+        var agent = _blackBoard?.NavMeshAgent;
+        if (agent == null || !agent.isActiveAndEnabled || !agent.isOnNavMesh)
+            return;
+
+        agent.ResetPath();
+        agent.isStopped = true;
+        agent.velocity = Vector3.zero;
     }
 }
