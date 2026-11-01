@@ -123,6 +123,7 @@ MonoBehaviour:
     _radius: 3
     _innerRadius: 0
     _angle: 360
+  _warningTime: 2
 --- !u!114 &11400007
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -139,3 +140,4 @@ MonoBehaviour:
     _radius: 8
     _innerRadius: 3
     _angle: 360
+  _warningTime: 1

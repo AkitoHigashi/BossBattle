@@ -9,17 +9,14 @@ public sealed class InAttackRangeNode : ConditionNode
     private const string DescriptionText =
         "ターゲットが攻撃範囲（Range）内にいればSuccess、いなければFailure。";
 
-    [SerializeField]
-    private SectorRangeSettings _range;
-
+    [SerializeField, Tooltip("攻撃範囲の半径")]
+    private float _attackRange = 5f;
     protected override NodeStatus OnUpdate()
     {
-        var owner = _blackBoard?.Transform;
-        var target = _blackBoard?.Target;
-        if (_range == null || owner == null || target == null)
+        if (_blackBoard.Target == null || _blackBoard.Transform == null)
             return NodeStatus.Failure;
 
-        return _range.Contains(owner.position, owner.forward, target.transform.position)
+        return Vector3.Distance(_blackBoard.Transform.position, _blackBoard.Target.transform.position) < _attackRange
             ? NodeStatus.Success
             : NodeStatus.Failure;
     }

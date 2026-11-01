@@ -3,10 +3,10 @@ using UnityEngine.AI;
 
 public abstract class MoveVerticalNode : ActionNode
 {
-    [SerializeField, Min(0.01f)]
+    [SerializeField, Min(0.01f), Tooltip("今の高さから上昇・下降する距離（NavMeshAgentのbaseOffsetの変化量）")]
     private float _moveDistance = 3f;
 
-    [SerializeField, Min(0.01f)]
+    [SerializeField, Min(0.01f), Tooltip("上昇・下降する速さ（m/秒）")]
     private float _moveSpeed = 2f;
 
     private float _targetOffset;

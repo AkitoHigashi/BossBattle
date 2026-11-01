@@ -7,7 +7,7 @@ public sealed class DelayNode : DecoratorNode
     private const string DescriptionText =
         "Durationの秒数だけ待ってから子ノードを実行し、その結果を返す。";
 
-    [SerializeField, Min(0f)] private float _duration = 1f;
+    [SerializeField, Min(0f), Tooltip("子ノードを実行するまで待つ秒数")] private float _duration = 1f;
 
     private bool _childStarted;
     private float _startTime;

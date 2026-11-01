@@ -1,21 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-6596975643237484278
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aefcc002a437a4f48ab196345602a76c, type: 3}
-  m_Name: SequenceNode
-  m_EditorClassIdentifier: Assembly-CSharp::SequenceNode
-  _guid: 6f1d5b335f22a77428b43640e7c68393
-  _graphPosition: {x: 450, y: 240}
-  _childNodes:
-  - {fileID: -5340775030629352122}
 --- !u!114 &-5340775030629352122
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -29,9 +13,10 @@ MonoBehaviour:
   m_Name: PatrolNode
   m_EditorClassIdentifier: Assembly-CSharp::PatrolNode
   _guid: de35d72f9fc61074aaba9f76bfa9b47f
-  _graphPosition: {x: 800, y: 480}
-  _patrolRadius: 5
+  _graphPosition: {x: 1000, y: 480}
+  _patrolRadius: 100
   _patrolDuration: 10
+  _arrivalDistance: 0.5
 --- !u!114 &-4664037579331798385
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -46,7 +31,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InAttackRangeNode
   _guid: 0af3fd52e1ff8f8449cce78738aed20c
   _graphPosition: {x: 0, y: 720}
-  _range: {fileID: 0}
+  _attackRange: 5
+--- !u!114 &-3577043985346838592
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37a7b8498dc34268b119a20dbed4b9c5, type: 3}
+  m_Name: AreaAttackNode
+  m_EditorClassIdentifier: Assembly-CSharp::AreaAttackNode
+  _guid: cd8d119a7d10b5648a3c3c45bbe90685
+  _graphPosition: {x: 400, y: 960}
+  _attackMultiplier: 1.5
+  _overrideTimeToAttack: 0
+  _timeToAttack: 0
+  _warningArea: {fileID: 11400007, guid: 06465a1b35bd433d9044e431ce25ebd3, type: 2}
+  _groundSearchRadius: 2
+  _recoveryTime: 0
+  _effectPrefab: {fileID: 0}
 --- !u!114 &-551833040610638705
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -60,10 +66,10 @@ MonoBehaviour:
   m_Name: SequenceNode
   m_EditorClassIdentifier: Assembly-CSharp::SequenceNode
   _guid: 62e832da4fa22c7458d9d413548e2aff
-  _graphPosition: {x: 100, y: 480}
+  _graphPosition: {x: 150, y: 480}
   _childNodes:
   - {fileID: -4664037579331798385}
-  - {fileID: 8782425140697016413}
+  - {fileID: 4648436356791507739}
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -79,7 +85,6 @@ MonoBehaviour:
   _rootNode: {fileID: 2094587108836020744}
   _nodes:
   - {fileID: 2094587108836020744}
-  - {fileID: -6596975643237484278}
   - {fileID: 1006830939558596924}
   - {fileID: -4664037579331798385}
   - {fileID: 8782425140697016413}
@@ -87,6 +92,9 @@ MonoBehaviour:
   - {fileID: -551833040610638705}
   - {fileID: 6754796842420280201}
   - {fileID: -5340775030629352122}
+  - {fileID: 8380706771274475233}
+  - {fileID: 4648436356791507739}
+  - {fileID: -3577043985346838592}
 --- !u!114 &103367942237844191
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -100,7 +108,7 @@ MonoBehaviour:
   m_Name: MoveToTargetPositionNode
   m_EditorClassIdentifier: Assembly-CSharp::MoveToTargetPositionNode
   _guid: cb09afc457515874a95616f98e30c303
-  _graphPosition: {x: 600, y: 720}
+  _graphPosition: {x: 800, y: 720}
   _moveSpeed: 12
   _arrivalDistance: 0.3
   _sampleRadius: 2
@@ -119,8 +127,8 @@ MonoBehaviour:
   m_Name: NearByPlayerNode
   m_EditorClassIdentifier: Assembly-CSharp::NearByPlayerNode
   _guid: 179af47e766f6c04ab360a13bcabfe5b
-  _graphPosition: {x: 400, y: 720}
-  _detectDistance: 5
+  _graphPosition: {x: 600, y: 720}
+  _detectDistance: 30
 --- !u!114 &2094587108836020744
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -134,8 +142,25 @@ MonoBehaviour:
   m_Name: RootNode
   m_EditorClassIdentifier: Assembly-CSharp::RootNode
   _guid: 6ae534e338f35a043993ef767a92b8df
-  _graphPosition: {x: 450, y: 0}
-  _childNode: {fileID: -6596975643237484278}
+  _graphPosition: {x: 575, y: 0}
+  _childNode: {fileID: 8380706771274475233}
+--- !u!114 &4648436356791507739
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aefcc002a437a4f48ab196345602a76c, type: 3}
+  m_Name: SequenceNode
+  m_EditorClassIdentifier: Assembly-CSharp::SequenceNode
+  _guid: e0dd9f973cbf94d428804a136ca2a251
+  _graphPosition: {x: 300, y: 720}
+  _childNodes:
+  - {fileID: 8782425140697016413}
+  - {fileID: -3577043985346838592}
 --- !u!114 &6754796842420280201
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -149,10 +174,28 @@ MonoBehaviour:
   m_Name: SequenceNode
   m_EditorClassIdentifier: Assembly-CSharp::SequenceNode
   _guid: e20b7ddc03d905a4db0c6306686a16c6
-  _graphPosition: {x: 500, y: 480}
+  _graphPosition: {x: 700, y: 480}
   _childNodes:
   - {fileID: 1006830939558596924}
   - {fileID: 103367942237844191}
+--- !u!114 &8380706771274475233
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b494eaf25e1dfc4e8cfac429274abec, type: 3}
+  m_Name: ReactiveSelectorNode
+  m_EditorClassIdentifier: Assembly-CSharp::ReactiveSelectorNode
+  _guid: 8dc579fe9bc4ae344a3cc59fdf148c98
+  _graphPosition: {x: 575, y: 240}
+  _childNodes:
+  - {fileID: -551833040610638705}
+  - {fileID: 6754796842420280201}
+  - {fileID: -5340775030629352122}
 --- !u!114 &8782425140697016413
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -166,10 +209,11 @@ MonoBehaviour:
   m_Name: AreaAttackNode
   m_EditorClassIdentifier: Assembly-CSharp::AreaAttackNode
   _guid: 909818d7aa125274e9846aa760f8b430
-  _graphPosition: {x: 218, y: 736}
+  _graphPosition: {x: 200, y: 960}
   _attackMultiplier: 1.5
+  _overrideTimeToAttack: 0
   _timeToAttack: 0
-  _warningArea: {fileID: 0}
+  _warningArea: {fileID: 11400006, guid: 06465a1b35bd433d9044e431ce25ebd3, type: 2}
   _groundSearchRadius: 2
   _recoveryTime: 0
   _effectPrefab: {fileID: 0}

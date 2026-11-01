@@ -7,7 +7,7 @@ public sealed class DropAttackNode : AttackNode
     private const string DescriptionText =
         "Time To Attackの間、足元の地面に予兆を出した後、地面の高さまで落下し、着地した瞬間にダメージを与える。\nWarning Area未設定なら予兆なしでターゲットに必ず当たる。Recovery Timeが過ぎたらSuccess。";
 
-    [SerializeField, Min(0.01f)] private float _fallSpeed = 24f;
+    [SerializeField, Min(0.01f), Tooltip("落下する速さ（m/秒）")] private float _fallSpeed = 24f;
 
     protected override NodeStatus OnAttack()
     {

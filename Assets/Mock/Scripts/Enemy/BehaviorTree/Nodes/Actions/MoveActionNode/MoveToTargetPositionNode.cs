@@ -8,11 +8,11 @@ public sealed class MoveToTargetPositionNode : ActionNode
     private const string DescriptionText =
         "高さを保ったまま、NavMeshの経路に沿ってターゲットのXZ位置まで移動する。\nArrival Distance以内に着いたらSuccess、Timeoutを過ぎたらFailure。";
 
-    [SerializeField, Min(0.01f)] private float _moveSpeed = 12f;
-    [SerializeField, Min(0.01f)] private float _arrivalDistance = 0.3f;
-    [SerializeField, Min(0.01f)] private float _sampleRadius = 2f;
-    [SerializeField, Min(0.01f)] private float _timeout = 10f;
-    [SerializeField, Min(0.01f)] private float _repathInterval = 0.1f;
+    [SerializeField, Min(0.01f), Tooltip("移動中のNavMeshAgentの速さ。終わったら元の速さに戻す")] private float _moveSpeed = 12f;
+    [SerializeField, Min(0.01f), Tooltip("ターゲットとの水平距離がこれ以内になったら到着")] private float _arrivalDistance = 0.3f;
+    [SerializeField, Min(0.01f), Tooltip("ターゲットや足元の位置からNavMeshを探す半径")] private float _sampleRadius = 2f;
+    [SerializeField, Min(0.01f), Tooltip("この秒数を過ぎても着かなければFailure")] private float _timeout = 10f;
+    [SerializeField, Min(0.01f), Tooltip("経路を引き直す間隔（秒）。動くターゲットへ追従するため")] private float _repathInterval = 0.1f;
 
     private float _startTime;
     private float _nextRepathTime;

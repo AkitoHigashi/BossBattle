@@ -4,7 +4,8 @@ using UnityEngine.Serialization;
 
 /// <summary>
 /// 攻撃ノードの共通処理
-/// Time To Attack の間だけ予兆を描画 → 攻撃 → Recovery Time の間待ってSuccess
+/// 攻撃までの時間だけ予兆を描画 → 攻撃 → Recovery Time の間待ってSuccess
+/// 攻撃までの時間は、基本は Warning Area の Warning Time、上書きONなら Time To Attack
 /// </summary>
 public abstract class AttackNode : ActionNode
 {
@@ -12,8 +13,11 @@ public abstract class AttackNode : ActionNode
     [SerializeField, Min(0f), Tooltip("キャラの基本攻撃力に掛ける、この攻撃固有の倍率。")]
     private float _attackMultiplier = 1.5f;
 
+    [SerializeField, Tooltip("ONにすると、Warning Area の Warning Time ではなく Time To Attack を使う。アニメーションに合わせたい時に使う")]
+    private bool _overrideTimeToAttack;
+
     [FormerlySerializedAs("_predictionDuration")]
-    [SerializeField, Min(0f), Tooltip("開始から攻撃までの秒数。アニメーションの振りかぶりに合わせる")]
+    [SerializeField, Min(0f), Tooltip("開始から攻撃までの秒数。上書きONの時か、Warning Area が未設定の時に使う")]
     private float _timeToAttack;
 
     [FormerlySerializedAs("_range")]
@@ -50,6 +54,10 @@ public abstract class AttackNode : ActionNode
 
     protected float RecoveryTime => Mathf.Max(0f, _recoveryTime);
 
+    /// <summary>開始から攻撃までの秒数。範囲があれば範囲側の時間、上書きONか範囲なしならノード側の時間</summary>
+    private float TimeToAttack =>
+        _warningArea != null && !_overrideTimeToAttack ? _warningArea.WarningTime : Mathf.Max(0f, _timeToAttack);
+
     protected override void OnStart()
     {
         _phase = Phase.WindUp;
@@ -74,8 +82,9 @@ public abstract class AttackNode : ActionNode
 
         if (_phase == Phase.WindUp)
         {
-            float progress = _timeToAttack <= 0f ? 1f :
-                Mathf.Clamp01((Time.time - _startTime) / _timeToAttack);
+            float timeToAttack = TimeToAttack;
+            float progress = timeToAttack <= 0f ? 1f :
+                Mathf.Clamp01((Time.time - _startTime) / timeToAttack);
             if (_isWarningShown)
                 _blackBoard.PredictionView.SetProgress(progress, this);
             if (progress < 1f)

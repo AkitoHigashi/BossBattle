@@ -15,3 +15,4 @@ MonoBehaviour:
   _range:
     _radius: 5
     _angle: 360
+  _warningTime: 2
