@@ -1,4 +1,3 @@
-using System.Linq;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEditor.UIElements;
@@ -25,7 +24,6 @@ namespace BTree.EditorTools
         private Label _agentLabel;
         private VisualElement _warningArea;
         private ToolbarButton _autoLayoutButton;
-        private ToolbarButton _importButton;
         private BtAgent _debugAgent;
         private double _nextAgentSearchTime;
         private double _nextBlackboardRefreshTime;
@@ -198,15 +196,13 @@ namespace BTree.EditorTools
             _treeField.RegisterValueChangedCallback(evt => SetTree(evt.newValue as BehaviorTree));
             toolbar.Add(_treeField);
 
-            toolbar.Add(new ToolbarButton(Save) { text = "保存" });
+            toolbar.Add(new ToolbarButton(Save)
+            {
+                text = "保存",
+                tooltip = "別ファイルのノードをこのツリーのファイルに取り込んでから保存します。元のファイルは残ります。",
+            });
             _autoLayoutButton = new ToolbarButton(AutoLayout) { text = "自動整列" };
             toolbar.Add(_autoLayoutButton);
-            _importButton = new ToolbarButton(ImportExternalNodes)
-            {
-                text = "外部ノードを取り込む",
-                tooltip = "別ファイルのノードアセットを複製して、このツリー専用のサブアセットにします。元のファイルは残ります。",
-            };
-            toolbar.Add(_importButton);
             toolbar.Add(new ToolbarButton(() => _graph?.FrameAll()) { text = "全体表示" });
 
             toolbar.Add(new ToolbarSpacer { flex = true });
@@ -216,9 +212,26 @@ namespace BTree.EditorTools
             return toolbar;
         }
 
+        /// <summary>
+        ///  別ファイルのNodeをツリーのサブアセットに取り込んでから保存する
+        ///  ツリーのファイルだけで完結するので、元のNodeアセットが無くても動く
+        /// </summary>
         private void Save()
         {
-            BehaviorTreeAssetUtility.SaveTree(_tree);// このツリーと、使っている別ファイルのNodeアセットだけ保存する
+            if (_tree == null)
+            {
+                return;
+            }
+
+            // 読み取り専用の時は書き込むと参照が消えるので、取り込まずに保存だけする
+            if (!_graph.IsReadOnly && BehaviorTreeAssetUtility.ImportExternalNodes(_tree) > 0)
+            {
+                _inspectorView.ShowNode(null);// 表示中のNodeが取り込み前の別ファイルのままにならないようにする
+                _graph.PopulateView(_tree);
+                return;// ImportExternalNodes の中で保存済み
+            }
+
+            BehaviorTreeAssetUtility.SaveTree(_tree);
         }
 
         private void AutoLayout()
@@ -229,32 +242,6 @@ namespace BTree.EditorTools
             }
 
             BehaviorTreeAssetUtility.AutoLayout(_tree);
-            _graph.PopulateView(_tree);
-        }
-
-        private void ImportExternalNodes()
-        {
-            if (_tree == null || _graph.IsReadOnly)
-            {
-                return;
-            }
-
-            var count = BehaviorTreeAssetUtility.GetNodes(_tree).Count(n => AssetDatabase.IsMainAsset(n));
-            if (count == 0)
-            {
-                EditorUtility.DisplayDialog("外部ノードを取り込む", "このツリーは別ファイルのノードを使っていません。", "OK");
-                return;
-            }
-
-            if (!EditorUtility.DisplayDialog("外部ノードを取り込む",
-                    $"別ファイルのノード {count} 個を複製して、「{_tree.name}」のサブアセットにします。\n" +
-                    "元のファイルは残るので、他のツリーには影響しません。",
-                    "取り込む", "キャンセル"))
-            {
-                return;
-            }
-
-            BehaviorTreeAssetUtility.ImportExternalNodes(_tree);
             _graph.PopulateView(_tree);
         }
 
@@ -271,7 +258,6 @@ namespace BTree.EditorTools
 
             _inspectorView.SetReadOnly(_graph.IsReadOnly);
             _autoLayoutButton?.SetEnabled(_tree != null && !_graph.IsReadOnly);
-            _importButton?.SetEnabled(_tree != null && !_graph.IsReadOnly);
         }
 
         private void OnUndoRedo()
