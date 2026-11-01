@@ -24,7 +24,8 @@ public class BlackBoard
         GroundBaseOffset = navMeshAgent != null ? navMeshAgent.baseOffset : 0f;
     }
     public CharacterMotor Target => _target;
-    public ReactiveProperty<float> Health => _health;
+    // ノードからValueを書き換えられないよう、読み取り専用の型で公開する
+    public ReadOnlyReactiveProperty<float> Health => _health;
     public float AttackRange => _attackRange;
     public int AttackDamage => _attackDamage;
     public NavMeshAgent NavMeshAgent => _navMeshAgent;
@@ -35,7 +36,7 @@ public class BlackBoard
     public AttackContext Attack { get; } = new AttackContext();
 
     private CharacterMotor _target;
-    private ReactiveProperty<float> _health;
+    private ReadOnlyReactiveProperty<float> _health;
     private float _attackRange;
     private int _attackDamage;
     private NavMeshAgent _navMeshAgent;
