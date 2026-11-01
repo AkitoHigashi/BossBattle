@@ -68,6 +68,13 @@ namespace BTree.EditorTools
 
             _scroll.Add(CreateHeader(Node));
 
+            if (!string.IsNullOrWhiteSpace(Node.Description))
+            {
+                var description = new Label(Node.Description);
+                description.AddToClassList("bt-inspector__description");
+                _scroll.Add(description);
+            }
+
             if (EditorApplication.isPlaying)
             {
                 _scroll.Add(new HelpBox(
@@ -83,7 +90,7 @@ namespace BTree.EditorTools
             {
                 _scroll.Add(new HelpBox(
                     "別ファイルのノードアセットです。他のツリーでも使っている場合、変更はそちらにも反映されます。" +
-                    "ツールバーの「外部ノードを取り込む」で、このツリー専用にできます。",
+                    "ツールバーの「保存」を押すと、このツリー専用のノードとして取り込まれます。",
                     HelpBoxMessageType.Info));
             }
 
