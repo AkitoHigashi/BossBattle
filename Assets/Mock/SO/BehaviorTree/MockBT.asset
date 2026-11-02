@@ -15,7 +15,7 @@ MonoBehaviour:
   _guid: c1c65a8850ba717419f6df9df531b67c
   _graphPosition: {x: 1397, y: 438}
   _weight: 1
-  _childNode: {fileID: 0}
+  _childNode: {fileID: 6857295601203184966}
   _duration: 1
 --- !u!114 &-6378304830188725258
 MonoBehaviour:
@@ -30,10 +30,10 @@ MonoBehaviour:
   m_Name: DelayNode
   m_EditorClassIdentifier: Assembly-CSharp::DelayNode
   _guid: 9d912faa451cbb446a66503b3bdb3a4e
-  _graphPosition: {x: 1703, y: 432}
+  _graphPosition: {x: 1741, y: 454}
   _weight: 99
-  _childNode: {fileID: 0}
-  _duration: 1
+  _childNode: {fileID: -4878668052964486633}
+  _duration: 3
 --- !u!114 &-5340775030629352122
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -65,10 +65,28 @@ MonoBehaviour:
   m_Name: DelayNode
   m_EditorClassIdentifier: Assembly-CSharp::DelayNode
   _guid: 8b200edcfada0ce439313a5f9cb48421
-  _graphPosition: {x: 1952, y: 427}
+  _graphPosition: {x: 1960, y: 430}
   _weight: 1
   _childNode: {fileID: 0}
   _duration: 1
+--- !u!114 &-4878668052964486633
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 833dfa14f5a606148b07e08fe2b5287b, type: 3}
+  m_Name: PatrolNode
+  m_EditorClassIdentifier: Assembly-CSharp::PatrolNode
+  _guid: 46e3624c9157b21468bf4fc41a964b2d
+  _graphPosition: {x: 1757, y: 662}
+  _weight: 1
+  _patrolRadius: 5
+  _patrolDuration: 10
+  _arrivalDistance: 0.5
 --- !u!114 &-4664037579331798385
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -174,6 +192,8 @@ MonoBehaviour:
   - {fileID: 4453224106409033316}
   - {fileID: -5246914437045618237}
   - {fileID: 176239618356861469}
+  - {fileID: -4878668052964486633}
+  - {fileID: 6857295601203184966}
 --- !u!114 &103367942237844191
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -297,6 +317,24 @@ MonoBehaviour:
   _childNodes:
   - {fileID: 1006830939558596924}
   - {fileID: 103367942237844191}
+--- !u!114 &6857295601203184966
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 833dfa14f5a606148b07e08fe2b5287b, type: 3}
+  m_Name: PatrolNode
+  m_EditorClassIdentifier: Assembly-CSharp::PatrolNode
+  _guid: 186913ccf1dfae44faf096a421481fe4
+  _graphPosition: {x: 1405, y: 646}
+  _weight: 1
+  _patrolRadius: 5
+  _patrolDuration: 10
+  _arrivalDistance: 0.5
 --- !u!114 &7520276066894134167
 MonoBehaviour:
   m_ObjectHideFlags: 1
