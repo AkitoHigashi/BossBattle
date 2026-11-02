@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class BtNode : ScriptableObject
@@ -28,6 +28,10 @@ public abstract class BtNode : ScriptableObject
     /// 前回の評価でRunningを返し、まだ処理の途中かどうか
     /// </summary>
     public bool IsRunning { get; private set; }
+    /// <summary>
+    /// WeightedRandamNodeで使う重み
+    /// </summary>
+    public int Weight => _weight;
 
     /// <summary>
     /// Nodeを評価し、結果を記録して親へ返す
@@ -135,4 +139,6 @@ public abstract class BtNode : ScriptableObject
     // グラフエディタが書き込む。ランタイムの評価には使わない
     [SerializeField, HideInInspector] private string _guid;
     [SerializeField, HideInInspector] private Vector2 _graphPosition;
+    [SerializeField, Tooltip("Nodeの重み ランダム選択に使用"), Min(0)] private int _weight = 1;
+
 }
