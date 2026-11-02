@@ -58,10 +58,10 @@ public sealed class AttackPredictionView : MonoBehaviour
         }
 
         object key = telegraphKey ?? _defaultKey;
-        if (!_visible.TryGetValue(key, out var visual))
+        if (!_visible.TryGetValue(key, out var visual) || visual.Root == null)
         {
-            visual = _pool.Count > 0 ? _pool.Pop() : CreateRenderers();
-            _visible.Add(key, visual);
+            visual = TakeFromPool() ?? CreateRenderers();
+            _visible[key] = visual;
         }
 
         // 表示全体の位置と向きを決める
@@ -209,9 +209,30 @@ public sealed class AttackPredictionView : MonoBehaviour
 
     private void Recycle(PredictionVisual visual)
     {
+        // 表示はシーン直下に別のGameObjectとして作っているので、Play終了やシーン切り替えの時は
+        // この敵より先に破棄されていることがある。破棄済みならプールにも戻さない
+        if (visual.Root == null)
+            return;
+
         visual.Root.SetActive(false);
         visual.Progress = 0f;
         _pool.Push(visual);
+    }
+
+    /// <summary>
+    /// プールから再利用できる表示を取り出す。破棄済みのものは捨てる
+    /// </summary>
+    /// <returns>再利用できる表示。無ければ null</returns>
+    private PredictionVisual TakeFromPool()
+    {
+        while (_pool.Count > 0)
+        {
+            var visual = _pool.Pop();
+            if (visual.Root != null)
+                return visual;
+        }
+
+        return null;
     }
 
     /// <summary>

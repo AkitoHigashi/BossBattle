@@ -3,9 +3,12 @@ using UnityEngine;
 using UnityEngine.AI;
 
 /// <summary>地上の予兆・1回の発動判定・攻撃終了待ちを行うクラス</summary>
-[CreateAssetMenu(fileName = "RangeAttackNode", menuName = "Behavior Tree/Mock/Nodes/Action Nodes/Range Attack Node")]
 public sealed class TelegraphedAttackNode : AttackNode
 {
+    public override string Description => DescriptionText;
+    private const string DescriptionText =
+        "足元の地面に攻撃範囲（Range）の予兆をPrediction Durationの間出した後、範囲内のターゲットにダメージを与える。\nエフェクトを設定していれば発動時に生成し、Attack Durationが過ぎたらSuccess。";
+
 
     public override BtNode Clone(List<BtNode> clones)
     {
@@ -40,6 +43,7 @@ public sealed class TelegraphedAttackNode : AttackNode
 
     protected override void OnSuccess() => FinishAttack();
     protected override void OnFailure() => FinishAttack();
+    protected override void OnAbort() => FinishAttack();
 
     protected override NodeStatus OnUpdate()
     {

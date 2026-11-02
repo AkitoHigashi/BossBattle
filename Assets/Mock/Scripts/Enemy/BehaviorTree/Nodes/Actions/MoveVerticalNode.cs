@@ -53,4 +53,6 @@ public abstract class MoveVerticalNode : ActionNode
     {
         _isMoving = false;
     }
+
+    protected override void OnAbort() => _isMoving = false;
 }

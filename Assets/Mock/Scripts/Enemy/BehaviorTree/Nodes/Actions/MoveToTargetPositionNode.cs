@@ -2,9 +2,12 @@ using UnityEngine;
 using UnityEngine.AI;
 
 /// <summary>高度をbaseOffsetで保ったまま、プレイヤーのXZ位置へ追従して停止する。</summary>
-[CreateAssetMenu(fileName = "MoveToTargetPositionNode", menuName = "Behavior Tree/Mock/Nodes/Action Nodes/MoveToTargetPositionNode")]
 public sealed class MoveToTargetPositionNode : ActionNode
 {
+    public override string Description => DescriptionText;
+    private const string DescriptionText =
+        "高さを保ったまま、NavMeshの経路に沿ってターゲットのXZ位置まで移動する。\nArrival Distance以内に着いたらSuccess、Timeoutを過ぎたらFailure。";
+
     [SerializeField, Min(0.01f)] private float _moveSpeed = 12f;
     [SerializeField, Min(0.01f)] private float _arrivalDistance = 0.3f;
     [SerializeField, Min(0.01f)] private float _sampleRadius = 2f;
@@ -72,6 +75,7 @@ public sealed class MoveToTargetPositionNode : ActionNode
 
     protected override void OnSuccess() => StopAndRestore();
     protected override void OnFailure() => StopAndRestore();
+    protected override void OnAbort() => StopAndRestore();
 
     private void StopAndRestore()
     {

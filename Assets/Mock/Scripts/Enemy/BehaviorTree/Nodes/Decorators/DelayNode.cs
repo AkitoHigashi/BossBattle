@@ -2,9 +2,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>子の開始を遅らせるノード</summary>
-[CreateAssetMenu(fileName = "DelayNode", menuName = "Behavior Tree/Mock/Nodes/Decorator Nodes/Delay Node")]
 public sealed class DelayNode : DecoratorNode
 {
+    public override string Description => DescriptionText;
+    private const string DescriptionText =
+        "Durationの秒数だけ待ってから子ノードを実行し、その結果を返す。";
+
     [SerializeField, Min(0f)] private float _duration = 1f;
 
     private bool _isRunning;
@@ -49,4 +52,6 @@ public sealed class DelayNode : DecoratorNode
         _childStarted = false;
         _startTime = 0f;
     }
+
+    protected override void OnAbort() => ResetDelay();
 }

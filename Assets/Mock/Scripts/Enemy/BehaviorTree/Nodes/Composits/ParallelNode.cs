@@ -2,9 +2,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>全ての子を並列実行するノード</summary>
-[CreateAssetMenu(fileName = "ParallelNode", menuName = "Behavior Tree/Mock/Nodes/Composite Nodes/Parallel Node")]
 public class ParallelNode : CompositeNode
 {
+    public override string Description => DescriptionText;
+    private const string DescriptionText =
+        "全ての子ノードを同時に実行する。\n全ての子が終わるまでRunning。1つでも失敗していればFailure、全て成功ならSuccess。";
+
     private NodeStatus[] _results;
     private bool _isRunning;
 
@@ -50,4 +53,6 @@ public class ParallelNode : CompositeNode
         _isRunning = false;
         return hasFailure ? NodeStatus.Failure : NodeStatus.Success;
     }
+
+    protected override void OnAbort() => _isRunning = false;
 }

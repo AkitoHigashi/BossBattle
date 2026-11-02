@@ -1,9 +1,12 @@
 using UnityEngine;
 
 /// <summary>対象にダメージを与え、攻撃後の待ち時間が終わるまでRunningを返す。</summary>
-[CreateAssetMenu(fileName = "NormalAttackNode", menuName = "Behavior Tree/Mock/Nodes/Action Nodes/NormalAttackNode")]
 public sealed class NormalAttackNode : AttackNode
 {
+    public override string Description => DescriptionText;
+    private const string DescriptionText =
+        "ターゲットにすぐダメージ（基本攻撃力×倍率）を与え、Attack Intervalの間待ってからSuccess。\nターゲットがいない・倒れている場合はFailure。";
+
     [SerializeField, Min(0f)]
     private float _attackInterval = 1f;
 
@@ -36,4 +39,7 @@ public sealed class NormalAttackNode : AttackNode
         _isWaiting = false;
         return NodeStatus.Success;
     }
+
+    // 攻撃後の待ち時間の途中で中断されたら、次は攻撃からやり直す
+    protected override void OnAbort() => _isWaiting = false;
 }
