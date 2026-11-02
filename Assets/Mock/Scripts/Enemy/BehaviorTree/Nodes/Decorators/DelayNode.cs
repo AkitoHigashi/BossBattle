@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>子の開始を遅らせるノード</summary>
 public sealed class DelayNode : DecoratorNode
@@ -14,7 +14,7 @@ public sealed class DelayNode : DecoratorNode
 
     protected override void OnStart()
     {
-        _startTime = Time.time;
+        _startTime = 0;
         _childStarted = false;
     }
 
@@ -23,12 +23,15 @@ public sealed class DelayNode : DecoratorNode
         if (_childNode == null)
             return NodeStatus.Failure;
 
-        if (!_childStarted)
-        {
-            if (Time.time - _startTime < Mathf.Max(0f, _duration))
-                return NodeStatus.Running;
 
+        if (_startTime > _duration)
+        {
             _childStarted = true;
+        }
+        _startTime += Time.deltaTime;
+        if (_startTime < _duration && !_childStarted)
+        {
+            return NodeStatus.Running;
         }
 
         return _childNode.Evaluate();
