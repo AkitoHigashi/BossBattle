@@ -6,6 +6,7 @@ public class InputBuffer : MonoBehaviour
 {
     public bool IsInitialized { get; private set; }
     public InputAction MoveAction => _moveAction;
+    public InputAction AttackAction => _attackAction;
     public InputAction InteractAction => _interactAction;
     public InputAction DodgeAction => _dodgeAction;
     public InputAction Skill1Action => _skill1Action;
@@ -19,6 +20,7 @@ public class InputBuffer : MonoBehaviour
 
     private const string MOVE_ACTION = "Move";
     private const string INTERACT_ACTION = "Interact";
+    private const string ATTACK_ACTION = "NormalAttack";
     private const string DODGE_ACTION = "Dodge";
     private const string SKILL1_ACTION = "Skill1";
     private const string SKILL2_ACTION = "Skill2";
@@ -30,6 +32,7 @@ public class InputBuffer : MonoBehaviour
     private const string UNIQUE_ACTION = "Unique";
 
     private InputAction _moveAction;
+    private InputAction _attackAction;
     private InputAction _interactAction;
     private InputAction _dodgeAction;
     private InputAction _skill1Action;
@@ -52,6 +55,7 @@ public class InputBuffer : MonoBehaviour
                 throw new System.InvalidOperationException("PlayerInputのActionsにInputActionアセットを設定してください。");
 
             _moveAction = playerInput.actions[MOVE_ACTION];
+            _attackAction = playerInput.actions[ATTACK_ACTION];
             _interactAction = playerInput.actions[INTERACT_ACTION];
             _dodgeAction = playerInput.actions[DODGE_ACTION];
             _skill1Action = playerInput.actions[SKILL1_ACTION];

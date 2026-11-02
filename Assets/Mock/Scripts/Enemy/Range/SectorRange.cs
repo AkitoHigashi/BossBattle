@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 /// <summary>
-/// 中心点からの半径と角度で定義される扇形の範囲を表す構造体。
+/// 外半径・内半径・角度で、円・扇形・ドーナツ型の範囲を表す。
 /// </summary>
 [Serializable]
 public struct SectorRange
@@ -14,18 +14,24 @@ public struct SectorRange
     [SerializeField, Min(MinRadius)]
     private float _radius;
 
+    [SerializeField, Min(0f), Tooltip("内側の安全地帯")]
+    private float _innerRadius;
+
     [SerializeField, Range(0f, FullCircleDegrees)]
     private float _angle;
 
     public float Radius => Mathf.Max(MinRadius, _radius);
 
+    public float InnerRadius => Mathf.Clamp(_innerRadius, 0f, Radius);
+
     public float Angle =>
         Mathf.Clamp(_angle, 0f, FullCircleDegrees);
 
-    public SectorRange(float radius, float angle)
+    public SectorRange(float radius, float angle, float innerRadius = 0f)
     {
         _radius = radius;
         _angle = angle;
+        _innerRadius = innerRadius;
     }
 
     /// <summary>
@@ -45,7 +51,8 @@ public struct SectorRange
 
         float radius = Radius;
 
-        if (offset.sqrMagnitude > radius * radius)
+        float innerRadius = InnerRadius;
+        if (offset.sqrMagnitude > radius * radius || offset.sqrMagnitude < innerRadius * innerRadius)
             return false;
 
         float angle = Angle;

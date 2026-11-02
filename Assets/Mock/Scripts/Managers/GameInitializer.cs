@@ -19,7 +19,7 @@ public class GameInitializer : MonoBehaviour
 
         _inputBuffer.Initialize();
         _characterComposition.Initialize();
-        _playerController.Initialize(_inputBuffer, _characterComposition.Character);
+        _playerController.Initialize(_inputBuffer, _characterComposition.Character, _characterComposition.CharacterData, _characterComposition.SkillSystem);
 
         IsInitialized = true;
     }
@@ -28,5 +28,4 @@ public class GameInitializer : MonoBehaviour
     {
         Initialize();
     }
-
 }
