@@ -21,9 +21,6 @@ public class CharacterComposition : MonoBehaviour
     [Header("UI（任意）")]
     [Tooltip("溜めゲージの表示。未設定でも溜めスキルは動作し、ゲージが出ないだけ")]
     [SerializeField] private ChargeGaugeView _chargeGaugeView;
-    [Tooltip("全スキルのクールダウン表示。未設定でもスキルは動作し、表示が出ないだけ")]
-    [SerializeField] private SkillCooldownView _cooldownView;
-
 
     public void Initialize()
     {
@@ -50,9 +47,6 @@ public class CharacterComposition : MonoBehaviour
             // ゲージのデータは SkillContext がキャラクターごとに持つので、View にはそれを渡す。
             if (_chargeGaugeView != null)
                 _chargeGaugeView.Initialize(context.ChargeGauge, transform);
-            // クールダウンは SkillSystem が管理しているので、表示にはそれを渡して読ませる。
-            if (_cooldownView != null)
-                _cooldownView.Initialize(SkillSystem);
         }
         Character = new Character(health, status, movement);
     }

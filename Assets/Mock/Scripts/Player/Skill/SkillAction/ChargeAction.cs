@@ -76,7 +76,7 @@ public class ChargeAction : SkillAction
         int chargingHash = Animator.StringToHash(_chargingBoolName);
 
         // 設定ミスは溜めを始める前に検出し、溜めモーションが出ないまま待ち続けるのを防ぐ。
-        if (!HasBoolParameter(animator, _chargingBoolName))
+        if (!context.HasAnimatorParameter(_chargingBoolName, AnimatorControllerParameterType.Bool))
             throw new InvalidOperationException($"Animator Boolが存在しません: {_chargingBoolName}");
 
         float startedAt = Time.time;
@@ -185,18 +185,6 @@ public class ChargeAction : SkillAction
             default:
                 return 1f;
         }
-    }
-
-    private static bool HasBoolParameter(Animator animator, string parameterName)
-    {
-        if (animator == null || animator.runtimeAnimatorController == null)
-            return false;
-
-        foreach (var parameter in animator.parameters)
-            if (parameter.name == parameterName && parameter.type == AnimatorControllerParameterType.Bool)
-                return true;
-
-        return false;
     }
 
     private void OnValidate()

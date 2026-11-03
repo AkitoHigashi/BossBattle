@@ -53,12 +53,8 @@ public class PlayerAttackAction : SkillAction
 
         if (!animator.HasState(0, stateHash))
             throw new InvalidOperationException($"Animator Stateが存在しません: {_stateFullPath}");
-        // 指定したTriggerがAnimatorに登録されているか確認
-        bool hasTrigger = false;
-        foreach (var parameter in animator.parameters)
-            if (parameter.name == _triggerName && parameter.type == AnimatorControllerParameterType.Trigger)
-                hasTrigger = true;
-        if (!hasTrigger)
+        // 指定したTriggerがAnimatorに登録されているか確認（一覧はキャラクターごとに1回だけ取得して使い回す）
+        if (!context.HasAnimatorParameter(_triggerName, AnimatorControllerParameterType.Trigger))
             throw new InvalidOperationException($"Animator Triggerが存在しません: {_triggerName}");
 
         try
@@ -134,7 +130,7 @@ public class PlayerAttackAction : SkillAction
                 animator.ResetTrigger(_triggerName);
                 // 処理の中断だけではアニメーションは止まらないため、中断遷移も要求する。
                 // Controller 側に、この Trigger で攻撃から退出する遷移の設定が必要。
-                TryRecoverAnimator(animator, stateHash);
+                TryRecoverAnimator(context, animator, stateHash);
             }
         }
     }
@@ -143,7 +139,7 @@ public class PlayerAttackAction : SkillAction
     /// 攻撃が中断された場合、設定されている中断Triggerを送信する。
     /// 中断Triggerが未設定の場合はAnimatorを操作しない。
     /// </summary>
-    private void TryRecoverAnimator(Animator animator, int attackHash)
+    private void TryRecoverAnimator(SkillContext context, Animator animator, int attackHash)
     {
         // 中断先のTriggerが設定されていなければ何もしない
         if (string.IsNullOrWhiteSpace(_interruptTriggerName))
@@ -161,15 +157,11 @@ public class PlayerAttackAction : SkillAction
             return;
 
         // 中断用Triggerが存在するか確認
-        foreach (var parameter in animator.parameters)
+        if (context.HasAnimatorParameter(_interruptTriggerName, AnimatorControllerParameterType.Trigger))
         {
-            if (parameter.name == _interruptTriggerName
-                    && parameter.type == AnimatorControllerParameterType.Trigger)
-            {
-                // 指定したTriggerで中断時の遷移を要求する
-                animator.SetTrigger(_interruptTriggerName);
-                return;
-            }
+            // 指定したTriggerで中断時の遷移を要求する
+            animator.SetTrigger(_interruptTriggerName);
+            return;
         }
 
         Debug.LogWarning($"中断用Animator Triggerが存在しません: {_interruptTriggerName}");

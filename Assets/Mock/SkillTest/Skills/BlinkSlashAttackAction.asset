@@ -14,4 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAttackAction
   _triggerName: BlinkSlash
   _stateFullPath: Base Layer.BlinkSlash
+  _interruptTriggerName: InterruptSkill
   _damage: 20
+  _breakValue: 0

@@ -8,6 +8,8 @@ using UnityEngine.UI;
 /// </summary>
 /// <remarks>
 /// 残り時間は SkillSystem.GetCooldownRemaing を毎フレーム読むだけで、クールダウンの管理には関わらない。
+/// 並べるスキルとキー表示は PlayerController.GetSkillSlots から受け取り、ここでは設定を持たない
+/// （スキルやキーを差し替えたとき、UI 側の変え忘れで表示がずれないようにするため）。
 /// ChargeGaugeView と同じく、仮の見た目なので Canvas や Image を実行時にコードで組み立てている。
 ///
 /// 終了時開始（OnEnd）のスキルは実行中まだクールダウンが始まっていないため、
@@ -16,23 +18,6 @@ using UnityEngine.UI;
 [DisallowMultipleComponent]
 public class SkillCooldownView : MonoBehaviour
 {
-    /// <summary>
-    /// 表示するスキル1つ分の設定。
-    /// </summary>
-    [Serializable]
-    private class Entry
-    {
-        public SkillDefinition Skill => _skill;
-        public string KeyLabel => _keyLabel;
-
-        [Tooltip("表示するスキル")]
-        [SerializeField] private SkillDefinition _skill;
-        [Tooltip("スロットに表示する入力キー（例：Shift+Q）")]
-        [SerializeField] private string _keyLabel;
-    }
-
-    [Tooltip("左から順に並べるスキル")]
-    [SerializeField] private Entry[] _entries = Array.Empty<Entry>();
     [Tooltip("スロット1つの大きさ（ピクセル）")]
     [SerializeField] private Vector2 _slotSize = new Vector2(84f, 84f);
     [Tooltip("スロット同士の間隔（ピクセル）")]
@@ -66,14 +51,18 @@ public class SkillCooldownView : MonoBehaviour
     private Font _font;
 
     /// <summary>
-    /// クールダウンを読む SkillSystem を設定し、UI を組み立てる。CharacterComposition の初期化時に呼ばれる。
+    /// クールダウンを読む SkillSystem と、並べるスキルを設定して UI を組み立てる。GameInitializer から呼ばれる。
     /// </summary>
-    public void Initialize(SkillSystem skillSystem)
+    /// <param name="skillSystem">クールダウンと実行中のスキルを読む対象。</param>
+    /// <param name="slots">左から順に並べるスキルとキー（PlayerController.GetSkillSlots の結果）。</param>
+    public void Initialize(SkillSystem skillSystem, SkillSlot[] slots)
     {
         _skillSystem = skillSystem ?? throw new ArgumentNullException(nameof(skillSystem));
+        if (slots == null)
+            throw new ArgumentNullException(nameof(slots));
 
         if (_canvasObject == null)
-            BuildUI();
+            BuildUI(slots);
     }
 
     private void LateUpdate()
@@ -115,7 +104,7 @@ public class SkillCooldownView : MonoBehaviour
     /// <summary>
     /// 画面下中央に、設定された順でスロットを横に並べる。
     /// </summary>
-    private void BuildUI()
+    private void BuildUI(SkillSlot[] skillSlots)
     {
         // 文字の描画には Unity 組み込みのフォントを使う（フォントアセットの準備が要らない）。
         // 日本語の字形が無い場合があるため、表示する文字は英数字に限っている。
@@ -129,10 +118,7 @@ public class SkillCooldownView : MonoBehaviour
         // 溜めゲージ（100）より奥に描く。
         canvas.sortingOrder = 90;
 
-        int count = 0;
-        foreach (Entry entry in _entries)
-            if (entry != null && entry.Skill != null)
-                count++;
+        int count = skillSlots.Length;
 
         RectTransform bar = CreateRect("CooldownBar", _canvasObject.transform);
         // 画面下中央を基準にする。
@@ -142,19 +128,11 @@ public class SkillCooldownView : MonoBehaviour
         bar.sizeDelta = new Vector2(count * _slotSize.x + Mathf.Max(0, count - 1) * _spacing, _slotSize.y);
 
         _slots = new Slot[count];
-        int index = 0;
-        foreach (Entry entry in _entries)
-        {
-            // 未設定の行は飛ばす。Inspector で行だけ追加した状態でもエラーにしない。
-            if (entry == null || entry.Skill == null)
-                continue;
-
-            _slots[index] = CreateSlot(bar, index, entry);
-            index++;
-        }
+        for (int index = 0; index < count; index++)
+            _slots[index] = CreateSlot(bar, index, skillSlots[index]);
     }
 
-    private Slot CreateSlot(RectTransform parent, int index, Entry entry)
+    private Slot CreateSlot(RectTransform parent, int index, SkillSlot entry)
     {
         RectTransform root = CreateRect(entry.Skill.SkillName, parent);
         root.anchorMin = root.anchorMax = new Vector2(0f, 0f);

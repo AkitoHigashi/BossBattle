@@ -408,6 +408,7 @@ MonoBehaviour:
   _inputBuffer: {fileID: 2099440925}
   _characterComposition: {fileID: 2099440922}
   _playerController: {fileID: 2099440921}
+  _skillCooldownView: {fileID: 2099440935}
 --- !u!4 &809501582
 Transform:
   m_ObjectHideFlags: 0
@@ -1309,7 +1310,6 @@ MonoBehaviour:
   _attackHitbox: {fileID: 2099440933}
   _animationEvents: {fileID: 1179213164}
   _chargeGaugeView: {fileID: 2099440934}
-  _cooldownView: {fileID: 2099440935}
 --- !u!114 &2099440923
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1654,21 +1654,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0004767ad2f7309a01596e85b665d03c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SkillCooldownView
-  _entries:
-  - _skill: {fileID: 11400000, guid: 17ddd7b4a1f940a09df9b4a6288c4738, type: 2}
-    _keyLabel: RMB
-  - _skill: {fileID: 11400000, guid: 096a31444b1d06f4f98fe9437ff3e8f4, type: 2}
-    _keyLabel: Q
-  - _skill: {fileID: 11400000, guid: 9fc81f4361e27819fa3c7c621f0cb19d, type: 2}
-    _keyLabel: E
-  - _skill: {fileID: 11400000, guid: 76adc42069efa5fd4dadf9562aec4112, type: 2}
-    _keyLabel: Shift+RMB
-  - _skill: {fileID: 11400000, guid: 8eff63fe7f7d8daee4d5fd643fc84052, type: 2}
-    _keyLabel: Shift+Q
-  - _skill: {fileID: 11400000, guid: e6d69949728f116393c925a8b817d3c6, type: 2}
-    _keyLabel: Shift+E
-  - _skill: {fileID: 11400000, guid: 2f4631abf1352e943b694d3aad355fa6, type: 2}
-    _keyLabel: Space
   _slotSize: {x: 84, y: 84}
   _spacing: 8
   _bottomMargin: 24

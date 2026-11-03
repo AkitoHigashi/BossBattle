@@ -70,17 +70,8 @@ public class ProjectileAttackAction : SkillAction
         Vector3 forward = owner.forward;
         forward.y = 0f;
 
-        Vector3 direction = _direction switch
-        {
-            MoveDirectionMode.Forward => forward,
-            // 長押し中にマウスを動かしても、その時点の照準へ撃つ。
-            MoveDirectionMode.AimDirection => execution.CurrentAimDirection,
-            MoveDirectionMode.Back => -forward,
-            MoveDirectionMode.InputDirection =>
-                throw new NotSupportedException("ProjectileAttackActionではInputDirectionは未対応です。"),
-            _ => throw new ArgumentOutOfRangeException(nameof(_direction))
-        };
-        direction.y = 0f;
+        // 長押し中にマウスを動かしても、発射した時点の照準へ撃つ。
+        Vector3 direction = MoveDirectionResolver.Resolve(_direction, context.CharacterMotor, execution);
         if (direction.sqrMagnitude <= 0.0001f)
             direction = forward;
 

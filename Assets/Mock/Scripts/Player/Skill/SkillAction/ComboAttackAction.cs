@@ -30,24 +30,8 @@ public class ComboAttackAction : SkillAction
 
             try
             {
-                // 発動時点の向きを取得
-                Vector3 forward = motor.transform.forward;
-                forward.y = 0f;
-
-                // 設定された方向モードで移動方向を決定
-                Vector3 moveDirection = _direction switch
-                {
-                    MoveDirectionMode.Forward => forward,
-                    MoveDirectionMode.AimDirection => execution.CurrentAimDirection,
-                    MoveDirectionMode.Back => -forward,
-                    // WASD方向を取得する仕組みは未実装
-                    MoveDirectionMode.InputDirection =>
-                        throw new NotSupportedException("ComboAttackActionではInputDirectionは未対応です。"),
-
-                    _ => throw new ArgumentOutOfRangeException(nameof(_direction))
-                };
-
-                moveDirection.y = 0f;
+                // 設定された方向モードで、この段の移動方向を決定
+                Vector3 moveDirection = MoveDirectionResolver.Resolve(_direction, motor, execution);
                 //スキル発動時の前進。
                 if(moveDirection.sqrMagnitude>0.001f)
                     motor.SetOverrideVelocity(moveDirection * _forwardSpeed, _duration);

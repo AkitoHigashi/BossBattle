@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -327,6 +328,41 @@ public class PlayerController : MonoBehaviour
                 this
             );
         }
+    }
+
+    /// <summary>
+    /// 設定されているスキルと、その入力キーの一覧を返す（通常攻撃を除く、スキル1〜6と回避の順）。
+    /// クールダウン表示などの UI が、スキルとキーの対応をここから受け取る。
+    /// </summary>
+    /// <remarks>
+    /// 対応をここ1か所で管理し、UI 側で同じ設定を持たないようにするためのメソッド。
+    /// 通常攻撃はクールダウンが短く、表示してもちらつくだけなので含めない。
+    /// </remarks>
+    public SkillSlot[] GetSkillSlots()
+    {
+        if (!_initialized)
+            throw new InvalidOperationException("PlayerControllerの初期化後に呼び出してください。");
+
+        var slots = new List<SkillSlot>();
+        AddSlot(slots, _skill1, _skill1Action);
+        AddSlot(slots, _skill2, _skill2Action);
+        AddSlot(slots, _skill3, _skill3Action);
+        AddSlot(slots, _skill4, _skill4Action);
+        AddSlot(slots, _skill5, _skill5Action);
+        AddSlot(slots, _skill6, _skill6Action);
+        AddSlot(slots, _dodge, _skillDodge);
+        return slots.ToArray();
+    }
+
+    private static void AddSlot(List<SkillSlot> slots, SkillDefinition skill, InputAction action)
+    {
+        // スキル未設定の枠は、押しても何も起きないので表示しない。
+        if (skill == null)
+            return;
+
+        // キー表示は InputAction の Binding から作る。キーを変更すると表示も自動で追従する。
+        string keyLabel = action != null ? action.GetBindingDisplayString() : string.Empty;
+        slots.Add(new SkillSlot(skill, keyLabel));
     }
 
     /// <summary>

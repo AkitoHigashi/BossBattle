@@ -2,14 +2,6 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
-public enum MoveDirectionMode
-{
-    Forward,
-    AimDirection,
-    Back,
-    InputDirection
-}
-
 [CreateAssetMenu(fileName = "BlinkAction", menuName = "Skill/Action/BlinkAction")]
 public class BlinkAction : SkillAction
 {
@@ -27,16 +19,8 @@ public class BlinkAction : SkillAction
         forward.y = 0f;
 
         // 設定された方向モードで移動方向を決定
-        Vector3 moveDirection = _direction switch
-        {
-            MoveDirectionMode.Forward => forward,
-            MoveDirectionMode.AimDirection => execution.Direction,
-            MoveDirectionMode.Back => -forward,
-            MoveDirectionMode.InputDirection => execution.Direction,
-            _ => Vector3.zero
-        };
-
-        moveDirection.y = 0f;
+        // AimDirection は「現在の照準」だが、ブリンクはスキルの最初に同期的に実行されるため、発動時のマウス方向と同じになる。
+        Vector3 moveDirection = MoveDirectionResolver.Resolve(_direction, motor, execution);
         if (_duration <= 0f || _speed <= 0f || moveDirection.sqrMagnitude <= 0.0001f)
             return;
 

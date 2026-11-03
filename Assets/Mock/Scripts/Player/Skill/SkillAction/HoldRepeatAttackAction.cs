@@ -66,7 +66,7 @@ public class HoldRepeatAttackAction : SkillAction
 
                 try
                 {
-                    Vector3 stepDirection = ResolveStepDirection(motor, execution);
+                    Vector3 stepDirection = MoveDirectionResolver.Resolve(_direction, motor, execution);
                     if (_stepSpeed > 0f && _stepDuration > 0f && stepDirection.sqrMagnitude > 0.0001f)
                         motor.SetOverrideVelocity(stepDirection.normalized * _stepSpeed, _stepDuration);
 
@@ -112,22 +112,5 @@ public class HoldRepeatAttackAction : SkillAction
             if (stopped)
                 return;
         }
-    }
-
-    private Vector3 ResolveStepDirection(CharacterMotor motor, SkillExecution execution)
-    {
-        Vector3 direction = _direction switch
-        {
-            MoveDirectionMode.Forward => motor.transform.forward,
-            // 長押し中にマウスを動かした場合も追従できるよう、発動時ではなく現在の照準を使う。
-            MoveDirectionMode.AimDirection => execution.CurrentAimDirection,
-            MoveDirectionMode.Back => -motor.transform.forward,
-            MoveDirectionMode.InputDirection =>
-                throw new NotSupportedException("HoldRepeatAttackActionではInputDirectionは未対応です。"),
-            _ => throw new ArgumentOutOfRangeException(nameof(_direction))
-        };
-
-        direction.y = 0f;
-        return direction;
     }
 }
