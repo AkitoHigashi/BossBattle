@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using FishNet.Managing;
@@ -19,12 +20,17 @@ namespace NetworkTest_Yajima.Editor
         private static readonly bool Guest = Project.Contains("/Library/VP/");
         private static readonly string Root = Guest ? Project.Substring(0, Project.IndexOf("/Library/VP/", StringComparison.Ordinal)) : Project;
         private static string PathFor(string name) => Root + "/Temp/RoomLifecycleCheck." + name;
+        private static ushort TestPort => ushort.Parse(File.ReadAllText(PathFor("port")));
         private static NetworkManager _network;
         private static RoomClient _rooms;
         private static RoomConnectionLifecycle _session;
         private static int _step, _round;
         private static double _deadline, _next, _wait;
         private static string _lastCommand;
+        private static ILobbyCharacterSelection _selection;
+        private static IReadOnlyDictionary<int, string> _selected = new Dictionary<int, string>();
+        private static bool _hostPicked;
+        private static bool _abruptChecked;
 
         static RoomConnectionLifecycleCheck()
         {
@@ -43,6 +49,8 @@ namespace NetworkTest_Yajima.Editor
             if (EditorApplication.isPlayingOrWillChangePlaymode) throw new Exception("Stop Play Mode first.");
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
             foreach (string name in new[] { "command", "guest", "result" }) File.WriteAllText(PathFor(name), "");
+            using (var socket = new System.Net.Sockets.UdpClient(new System.Net.IPEndPoint(System.Net.IPAddress.Loopback, 0)))
+                File.WriteAllText(PathFor("port"), ((System.Net.IPEndPoint)socket.Client.LocalEndPoint).Port.ToString());
             File.WriteAllText(PathFor("running"), "run");
             EditorSceneManager.OpenScene(RoomSceneTransition.BrowserPath);
             EditorApplication.EnterPlaymode();
@@ -53,6 +61,8 @@ namespace NetworkTest_Yajima.Editor
             if (state != PlayModeStateChange.EnteredPlayMode || !File.Exists(PathFor("running"))) return;
             _step = _round = 0; _next = _wait = 0; _lastCommand = null;
             _network = null; _rooms = null; _session = null;
+            _selection = null; _selected = new Dictionary<int, string>(); _hostPicked = false;
+            _abruptChecked = false;
             _deadline = EditorApplication.timeSinceStartup + 120;
             EditorApplication.update -= Tick;
             EditorApplication.update += Tick;
@@ -73,6 +83,14 @@ namespace NetworkTest_Yajima.Editor
                     _rooms = _network.GetComponent<RoomClient>();
                     _session = _network.GetComponent<RoomConnectionLifecycle>();
                     if (_session == null) throw new Exception("Missing lifecycle on prefab");
+                    _selection = _network.GetComponents<MonoBehaviour>().OfType<ILobbyCharacterSelection>().Single();
+                    _selection.Changed += selections => _selected = selections;
+                    var manager = _network.GetComponents<MonoBehaviour>().Single(component =>
+                        component.GetType().FullName == "NCG.Character.Selection.CharacterSelectionManager");
+                    var serialized = new SerializedObject(manager);
+                    // ホストの初期値はC、参加端末側はD。実辞書にはサーバーのCが入るはず。
+                    serialized.FindProperty("_defaultCharacterType").enumValueIndex = Guest ? 3 : 2;
+                    serialized.ApplyModifiedPropertiesWithoutUndo();
                 }
                 if (Guest) GuestTick(); else HostTick();
             }
@@ -99,33 +117,55 @@ namespace NetworkTest_Yajima.Editor
             {
                 case 0:
                     if (!FullyStopped || !_session.IsIdle) throw new Exception("Browser must start disconnected");
-                    _session.CreateAndHost("", 4, 18535);
+                    _session.CreateAndHost("", 4, TestPort);
                     if (!FullyStopped || !_session.IsIdle) throw new Exception("Invalid create started server");
                     Canvas.ForceUpdateCanvases();
                     ScreenCapture.CaptureScreenshot("Temp/RoomLifecycle.Browser.png");
                     _step++; break;
                 case 1:
+                    _hostPicked = false;
                     SetBrowserInput("RoomName", "Room lifecycle " + _round);
-                    SetBrowserInput("Port", "18535");
+                    SetBrowserInput("Port", TestPort.ToString());
                     ClickBrowser("Create"); _step++; break;
                 case 2:
                     if (!InRoom || !Lobby) return;
                     if (!_session.IsHost || !_network.ServerManager.Started || !_network.ClientManager.Connection.IsAuthenticated)
                         throw new Exception("Create did not start host and room together");
+                    int self = _network.ClientManager.Connection.ClientId;
+                    if (!_hostPicked)
+                    {
+                        if (!_selected.TryGetValue(self, out string initial) || initial != "CharacterC" ||
+                            _rooms.CurrentRoom.Members[0].Character != 2) return;
+                        _selection.Select(1); // 他の人の入室で、この手動選択を初期値へ戻してはいけない。
+                        _hostPicked = true;
+                        return;
+                    }
+                    if (!_selected.TryGetValue(self, out string chosen) || chosen != "CharacterB" ||
+                        _rooms.CurrentRoom.Members[0].Character != 1) return;
                     File.WriteAllText(PathFor("command"), "join" + _round); _step++; break;
                 case 3:
                     if (_rooms.CurrentRoom.Members.Length != 2 || guest != "joined" + _round) return;
+                    if (!SelectionsMatchMembers()) return;
+                    if (_selected[_network.ClientManager.Connection.ClientId] != "CharacterB")
+                        throw new Exception("Guest join reset host's manual choice");
                     if (_round == 0) { File.WriteAllText(PathFor("command"), "leaveLobby"); _step = 4; }
                     else if (_round == 1) { ClickExit(false); _step = 10; }
                     else { _rooms.SetReady(true); File.WriteAllText(PathFor("command"), "ready" + _round); _step = 6; }
                     break;
                 case 4:
                     if (guest != "leftLobby") return;
+                    if (_selected.Count != 1 || !SelectionsMatchMembers()) return;
                     if (!InRoom || !Lobby || !_network.ServerManager.Started || _rooms.CurrentRoom.Members.Length != 1)
                         throw new Exception("Guest lobby exit damaged host room");
                     File.WriteAllText(PathFor("command"), "joinAgain"); _step++; break;
                 case 5:
                     if (_rooms.CurrentRoom.Members.Length != 2 || guest != "joinedAgain") return;
+                    if (!SelectionsMatchMembers()) return;
+                    if (!_abruptChecked)
+                    {
+                        _abruptChecked = true;
+                        File.WriteAllText(PathFor("command"), "dropConnection"); _step = 12; break;
+                    }
                     _rooms.SetReady(true); File.WriteAllText(PathFor("command"), "ready0"); _step++; break;
                 case 6:
                     if (!_rooms.CurrentRoom.Members.All(member => member.IsReady)) return;
@@ -137,6 +177,7 @@ namespace NetworkTest_Yajima.Editor
                     _step = _round == 0 ? 8 : 10; break;
                 case 8:
                     if (guest != "leftGame") return;
+                    if (_selected.Count != 1 || !SelectionsMatchMembers()) return;
                     if (!InRoom || !Game || !_network.ServerManager.Started || _rooms.CurrentRoom.Members.Length != 1)
                         throw new Exception("Guest game exit damaged host room");
                     ClickExit(true); _step++; break;
@@ -150,8 +191,14 @@ namespace NetworkTest_Yajima.Editor
                     File.WriteAllText(PathFor("command"), "cancelCheck"); _step++; break;
                 case 11:
                     if (guest != "cancelled") return;
-                    Finish("PASS: disconnected browser; create starts host; join connects client; lobby/game guest exits disconnect only guest; lobby/game host dissolve disconnects everyone; recreate and cancel work");
+                    Finish("PASS: server default C registered for host/guest; lists and RoomInfo agree; host manual B survives guest join; lobby/game exit and abrupt disconnect remove selection; rejoin initializes C; connection lifecycle, dissolve and cancel work");
                     break;
+                case 12:
+                    if (guest != "dropped" || _rooms.CurrentRoom.Members.Length != 1 || _selected.Count != 1 || !SelectionsMatchMembers()) return;
+                    File.WriteAllText(PathFor("command"), "joinAfterDrop"); _step++; break;
+                case 13:
+                    if (guest != "joinedAfterDrop" || !SelectionsMatchMembers() || _rooms.CurrentRoom.Members.Length != 2) return;
+                    _rooms.SetReady(true); File.WriteAllText(PathFor("command"), "ready0"); _step = 6; break;
             }
         }
 
@@ -169,31 +216,42 @@ namespace NetworkTest_Yajima.Editor
                 if (command.StartsWith("join"))
                 {
                     if (!FullyStopped || !_session.IsIdle) throw new Exception("Previous guest session not stopped");
-                    SetBrowserInput("Port", "18535");
+                    SetBrowserInput("Port", TestPort.ToString());
                     ClickBrowser("Client");
                 }
                 else if (command == "leaveLobby") ClickExit(false);
                 else if (command == "leaveGame") ClickExit(true);
+                else if (command == "dropConnection") _network.ClientManager.StopConnection();
                 else if (command.StartsWith("ready")) _rooms.SetReady(true);
                 else if (command == "cancelCheck")
                 {
-                    _session.JoinHost("127.0.0.1", 18536);
+                    _session.JoinHost("127.0.0.1", TestPort == ushort.MaxValue ? (ushort)60000 : (ushort)(TestPort + 1));
                     _session.Cancel();
                 }
             }
             if (_network.ServerManager.Started) throw new Exception("Join started server on guest");
-            if (InRoom && Lobby && command.StartsWith("join"))
-                File.WriteAllText(PathFor("guest"), command == "joinAgain" ? "joinedAgain" : "joined" + command.Substring(4));
+            if (InRoom && Lobby && command.StartsWith("join") && SelectionsMatchMembers() &&
+                _selected.TryGetValue(_network.ClientManager.Connection.ClientId, out string ownChoice) && ownChoice == "CharacterC")
+                File.WriteAllText(PathFor("guest"), command == "joinAgain" ? "joinedAgain" :
+                    command == "joinAfterDrop" ? "joinedAfterDrop" : "joined" + command.Substring(4));
             if (InRoom && Game && command.StartsWith("ready"))
                 File.WriteAllText(PathFor("guest"), "game" + command.Substring(5));
             if (FullyStopped && _session.IsIdle && Browser && !_rooms.HasRoom)
             {
                 if (command == "leaveLobby") File.WriteAllText(PathFor("guest"), "leftLobby");
                 if (command == "leaveGame") File.WriteAllText(PathFor("guest"), "leftGame");
+                if (command == "dropConnection") File.WriteAllText(PathFor("guest"), "dropped");
                 if (command == "ready1" || command == "join1") File.WriteAllText(PathFor("guest"), "dissolved1");
                 if (command == "ready2") File.WriteAllText(PathFor("guest"), "dissolved2");
                 if (command == "cancelCheck") File.WriteAllText(PathFor("guest"), "cancelled");
             }
+        }
+
+        private static bool SelectionsMatchMembers()
+        {
+            var members = _rooms.CurrentRoom.Members;
+            return members != null && _selected.Count == members.Length && members.All(member =>
+                _selected.TryGetValue(member.ClientId, out string choice) && choice == "Character" + (char)('A' + member.Character));
         }
 
         private static void SetBrowserInput(string name, string value)

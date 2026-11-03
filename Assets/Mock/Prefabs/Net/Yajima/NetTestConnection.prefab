@@ -114,9 +114,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 5274871142702213}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3fecc4b8bfe86114aaf7cabba98da92c, type: 3}
+  m_Script: {fileID: 11500000, guid: 6303d78d383e462c95df7e44dc8c4f11, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: NetworkTest_Yajima::NetworkTest_Yajima.NetTestUI
+  m_EditorClassIdentifier: NetworkTest_Yajima::NetworkTest_Yajima.RoomConnectionBrowserUI
   _networkManager: {fileID: 2039565845548045133}
   _rooms: {fileID: 1523536372722870992}
   _address: {fileID: 4138400421156980136}
@@ -3170,6 +3170,7 @@ GameObject:
   - component: {fileID: 7360446088650186117}
   - component: {fileID: 1523536372722870992}
   - component: {fileID: 3925153343490346736}
+  - component: {fileID: 900000000000000003}
   m_Layer: 0
   m_Name: NetTestConnection
   m_TagString: Untagged
@@ -3294,7 +3295,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: NetworkTest_Yajima::NetworkTest_Yajima.RoomManager
   _networkManager: {fileID: 2039565845548045133}
-  _maxRooms: 100
+  _maxRooms: 1
   _maxMembers: 16
 --- !u!114 &1523536372722870992
 MonoBehaviour:
@@ -3318,11 +3319,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 5431054889195107874}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a25e45be697cee7458da9b9382a616da, type: 3}
+  m_Script: {fileID: 11500000, guid: e0fe8d9e39ce4bc48e4ef6c921b5f085, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: NetworkTest_Yajima::NetworkTest_Yajima.RoomSceneTransition
+  m_EditorClassIdentifier: NetworkTest_Yajima::NetworkTest_Yajima.RoomConnectionSceneNavigation
   _scenePath: Assets/Mock/Scenes/Net/Yajima/IngameTest.unity
   _connectionUI: {fileID: 5274871142702213}
+--- !u!114 &900000000000000003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5431054889195107874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ab3f0bb422949738c722e71381a74fb, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: NetworkTest_Yajima::NetworkTest_Yajima.RoomConnectionLifecycle
 --- !u!1 &5443624653631561547
 GameObject:
   m_ObjectHideFlags: 0

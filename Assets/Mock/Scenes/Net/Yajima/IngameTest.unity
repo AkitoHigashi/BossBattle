@@ -748,6 +748,45 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1862875822093476336, guid: 88de3ba1c9a130a479002a93f3ed4633, type: 3}
   m_PrefabInstance: {fileID: 2091219283}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2109000100
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2109000101}
+  - component: {fileID: 2109000102}
+  m_Layer: 5
+  m_Name: IngameRoomUI
+  m_TagString: Untagged
+  m_IsActive: 1
+--- !u!4 &2109000101
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2109000100}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+--- !u!114 &2109000102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2109000100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45d667e20a1b4c429620ae9b5c50d70c, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: NetworkTest_Yajima::NetworkTest_Yajima.IngameRoomUI
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -759,3 +798,4 @@ SceneRoots:
   - {fileID: 323119611}
   - {fileID: 506467142}
   - {fileID: 682428046}
+  - {fileID: 2109000101}

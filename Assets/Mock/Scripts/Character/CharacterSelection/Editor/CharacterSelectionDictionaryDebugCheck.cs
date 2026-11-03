@@ -75,6 +75,23 @@ namespace NCG.Character.Selection.Editor
                         _network.ServerManager.StartConnection(18534); _step++; break;
                     case 1:
                         if (!_network.ServerManager.Started) return;
+                        var selection = _network.GetComponent<CharacterSelectionManager>();
+                        var settings = new SerializedObject(selection);
+                        int originalDefault = settings.FindProperty("_defaultCharacterType").enumValueIndex;
+                        settings.FindProperty("_defaultCharacterType").enumValueIndex = 3;
+                        settings.ApplyModifiedPropertiesWithoutUndo();
+                        selection.JoinRoom(9999);
+                        if (!selection.TryGetCharacterType(9999, out var initial) || initial != CharacterType.CharacterD)
+                            throw new Exception("Server-only JoinRoom incorrectly requires local client authentication");
+                        settings.FindProperty("_defaultCharacterType").enumValueIndex = 0;
+                        settings.ApplyModifiedPropertiesWithoutUndo();
+                        selection.JoinRoom(9999);
+                        if (!selection.TryGetCharacterType(9999, out var repeated) || repeated != CharacterType.CharacterD)
+                            throw new Exception("Duplicate JoinRoom overwrote existing selection");
+                        selection.LeaveRoom(9999);
+                        if (selection.TryGetCharacterType(9999, out _)) throw new Exception("Server-only LeaveRoom did not remove entry");
+                        settings.FindProperty("_defaultCharacterType").enumValueIndex = originalDefault;
+                        settings.ApplyModifiedPropertiesWithoutUndo();
                         _network.ClientManager.StartConnection("127.0.0.1", 18534); _step++; break;
                     case 2:
                         if (!_network.ClientManager.Connection.IsAuthenticated) return;
@@ -125,7 +142,7 @@ namespace NCG.Character.Selection.Editor
             EditorApplication.update -= Tick;
             SessionState.SetBool(Key, false);
             string result = error == null
-                ? "PASS: actual dictionary 0 -> 1 (CharacterD) -> 0 after server stop; monitor survives disconnect, lobby transition and manager destruction; restart empty"
+                ? "PASS: server-only join/leave works without local authentication; duplicate join preserves choice; actual dictionary clears on stop; monitor survives disconnect and manager destruction; restart empty"
                 : "FAIL: " + error;
             File.WriteAllText("Temp/DictionaryDebugCheck.result", result);
             Debug.Log("[DictionaryDebugCheck] " + result);

@@ -25,6 +25,8 @@ namespace NetworkTest_Yajima
         public event Action<RoomInfo> RoomStarted;
 
         public bool CanSelectCharacter(int clientId) => _membership.TryGetValue(clientId, out Room room) && !room.Started;
+        /// <summary>サーバーで所属が確定した後に発火。部屋作成者も対象。</summary>
+        public event Action<int> MemberJoined;
         public event Action<int> MemberLeft;
         public void ApplyCharacterSelection(int clientId, int character)
         {
@@ -87,6 +89,7 @@ namespace NetworkTest_Yajima
                     room.Members.Add(connection);
                     _rooms.Add(room.Id, room);
                     _membership.Add(connection.ClientId, room);
+                    MemberJoined?.Invoke(connection.ClientId);
                     Publish(room);
                     break;
                 case RoomOperation.Join:
@@ -97,6 +100,7 @@ namespace NetworkTest_Yajima
                     { error = "開始済み、または満員です。"; break; }
                     room.Members.Add(connection);
                     _membership.Add(connection.ClientId, room);
+                    MemberJoined?.Invoke(connection.ClientId);
                     Publish(room);
                     break;
                 case RoomOperation.Leave:

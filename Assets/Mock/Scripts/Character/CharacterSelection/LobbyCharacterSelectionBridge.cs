@@ -23,6 +23,7 @@ namespace NCG.Character.Selection
             _network = GetComponent<NetworkManager>();
             _client = GetComponent<RoomClient>();
             _selection.OnSelectionChanged += Receive;
+            _rooms.MemberJoined += OnMemberJoined;
             _rooms.MemberLeft += _selection.LeaveRoom;
         }
         private void Start()
@@ -38,6 +39,13 @@ namespace NCG.Character.Selection
         }
         public void RequestList() => _selection.UpdateCharacterSelections();
         private void Receive(CharacterSelectionEntry[] entries) => Changed?.Invoke(entries.ToDictionary(e => e.ClientId, e => e.CharacterType.ToString()));
+        private void OnMemberJoined(int clientId)
+        {
+            _selection.JoinRoom(clientId);
+            // RoomInfo側の表示・Ready判定にも、サーバーで決めた初期値を反映する。
+            if (_selection.TryGetCharacterType(clientId, out CharacterType character))
+                _rooms.ApplyCharacterSelection(clientId, (int)character);
+        }
         private void OnSelectRequested(NetworkConnection sender, CharacterSelectRequest message, Channel channel)
         {
             if (!Enum.IsDefined(typeof(CharacterType), message.CharacterType)) return;
@@ -46,7 +54,10 @@ namespace NCG.Character.Selection
         private void OnDestroy()
         {
             if (_rooms != null && _selection != null)
+            {
+                _rooms.MemberJoined -= OnMemberJoined;
                 _rooms.MemberLeft -= _selection.LeaveRoom;
+            }
             if (_selection != null)
             {
                 _selection.OnSelectionChanged -= Receive;
