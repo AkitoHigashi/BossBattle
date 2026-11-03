@@ -1,8 +1,8 @@
 using UnityEngine;
 
 /// <summary>
-/// 溜めゲージの表示用データ（キャラクターごとに1つ）。
-/// ChargeAction が書き込み、ChargeGaugeView が毎フレーム読んで描画する。
+/// 頭上ゲージの表示用データ（キャラクターごとに1つ）。
+/// ChargeAction（溜め量）と HoldRepeatAttackAction（長押しの残り時間）が書き込み、ChargeGaugeView が毎フレーム読んで描画する。
 /// </summary>
 /// <remarks>
 /// 表示（uGUI）とデータを分けているのは、Action 側を UI の作りに依存させないため。

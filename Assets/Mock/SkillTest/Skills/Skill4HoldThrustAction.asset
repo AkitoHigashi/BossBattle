@@ -17,5 +17,5 @@ MonoBehaviour:
   _maxHoldDuration: 4
   _interval: 0
   _direction: 1
-  _stepSpeed: 2
+  _stepSpeed: 0
   _stepDuration: 0.15

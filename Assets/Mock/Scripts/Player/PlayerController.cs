@@ -29,7 +29,7 @@ public class PlayerController : MonoBehaviour
     [Tooltip("回避。実行中のスキルに割り込める")]
     [SerializeField] private SkillDefinition _dodge;
 
-    [Tooltip("ON: マウス方向を向く / OFF: 移動方向を向く")]
+    [Tooltip("ON: 常にマウス方向を向く / OFF: 歩行中は進行方向、スキル使用中だけマウス方向を向く")]
     [SerializeField] private bool _faceMouseCursor = true;
 
     [Tooltip("マウス方向の計算に使うカメラ。未設定なら Camera.main を使う")]
@@ -106,8 +106,11 @@ public class PlayerController : MonoBehaviour
         if (hasAim)
             _skillSystem?.UpdateAimDirection(direction);
 
-        // 通常回転にマウス方向を使用するか
-        if (!_faceMouseCursor || !hasAim)
+        // OFF の設定でも、スキル中は攻撃をマウス方向へ向けるためマウス方向を向く。
+        // スキルが終わると照準による回転を解除し、CharacterMovement が設定した進行方向の回転に戻る。
+        bool isUsingSkill = _skillSystem?.CurrentSkill != null;
+        bool faceMouse = _faceMouseCursor || isUsingSkill;
+        if (!faceMouse || !hasAim)
         {
             _motor.ClearAimFacingDirection();
             return;
@@ -244,18 +247,10 @@ public class PlayerController : MonoBehaviour
         _skillSystem.HandleSkillInput(_normalAttack, SkillInputPhase.Released, direction);
     }
 
-    private void OnSkill1Performed(InputAction.CallbackContext context)
-    {
-        Vector3 direction = TryGetMouseDirection(out var mouseDirection)
-            ? mouseDirection : transform.forward;
+    // 連撃の再入力も長押しスキルと同じ経路で渡す。押下ごとに受付結果をログで確認できる。
+    private void OnSkill1Performed(InputAction.CallbackContext context) => SendSkillInput(_skill1, SkillInputPhase.Pressed);
 
-        _skillSystem.HandleSkillInput(_skill1, SkillInputPhase.Pressed, direction);
-    }
-
-    private void OnSkill1Canceled(InputAction.CallbackContext context)
-    {
-        _skillSystem.HandleSkillInput(_skill1, SkillInputPhase.Released, transform.forward);
-    }
+    private void OnSkill1Canceled(InputAction.CallbackContext context) => SendSkillInput(_skill1, SkillInputPhase.Released);
 
     private void OnSkill2(InputAction.CallbackContext context)
     {
@@ -271,19 +266,19 @@ public class PlayerController : MonoBehaviour
         UseSkill(_skill3, direction);
     }
 
-    private void OnSkill4Performed(InputAction.CallbackContext context) => SendHoldSkillInput(_skill4, SkillInputPhase.Pressed);
-    private void OnSkill4Canceled(InputAction.CallbackContext context) => SendHoldSkillInput(_skill4, SkillInputPhase.Released);
-    private void OnSkill5Performed(InputAction.CallbackContext context) => SendHoldSkillInput(_skill5, SkillInputPhase.Pressed);
-    private void OnSkill5Canceled(InputAction.CallbackContext context) => SendHoldSkillInput(_skill5, SkillInputPhase.Released);
-    private void OnSkill6Performed(InputAction.CallbackContext context) => SendHoldSkillInput(_skill6, SkillInputPhase.Pressed);
-    private void OnSkill6Canceled(InputAction.CallbackContext context) => SendHoldSkillInput(_skill6, SkillInputPhase.Released);
+    private void OnSkill4Performed(InputAction.CallbackContext context) => SendSkillInput(_skill4, SkillInputPhase.Pressed);
+    private void OnSkill4Canceled(InputAction.CallbackContext context) => SendSkillInput(_skill4, SkillInputPhase.Released);
+    private void OnSkill5Performed(InputAction.CallbackContext context) => SendSkillInput(_skill5, SkillInputPhase.Pressed);
+    private void OnSkill5Canceled(InputAction.CallbackContext context) => SendSkillInput(_skill5, SkillInputPhase.Released);
+    private void OnSkill6Performed(InputAction.CallbackContext context) => SendSkillInput(_skill6, SkillInputPhase.Pressed);
+    private void OnSkill6Canceled(InputAction.CallbackContext context) => SendSkillInput(_skill6, SkillInputPhase.Released);
 
     /// <summary>
-    /// 長押しスキルの押下・解放を SkillSystem へ渡す。
+    /// 押下・解放の両方を使うスキル（連撃・長押し・溜め）の入力を SkillSystem へ渡す。
     /// 押下は「未実行なら発動要求／実行中なら押下状態の更新」、解放は実行中のスキルの IsHeld を下ろすだけ。
     /// 解放はスキルを中断しない。長押しをやめた後どうするかは各 Action が IsHeld を見て判断する。
     /// </summary>
-    private void SendHoldSkillInput(SkillDefinition definition, SkillInputPhase phase)
+    private void SendSkillInput(SkillDefinition definition, SkillInputPhase phase)
     {
         Vector3 direction = TryGetMouseDirection(out var mouseDirection) ? mouseDirection : transform.forward;
         bool accepted = _skillSystem.HandleSkillInput(definition, phase, direction);

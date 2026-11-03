@@ -10,8 +10,8 @@ using UnityEngine.UI;
 /// 残り時間は SkillSystem.GetCooldownRemaing を毎フレーム読むだけで、クールダウンの管理には関わらない。
 /// ChargeGaugeView と同じく、仮の見た目なので Canvas や Image を実行時にコードで組み立てている。
 ///
-/// 終了時開始（OnEnd）のスキルは、実行中はまだクールダウンが始まっていないため「使用可能」の表示のままになる。
-/// 実行中の表示が必要になったら、SkillSystem から実行中のスキルを取得できるようにする必要がある。
+/// 終了時開始（OnEnd）のスキルは実行中まだクールダウンが始まっていないため、
+/// SkillSystem.CurrentSkill で実行中かを調べ、「使用中」として別の色で表示する。
 /// </remarks>
 [DisallowMultipleComponent]
 public class SkillCooldownView : MonoBehaviour
@@ -43,6 +43,8 @@ public class SkillCooldownView : MonoBehaviour
     [Header("色")]
     [SerializeField] private Color _readyColor = new Color(0.15f, 0.45f, 0.25f, 0.85f);
     [SerializeField] private Color _coolingColor = new Color(0.2f, 0.2f, 0.2f, 0.85f);
+    [Tooltip("スキルを使っている最中の色")]
+    [SerializeField] private Color _activeColor = new Color(0.85f, 0.6f, 0.1f, 0.95f);
     [Tooltip("残り時間を表す覆い。上から下へ縮んでいき、なくなると使用可能")]
     [SerializeField] private Color _overlayColor = new Color(0f, 0f, 0f, 0.6f);
     [SerializeField] private Color _textColor = Color.white;
@@ -79,8 +81,20 @@ public class SkillCooldownView : MonoBehaviour
         if (_skillSystem == null)
             return;
 
+        SkillDefinition activeSkill = _skillSystem.CurrentSkill;
+
         foreach (Slot slot in _slots)
         {
+            // 使用中は、クールダウンより優先して表示する。
+            // 開始時にクールダウンが始まるスキルでも、使っている間は「使用中」と分かる方が状況をつかみやすい。
+            if (slot.Skill == activeSkill)
+            {
+                slot.Background.color = _activeColor;
+                slot.Overlay.anchorMax = new Vector2(1f, 0f);
+                slot.RemainingText.text = "IN USE";
+                continue;
+            }
+
             float remaining = _skillSystem.GetCooldownRemaing(slot.Skill);
             float cooldown = slot.Skill.Cooldown;
             bool isCooling = remaining > 0f && cooldown > 0f;

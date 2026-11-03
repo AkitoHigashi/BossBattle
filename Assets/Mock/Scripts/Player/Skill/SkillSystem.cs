@@ -11,6 +11,11 @@ public class SkillSystem : ISkillSystem, IDisposable
     /// 現在スキルが実行中かどうかを外部へ通知する
     /// </summary>
     public Observable<bool> IsExecuting => _isExecuting;
+    /// <summary>
+    /// 現在実行中のスキル。実行していなければ null。
+    /// UI の「使用中」表示や、スキル中だけマウス方向を向く処理など、読み取り専用で使う。
+    /// </summary>
+    public SkillDefinition CurrentSkill => _currentExecution?.Definition;
     private readonly SkillContext _skillContext;
     private readonly Dictionary<SkillDefinition, float> _nextUsableTimes = new Dictionary<SkillDefinition, float>();
     private readonly ReactiveProperty<bool> _isExecuting = new ReactiveProperty<bool>(false);

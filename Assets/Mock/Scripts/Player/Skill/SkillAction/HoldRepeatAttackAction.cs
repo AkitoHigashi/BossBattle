@@ -37,13 +37,17 @@ public class HoldRepeatAttackAction : SkillAction
             throw new InvalidOperationException("HoldRepeatAttackAction の攻撃が未設定です。");
 
         CharacterMotor motor = context.CharacterMotor;
+        ChargeGauge gauge = context.ChargeGauge;
         float startedAt = Time.time;
 
-        // 「離したら即キャンセル」を実現するため、突きの再生中も解放を監視する。
+        // 「離したら即キャンセル」とゲージ表示のため、突きの再生中も毎フレーム監視する。
         // PlayerAttackAction は execution.Token でしか止められないので、解放を検知したら実行ごと中断する。
         // 中断後の後片付け（攻撃判定・移動・中断用Animator遷移）は既存の finally と SkillSystem が行う。
         using var watchCts = CancellationTokenSource.CreateLinkedTokenSource(execution.Token);
-        CancelOnReleaseAsync(execution, watchCts.Token).Forget();
+        // 残りの継続時間を表すため、満タンから始めて減らしていく。
+        gauge.Show(hasJustZone: false);
+        gauge.SetProgress(1f);
+        MonitorAsync(execution, gauge, startedAt, watchCts.Token).Forget();
 
         try
         {
@@ -80,19 +84,34 @@ public class HoldRepeatAttackAction : SkillAction
         {
             // 正常終了後に監視が残ると、後から Cancel を呼んでしまうため必ず止める。
             watchCts.Cancel();
+            // 終了・中断のどちらでも、ゲージを残さない。
+            gauge.Hide();
         }
     }
 
     /// <summary>
-    /// ボタンが離されたら、このスキルの実行を中断する。
+    /// 毎フレーム、残りの継続時間をゲージへ反映し、ボタンが離されたらこのスキルの実行を中断する。
     /// </summary>
-    private static async UniTaskVoid CancelOnReleaseAsync(SkillExecution execution, CancellationToken token)
+    private async UniTaskVoid MonitorAsync(SkillExecution execution, ChargeGauge gauge, float startedAt, CancellationToken token)
     {
-        // 監視の停止（正常終了・別要因の中断）は例外ではなく戻り値で受け取り、ログを汚さない。
-        bool stopped = await UniTask.WaitUntil(() => !execution.IsHeld, cancellationToken: token)
-            .SuppressCancellationThrow();
-        if (!stopped)
-            execution.Cancel();
+        // 継続時間が 0 の設定でも割り算で壊れないよう、下限を設ける。
+        float duration = Mathf.Max(_maxHoldDuration, 0.01f);
+
+        while (true)
+        {
+            gauge.SetProgress(1f - (Time.time - startedAt) / duration);
+
+            if (!execution.IsHeld)
+            {
+                execution.Cancel();
+                return;
+            }
+
+            // 監視の停止（正常終了・別要因の中断）は例外ではなく戻り値で受け取り、ログを汚さない。
+            bool stopped = await UniTask.NextFrame(token).SuppressCancellationThrow();
+            if (stopped)
+                return;
+        }
     }
 
     private Vector3 ResolveStepDirection(CharacterMotor motor, SkillExecution execution)
