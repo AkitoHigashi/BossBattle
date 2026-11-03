@@ -1,7 +1,7 @@
 using FishNet;
 using FishNet.Connection;
-using FishNet.Transporting;
 using FishNet.Managing;
+using FishNet.Transporting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +12,7 @@ namespace NCG.Character.Selection
     /// <summary>キャラクター選択を管理するクラス</summary>
     public class CharacterSelectionManager : MonoBehaviour
     {
+        [SerializeField] CharacterType _defaultCharacterType = CharacterType.CharacterA;
         /// <summary>サーバーが保持する正式なキャラクター選択状況</summary>
         readonly Dictionary<int, CharacterType> _selections = new();
         NetworkManager _network;
@@ -41,8 +42,6 @@ namespace NCG.Character.Selection
             _network.ServerManager.RegisterBroadcast<CharacterSelectionListRequest>(OnSelectionReceived);
             // クライアントでは更新通知を受ける
             _network.ClientManager.RegisterBroadcast<CharacterSelectionList>(OnList);
-            // クライアントの接続状況が変わったときの通知を受ける
-            _network.ServerManager.OnRemoteConnectionState += OnRemoteConnectionState;
             // サーバーの状況が変わったときの通知を受ける
             _network.ServerManager.OnServerConnectionState += OnServerConnectionState;
         }
@@ -54,14 +53,13 @@ namespace NCG.Character.Selection
             _network.ServerManager.UnregisterBroadcast<CharacterSelectRequest>(OnSelectRequested);
             _network.ServerManager.UnregisterBroadcast<CharacterSelectionListRequest>(OnSelectionReceived);
             _network.ClientManager.UnregisterBroadcast<CharacterSelectionList>(OnList);
-            _network.ServerManager.OnRemoteConnectionState -= OnRemoteConnectionState;
             _network.ServerManager.OnServerConnectionState -= OnServerConnectionState;
         }
 
-        // クライアントからサーバーにリクエスト
+        // クライアントからサーバーへ
         #region Client => Server
         /// <summary>
-        /// キャラクター選択をするメソッド
+        /// キャラクター選択をリクエストするメソッド
         /// </summary>
         /// <param name="characterType">選択したキャラクター</param>
         public void SelectCharacter(CharacterType characterType)
@@ -73,31 +71,53 @@ namespace NCG.Character.Selection
         }
 
         /// <summary>
-        /// 表示を更新するメソッド
+        /// 表示を更新をリクエストするメソッド
         /// </summary>
         public void UpdateCharacterSelections()
         {
             if (!CanSend) return;
 
+            // サーバーに表示更新リクエスト
             _network.ClientManager.Broadcast(new CharacterSelectionListRequest());
         }
 
         /// <summary>
-        /// 部屋から退出するメソッド
+        /// 各クライアントでUIを更新するメソッド
         /// </summary>
-        public void LeaveRoom(int clientId)
+        /// <param name="characterSelectionList">キャラクター選択状況一覧</param>
+        /// <param name="channel">デリゲートを合わせるためだけの不要な引数</param>
+        void OnList(CharacterSelectionList characterSelectionList, Channel channel)
         {
-            if (!_registered || _network == null || !_network.ServerManager.Started) return;
-
-            if (_selections.Remove(clientId))
-                UpdateCharacterSelectionsRequested();
+            // イベント発火でUI更新
+            OnSelectionChanged?.Invoke(characterSelectionList.Entries);
         }
         #endregion
 
-        // サーバーからクライアントにリクエスト
+        // サーバーからクライアントへ
         #region Server => Client
         /// <summary>
+        /// 部屋に参加した時に呼ばれるメソッド
+        /// </summary>
+        /// <param name="clientId">参加したクライアントのID</param>
+        public void JoinRoom(int clientId)
+        {
+            // 誰かが抜けたことによる通知のためIsAuthenticatedによる認証判定は不要
+            // とはいえ準備が整っていなければreturn
+            if (!_registered || _network == null || !_network.ServerManager.Started) return;
+
+            // 入室の重複通知の場合はreturn
+            if (_selections.ContainsKey(clientId)) return;
+
+            // 選択処理を正常に実行できなかったらreturn
+            if (!TryUpdateSelection(_defaultCharacterType, clientId)) return;
+
+            // 各クライアントに表示更新通知
+            UpdateCharacterSelectionsRequested();
+        }
+
+        /// <summary>
         /// 選択更新リクエストを処理するメソッド
+        /// <para>Broadcastによってサーバーでのみ実行される</para>
         /// </summary>
         /// <param name="sender">選択更新を行ったプレイヤーの情報</param>
         /// <param name="message">選択更新リクエスト</param>
@@ -108,20 +128,34 @@ namespace NCG.Character.Selection
         {
             var characterType = message.CharacterType;
             var clientId = sender.ClientId;
-            if (!Enum.IsDefined(typeof(CharacterType), characterType)) return;
+
+            // 選択処理を正常に実行できなかったらreturn
+            if (!TryUpdateSelection(characterType, clientId)) return;
+
+            // 各クライアントに表示更新通知
+            UpdateCharacterSelectionsRequested();
+        }
+
+        /// <summary>
+        /// 選択処理を実行するメソッド
+        /// </summary>
+        /// <param name="characterType">選択したキャラクターの種類</param>
+        /// <param name="clientId">キャラクターを選択したプレイヤー</param>
+        /// <returns>選択処理を正常に実行できたか</returns>
+        bool TryUpdateSelection(CharacterType characterType, int clientId)
+        {
+            if (!Enum.IsDefined(typeof(CharacterType), characterType)) return false;
 
             // 現在の選択と同じなら更新をスルー
             if (_selections.TryGetValue(clientId, out var current)
                 && current == characterType)
             {
-                return;
+                return false;
             }
 
             // 最新状態に更新
             _selections[clientId] = characterType;
-
-            // 各クライアントに表示更新通知
-            UpdateCharacterSelectionsRequested();
+            return true;
         }
 
         /// <summary>
@@ -137,56 +171,13 @@ namespace NCG.Character.Selection
         }
 
         /// <summary>
-        /// キャラクター選択状況一覧を更新リクエストをするメソッド
+        /// キャラクター選択状況一覧の更新リクエストをするメソッド
         /// </summary>
         void UpdateCharacterSelectionsRequested()
         {
             // 各クライアントに表示更新通知
             _network.ServerManager.Broadcast(CreateList());
         }
-
-        /// <summary>
-        /// 各クライアントでUIを更新するメソッド
-        /// </summary>
-        /// <param name="characterSelectionList">キャラクター選択状況一覧</param>
-        /// <param name="channel">デリゲートを合わせるためだけの不要な引数</param>
-        void OnList(CharacterSelectionList characterSelectionList, Channel channel)
-        {
-            // イベント発火でUI更新
-            OnSelectionChanged?.Invoke(characterSelectionList.Entries);
-        }
-        #endregion
-
-        // 接続状況に応じたコールバック
-        #region ConnectionCallBack
-        /// <summary>
-        /// サーバー停止時に辞書に登録したデータを削除するメソッド
-        /// </summary>
-        /// <param name="args">サーバー状態</param>
-        void OnServerConnectionState(ServerConnectionStateArgs args)
-        {
-            // サーバーが停止していなかったらreturn
-            if (args.ConnectionState != LocalConnectionState.Stopped
-                || _network.ServerManager.Started) return;
-
-            // 辞書をリセット
-            _selections.Clear();
-        }
-
-        /// <summary>
-        /// クライアントの接続が切れた時に辞書に登録したデータを削除するメソッド
-        /// </summary>
-        /// <param name="sender">接続が切れたクライアントの情報</param>
-        /// <param name="args">接続状態</param>
-        void OnRemoteConnectionState(NetworkConnection sender, RemoteConnectionStateArgs args)
-        {
-            // クライアントの接続が切れていなければreturn
-            if (args.ConnectionState != RemoteConnectionState.Stopped) return;
-
-            // クライアントの情報を削除出来たら
-            LeaveRoom(sender.ClientId);
-        }
-        #endregion
 
         /// <summary>
         /// 更新データ一覧を作成するメソッド
@@ -198,6 +189,39 @@ namespace NCG.Character.Selection
                 .Select(element => new CharacterSelectionEntry(element.Key, element.Value))
                 .ToArray());
         }
+
+        /// <summary>
+        /// 部屋から退出した時に呼ばれるメソッド
+        /// </summary>
+        /// <param name="clientId">退出したクライアントのID</param>
+        public void LeaveRoom(int clientId)
+        {
+            // 誰かが抜けたことによる通知のためIsAuthenticatedによる認証判定は不要
+            // とはいえ準備が整っていなければreturn
+            if (!_registered || _network == null || !_network.ServerManager.Started) return;
+
+            // 辞書から削除
+            if (_selections.Remove(clientId))
+                UpdateCharacterSelectionsRequested();
+        }
+        #endregion
+
+        // 接続状況に応じたコールバック
+        #region ConnectionCallBack
+        /// <summary>
+        /// サーバーの状態が変わったときに辞書の情報を更新するメソッド
+        /// </summary>
+        /// <param name="args">サーバー状態</param>
+        void OnServerConnectionState(ServerConnectionStateArgs args)
+        {
+            // サーバーが停止していなかったらreturn
+            if (args.ConnectionState != LocalConnectionState.Stopped
+                || _network.ServerManager.Started) return;
+
+            // サーバー停止時に辞書をリセット
+            _selections.Clear();
+        }
+        #endregion
 
         /// <summary>
         /// クライアントに合わせたキャラクターの種類を取得するメソッド
