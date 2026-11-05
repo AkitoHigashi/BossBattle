@@ -56,10 +56,14 @@ namespace NCG.Player.Spawn
             var networkConnection = playerInfo.NetworkConnection;
 
             // プレイヤーに対するキャラクターをすでに生成していたらreturn
-            if (_spawnedClients.Contains(networkConnection.ClientId)) return;
+            if (_spawnedClients.Contains(networkConnection.ClientId))
+            {
+                Debug.Log($"{networkConnection.ClientId}のプレイヤーキャラクターはすでに生成されています");
+                return;
+            }
 
-            if (_selectionManager == null 
-                || !_selectionManager.TryGetCharacterType(networkConnection.ClientId, out var characterType)) 
+            if (_selectionManager == null
+                || !_selectionManager.TryGetCharacterType(networkConnection.ClientId, out var characterType))
                 return;
 
             if (_characterDataList == null)
