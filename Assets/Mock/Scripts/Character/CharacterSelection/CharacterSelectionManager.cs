@@ -16,13 +16,13 @@ namespace NCG.Character.Selection
         /// <summary>サーバーが保持する正式なキャラクター選択状況</summary>
         readonly Dictionary<int, CharacterType> _selections = new();
         NetworkManager _network;
-        bool _registered;
+        bool _isRegistered;
 
         /// <summary>キャラクター選択状況が更新されたときに発火するイベント</summary>
         public event Action<CharacterSelectionEntry[]> OnSelectionChanged;
 
         /// <summary>クライアントの状態を判定して入力送信ができるかを返すプロパティ</summary>
-        bool CanSend => _registered && _network != null && _network.ClientManager.Started && _network.ClientManager.Connection.IsAuthenticated;
+        bool CanSend => _isRegistered && _network != null && _network.ClientManager.Started && _network.ClientManager.Connection.IsAuthenticated;
 
         private void Start()
         {
@@ -34,7 +34,7 @@ namespace NCG.Character.Selection
                 return;
             }
 
-            _registered = true;
+            _isRegistered = true;
             // 購読
             // サーバーでは更新リクエストを受ける
             _network.ServerManager.RegisterBroadcast<CharacterSelectRequest>(OnSelectRequested);
@@ -48,7 +48,7 @@ namespace NCG.Character.Selection
 
         private void OnDestroy()
         {
-            if (!_registered || _network == null) return;
+            if (!_isRegistered || _network == null) return;
             // 解除
             _network.ServerManager.UnregisterBroadcast<CharacterSelectRequest>(OnSelectRequested);
             _network.ServerManager.UnregisterBroadcast<CharacterSelectionListRequest>(OnSelectionReceived);
@@ -103,7 +103,7 @@ namespace NCG.Character.Selection
         {
             // 誰かが抜けたことによる通知のためIsAuthenticatedによる認証判定は不要
             // とはいえ準備が整っていなければreturn
-            if (!_registered || _network == null || !_network.ServerManager.Started) return;
+            if (!_isRegistered || _network == null || !_network.ServerManager.Started) return;
 
             // 入室の重複通知の場合はreturn
             if (_selections.ContainsKey(clientId)) return;
@@ -198,7 +198,7 @@ namespace NCG.Character.Selection
         {
             // 誰かが抜けたことによる通知のためIsAuthenticatedによる認証判定は不要
             // とはいえ準備が整っていなければreturn
-            if (!_registered || _network == null || !_network.ServerManager.Started) return;
+            if (!_isRegistered || _network == null || !_network.ServerManager.Started) return;
 
             // 辞書から削除
             if (_selections.Remove(clientId))
