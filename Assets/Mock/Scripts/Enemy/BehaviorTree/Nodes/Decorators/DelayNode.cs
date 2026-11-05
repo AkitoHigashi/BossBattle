@@ -1,5 +1,4 @@
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>子の開始を遅らせるノード</summary>
 public sealed class DelayNode : DecoratorNode
@@ -8,17 +7,15 @@ public sealed class DelayNode : DecoratorNode
     private const string DescriptionText =
         "Durationの秒数だけ待ってから子ノードを実行し、その結果を返す。";
 
-    [SerializeField, Min(0f)] private float _duration = 1f;
+    [SerializeField, Min(0f), Tooltip("子ノードを実行するまで待つ秒数")] private float _duration = 1f;
 
-    private bool _isRunning;
     private bool _childStarted;
     private float _startTime;
 
-    public override BtNode Clone(List<BtNode> clones)
+    protected override void OnStart()
     {
-        var clone = (DelayNode)base.Clone(clones);
-        clone.ResetDelay();
-        return clone;
+        _startTime = 0;
+        _childStarted = false;
     }
 
     protected override NodeStatus OnUpdate()
@@ -26,32 +23,17 @@ public sealed class DelayNode : DecoratorNode
         if (_childNode == null)
             return NodeStatus.Failure;
 
-        if (!_isRunning)
-        {
-            _startTime = Time.time;
-            _isRunning = true;
-        }
 
-        if (!_childStarted)
+        if (_startTime > _duration)
         {
-            if (Time.time - _startTime < Mathf.Max(0f, _duration))
-                return NodeStatus.Running;
-
             _childStarted = true;
+        }
+        _startTime += Time.deltaTime;
+        if (_startTime < _duration && !_childStarted)
+        {
+            return NodeStatus.Running;
         }
 
         return _childNode.Evaluate();
     }
-
-    protected override void OnSuccess() => ResetDelay();
-    protected override void OnFailure() => ResetDelay();
-
-    private void ResetDelay()
-    {
-        _isRunning = false;
-        _childStarted = false;
-        _startTime = 0f;
-    }
-
-    protected override void OnAbort() => ResetDelay();
 }

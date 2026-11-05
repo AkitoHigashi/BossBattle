@@ -10,8 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3705a145a2bdadd4f826e35dc6e1bb37, type: 3}
-  m_Name: SectorRangeSettings
+  m_Name: CenterRange
   m_EditorClassIdentifier: Assembly-CSharp::SectorRangeSettings
   _range:
     _radius: 5
     _angle: 360
+  _warningTime: 2

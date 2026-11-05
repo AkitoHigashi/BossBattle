@@ -30,7 +30,7 @@ namespace BTree.EditorTools
 
             foreach (var property in GetDisplayProperties(typeof(BlackBoard)))
             {
-                // AttackContext のような入れ子のクラスは、中のプロパティを折りたたみで並べる
+                // 入れ子のクラスは、中のプロパティを折りたたみで並べる
                 if (IsNestedContext(property.PropertyType))
                 {
                     var foldout = new Foldout { text = property.Name, value = true };

@@ -95,7 +95,6 @@ namespace BTree.EditorTools
 
                 case NodeKind.Root:
                 case NodeKind.Decorator:
-                case NodeKind.Condition:
                     if (so.FindProperty(ChildProperty).objectReferenceValue is BtNode single)
                     {
                         children.Add(single);
@@ -126,12 +125,11 @@ namespace BTree.EditorTools
 
                 case NodeKind.Root:
                 case NodeKind.Decorator:
-                case NodeKind.Condition:
                     so.FindProperty(ChildProperty).objectReferenceValue = children.Count > 0 ? children[0] : null;
                     break;
 
                 default:
-                    return;// Actionは子を持たない
+                    return;// ActionとConditionは子を持たない
             }
 
             so.ApplyModifiedProperties();// 値が変わった時だけUndoに記録される

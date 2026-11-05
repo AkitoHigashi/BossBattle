@@ -15,7 +15,12 @@ public class SectorRangeSettings : ScriptableObject
     [SerializeField]
     private SectorRange _range = new SectorRange(5f, 360f);
 
+    [SerializeField, Min(0f), Tooltip("予兆を出してから攻撃するまでの秒数。攻撃ノード側で上書きできる")]
+    private float _warningTime = 1f;
+
     public SectorRange Range => _range;
+
+    public float WarningTime => Mathf.Max(0f, _warningTime);
 
     public bool Contains(
         Vector3 origin,

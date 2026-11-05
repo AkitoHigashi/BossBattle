@@ -4,6 +4,9 @@ public sealed class SequenceNode : CompositeNode
     private const string DescriptionText =
         "子ノードを左から順に実行していくノード。\n1つでも失敗したらFailure、全て成功したらSuccess。";
 
+    // 次に開始された時は最初の子からやり直す
+    protected override void OnStart() => _index = 0;
+
     protected override NodeStatus OnUpdate()
     {
         while (_index < _childNodes.Length)
@@ -18,16 +21,12 @@ public sealed class SequenceNode : CompositeNode
 
             if (status == NodeStatus.Failure)
             {
-                _index = 0;// 次は最初の子からやり直す
                 return NodeStatus.Failure;
             }
             _index++;
         }
-        _index = 0;
         return NodeStatus.Success;
     }
-
-    protected override void OnAbort() => _index = 0;
 
     private int _index;
 }

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class BtNode : ScriptableObject
@@ -28,6 +28,10 @@ public abstract class BtNode : ScriptableObject
     /// 前回の評価でRunningを返し、まだ処理の途中かどうか
     /// </summary>
     public bool IsRunning { get; private set; }
+    /// <summary>
+    /// WeightedRandamNodeで使う重み
+    /// </summary>
+    public int Weight => _weight;
 
     /// <summary>
     /// Nodeを評価し、結果を記録して親へ返す
@@ -36,6 +40,14 @@ public abstract class BtNode : ScriptableObject
     public NodeStatus Evaluate()
     {
         LastEvaluatedFrame = Time.frameCount;
+
+        // OnUpdate中の通知から再評価されても二重に開始しないよう、先に立てる
+        if (!_isStarted)
+        {
+            _isStarted = true;
+            OnStart();
+        }
+
         Status = OnUpdate();
         IsRunning = Status == NodeStatus.Running;
 
@@ -46,6 +58,11 @@ public abstract class BtNode : ScriptableObject
         else if (Status == NodeStatus.Failure)
         {
             OnFailure();
+        }
+
+        if (!IsRunning)
+        {
+            End();
         }
 
         return Status;
@@ -64,6 +81,18 @@ public abstract class BtNode : ScriptableObject
 
         IsRunning = false;
         OnAbort();
+        End();
+    }
+
+    private void End()
+    {
+        if (!_isStarted)
+        {
+            return;
+        }
+
+        _isStarted = false;
+        OnEnd();
     }
 
     public void Initialize(BlackBoard blackBoard)
@@ -84,6 +113,11 @@ public abstract class BtNode : ScriptableObject
         return clone;
     }
 
+    /// <summary>
+    /// Running以外の状態から評価された時、OnUpdateの前に1回だけ呼ばれる。途中の状態の初期化を書く
+    /// </summary>
+    protected virtual void OnStart() { }
+
     protected abstract NodeStatus OnUpdate();
     protected virtual void OnSuccess() { }
     protected virtual void OnFailure() { }
@@ -92,9 +126,19 @@ public abstract class BtNode : ScriptableObject
     /// 中断された時に呼ばれる。途中の状態のリセットや、動かしていたものの停止を書く
     /// </summary>
     protected virtual void OnAbort() { }
+
+    /// <summary>
+    /// 成功・失敗・中断のどれで終わっても、OnSuccess/OnFailure/OnAbortの後に1回だけ呼ばれる
+    /// 共通の後片付けはここに書く
+    /// </summary>
+    protected virtual void OnEnd() { }
+
     protected BlackBoard _blackBoard;
+    private bool _isStarted;
 
     // グラフエディタが書き込む。ランタイムの評価には使わない
     [SerializeField, HideInInspector] private string _guid;
     [SerializeField, HideInInspector] private Vector2 _graphPosition;
+    [SerializeField, Tooltip("Nodeの重み ランダム選択に使用"), Min(0)] private int _weight = 1;
+
 }

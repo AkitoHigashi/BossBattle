@@ -8,18 +8,34 @@ public sealed class MoveToTargetPositionNode : ActionNode
     private const string DescriptionText =
         "高さを保ったまま、NavMeshの経路に沿ってターゲットのXZ位置まで移動する。\nArrival Distance以内に着いたらSuccess、Timeoutを過ぎたらFailure。";
 
-    [SerializeField, Min(0.01f)] private float _moveSpeed = 12f;
-    [SerializeField, Min(0.01f)] private float _arrivalDistance = 0.3f;
-    [SerializeField, Min(0.01f)] private float _sampleRadius = 2f;
-    [SerializeField, Min(0.01f)] private float _timeout = 10f;
-    [SerializeField, Min(0.01f)] private float _repathInterval = 0.1f;
+    [SerializeField, Min(0.01f), Tooltip("移動中のNavMeshAgentの速さ。終わったら元の速さに戻す")] private float _moveSpeed = 12f;
+    [SerializeField, Min(0.01f), Tooltip("ターゲットとの水平距離がこれ以内になったら到着")] private float _arrivalDistance = 0.3f;
+    [SerializeField, Min(0.01f), Tooltip("ターゲットや足元の位置からNavMeshを探す半径")] private float _sampleRadius = 2f;
+    [SerializeField, Min(0.01f), Tooltip("この秒数を過ぎても着かなければFailure")] private float _timeout = 10f;
+    [SerializeField, Min(0.01f), Tooltip("経路を引き直す間隔（秒）。動くターゲットへ追従するため")] private float _repathInterval = 0.1f;
 
-    private bool _isMoving;
     private float _startTime;
     private float _nextRepathTime;
     private float _originalSpeed;
     private float _originalStoppingDistance;
     private NavMeshPath _path;
+
+    protected override void OnStart()
+    {
+        _startTime = Time.time;
+        _nextRepathTime = Time.time;
+        _path ??= new NavMeshPath();
+
+        // 黒板のAgentは差し替わらないので、OnEndで同じAgentへ戻せる
+        var agent = _blackBoard?.NavMeshAgent;
+        if (agent == null)
+            return;
+
+        _originalSpeed = agent.speed;
+        _originalStoppingDistance = agent.stoppingDistance;
+        agent.speed = Mathf.Max(0.01f, _moveSpeed);
+        agent.stoppingDistance = Mathf.Max(0.01f, _arrivalDistance) * 0.5f;
+    }
 
     protected override NodeStatus OnUpdate()
     {
@@ -27,18 +43,6 @@ public sealed class MoveToTargetPositionNode : ActionNode
         var target = _blackBoard?.Target;
         if (agent == null || target == null || !agent.isActiveAndEnabled || !agent.isOnNavMesh)
             return NodeStatus.Failure;
-
-        if (!_isMoving)
-        {
-            _originalSpeed = agent.speed;
-            _originalStoppingDistance = agent.stoppingDistance;
-            agent.speed = Mathf.Max(0.01f, _moveSpeed);
-            agent.stoppingDistance = Mathf.Max(0.01f, _arrivalDistance) * 0.5f;
-            _startTime = Time.time;
-            _nextRepathTime = Time.time;
-            _path = new NavMeshPath();
-            _isMoving = true;
-        }
 
         Vector3 offset = target.transform.position - agent.transform.position;
         offset.y = 0f;
@@ -73,29 +77,20 @@ public sealed class MoveToTargetPositionNode : ActionNode
         return NodeStatus.Running;
     }
 
-    protected override void OnSuccess() => StopAndRestore();
-    protected override void OnFailure() => StopAndRestore();
-    protected override void OnAbort() => StopAndRestore();
-
-    private void StopAndRestore()
+    protected override void OnEnd()
     {
-        if (!_isMoving)
+        var agent = _blackBoard?.NavMeshAgent;
+        if (agent == null)
             return;
 
-        var agent = _blackBoard?.NavMeshAgent;
-        if (agent != null)
-        {
-            agent.speed = _originalSpeed;
-            agent.stoppingDistance = _originalStoppingDistance;
-        }
+        agent.speed = _originalSpeed;
+        agent.stoppingDistance = _originalStoppingDistance;
 
-        if (agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh)
+        if (agent.isActiveAndEnabled && agent.isOnNavMesh)
         {
             agent.ResetPath();
             agent.isStopped = true;
             agent.velocity = Vector3.zero;
         }
-        _isMoving = false;
-        _path = null;
     }
 }

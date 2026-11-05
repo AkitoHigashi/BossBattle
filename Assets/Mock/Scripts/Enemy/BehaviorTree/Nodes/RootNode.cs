@@ -7,7 +7,7 @@ public sealed class RootNode : BtNode
     private const string DescriptionText =
         "ツリーの開始地点。子ノードを1つだけ持ち、その結果をそのまま返す。";
 
-    [SerializeField] private BtNode _childNode;
+    [SerializeField, Tooltip("ツリーの最初に評価する子ノード。グラフエディタの線で設定する")] private BtNode _childNode;
 
     public override BtNode Clone(List<BtNode> clones)
     {

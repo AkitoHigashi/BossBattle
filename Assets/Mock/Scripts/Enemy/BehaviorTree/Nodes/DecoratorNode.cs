@@ -3,7 +3,7 @@ using UnityEngine;
 
 public abstract class DecoratorNode : BtNode
 {
-    [SerializeField] protected BtNode _childNode;
+    [SerializeField, Tooltip("子ノード。グラフエディタの線で設定する")] protected BtNode _childNode;
 
     public override BtNode Clone(List<BtNode> clones)
     {

@@ -1,14 +1,6 @@
-using System.Collections.Generic;
-using UnityEngine;
-
+/// <summary>
+/// 判定だけを行う葉ノード。子を持たず、Success / Failure を返す
+/// </summary>
 public abstract class ConditionNode : BtNode
 {
-    public override BtNode Clone(List<BtNode> clones)
-    {
-        var clone = (ConditionNode)base.Clone(clones);
-        clone._childNode = _childNode != null ? _childNode.Clone(clones) : null;
-        return clone;
-    }
-
-    [SerializeField] protected BtNode _childNode;
 }

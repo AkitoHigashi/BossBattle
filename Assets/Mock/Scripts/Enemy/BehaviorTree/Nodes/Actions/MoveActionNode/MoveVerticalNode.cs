@@ -3,17 +3,30 @@ using UnityEngine.AI;
 
 public abstract class MoveVerticalNode : ActionNode
 {
-    [SerializeField, Min(0.01f)]
+    [SerializeField, Min(0.01f), Tooltip("今の高さから上昇・下降する距離（NavMeshAgentのbaseOffsetの変化量）")]
     private float _moveDistance = 3f;
 
-    [SerializeField, Min(0.01f)]
+    [SerializeField, Min(0.01f), Tooltip("上昇・下降する速さ（m/秒）")]
     private float _moveSpeed = 2f;
 
-    private bool _isMoving;
     private float _targetOffset;
 
     // 上は1、下は-1
     protected abstract float Direction { get; }
+
+    protected override void OnStart()
+    {
+        NavMeshAgent agent = _blackBoard?.NavMeshAgent;
+
+        if (agent == null || !agent.isActiveAndEnabled || !agent.isOnNavMesh)
+            return;
+
+        agent.ResetPath();
+        agent.isStopped = true;
+        agent.velocity = Vector3.zero;
+        _targetOffset =
+            agent.baseOffset + Direction * _moveDistance;
+    }
 
     protected override NodeStatus OnUpdate()
     {
@@ -21,17 +34,6 @@ public abstract class MoveVerticalNode : ActionNode
 
         if (agent == null || !agent.isActiveAndEnabled || !agent.isOnNavMesh)
             return NodeStatus.Failure;
-
-        if (!_isMoving)
-        {
-            agent.ResetPath();
-            agent.isStopped = true;
-            agent.velocity = Vector3.zero;
-            _targetOffset =
-                agent.baseOffset + Direction * _moveDistance;
-
-            _isMoving = true;
-        }
 
         agent.baseOffset = Mathf.MoveTowards(
             agent.baseOffset,
@@ -45,14 +47,6 @@ public abstract class MoveVerticalNode : ActionNode
             return NodeStatus.Running;
         }
 
-        _isMoving = false;
         return NodeStatus.Success;
     }
-
-    protected override void OnFailure()
-    {
-        _isMoving = false;
-    }
-
-    protected override void OnAbort() => _isMoving = false;
 }

@@ -8,7 +8,7 @@ public sealed class WarpToTargetXZNode : ActionNode
     private const string DescriptionText =
         "高さを保ったまま、ターゲットの真上（XZ座標）へ一瞬でワープする。\nターゲットの位置がNavMeshの外ならFailure。";
 
-    [SerializeField, Min(0.01f)] private float _sampleRadius = 2f;
+    [SerializeField, Min(0.01f), Tooltip("ターゲットの真下のNavMeshを探す半径")] private float _sampleRadius = 2f;
 
     protected override NodeStatus OnUpdate()
     {

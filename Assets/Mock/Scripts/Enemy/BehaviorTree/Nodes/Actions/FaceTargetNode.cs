@@ -24,6 +24,8 @@ public class FaceTargetNode : ActionNode
             target.transform.position - agent.transform.position;
 
         direction.y = 0f;
+        if (direction.sqrMagnitude < 0.0001f)
+            return NodeStatus.Success;// 真上・真下にいる時は向きを変えない
 
         agent.transform.rotation =
             Quaternion.LookRotation(direction, Vector3.up);
