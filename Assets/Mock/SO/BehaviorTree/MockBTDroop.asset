@@ -9,21 +9,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f8bbe2f344191d3df035aff13e3dd264, type: 3}
-  m_Name: DropAttackNode
-  m_EditorClassIdentifier: Assembly-CSharp::DropAttackNode
+  m_Script: {fileID: 11500000, guid: 37a7b8498dc34268b119a20dbed4b9c5, type: 3}
+  m_Name: AreaAttackNode
+  m_EditorClassIdentifier: Assembly-CSharp::AreaAttackNode
   _guid: 24e8987fe6f8daa4dacaa56e08d9aa81
-  _graphPosition: {x: 600, y: 480}
+  _graphPosition: {x: 909.6, y: 512}
   _weight: 1
   _attackMultiplier: 1.5
-  _overrideTimeToAttack: 0
+  _overrideTimeToAttack: 1
   _timeToAttack: 0
   _warningArea: {fileID: 11400000, guid: fd3771dfb725af94fae8bc094620c508, type: 2}
   _yawOffset: 0
   _groundSearchRadius: 2
   _recoveryTime: 0
-  _fallSpeed: 24
---- !u!114 &-4241302477432288552
+--- !u!114 &-6924782193006070825
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -32,14 +31,49 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 03bbf281f5b44074886f5d6a919dc3d8, type: 3}
-  m_Name: MoveUpNode
-  m_EditorClassIdentifier: Assembly-CSharp::MoveUpNode
-  _guid: 09cfcc889c27e2348ada52e6b3084060
+  m_Script: {fileID: 11500000, guid: e683cc64c83f4aef83d1f7b37e3a237f, type: 3}
+  m_Name: AttackWarningNode
+  m_EditorClassIdentifier: Assembly-CSharp::AttackWarningNode
+  _guid: af68deea3fda4236af979dd61b8a8c7a
+  _graphPosition: {x: 725.6, y: 528}
+  _weight: 1
+  _childNode: {fileID: 5744517827401968306}
+  _warningArea: {fileID: 11400000, guid: fd3771dfb725af94fae8bc094620c508, type: 2}
+  _groundSearchRadius: 2
+  _yawOffset: 0
+--- !u!114 &-3610296090935715097
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4cbe5a88c45e5441b241c998b26bd1b, type: 3}
+  m_Name: PlayAnimationNode
+  m_EditorClassIdentifier: Assembly-CSharp::PlayAnimationNode
+  _guid: 74554f7cf17515e4dad59fdc99aa5393
   _graphPosition: {x: 200, y: 480}
   _weight: 1
-  _moveDistance: 5
-  _moveSpeed: 10
+  _animationName: Base Layer.TakeOffAnimation
+  _waitForCompletion: 1
+--- !u!114 &-2608985587918842261
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ea8471df83b41c2a37cb25804e7667c, type: 3}
+  m_Name: ChaseNode
+  m_EditorClassIdentifier: Assembly-CSharp::ChaseNode
+  _guid: 645ae971ac2f6764f8d5abdb9fc3c344
+  _graphPosition: {x: -180.8, y: 496}
+  _weight: 1
+  _arrivalDistance: 3
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -54,12 +88,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BehaviorTree
   _rootNode: {fileID: 2094587108836020744}
   _nodes:
+  - {fileID: -6924782193006070825}
   - {fileID: 2094587108836020744}
   - {fileID: -8177920106254883986}
-  - {fileID: -4241302477432288552}
   - {fileID: 8821609811789174155}
   - {fileID: 7057776913987929432}
   - {fileID: 2116932166439036414}
+  - {fileID: -3610296090935715097}
+  - {fileID: -2608985587918842261}
+  - {fileID: 5744517827401968306}
 --- !u!114 &2094587108836020744
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -92,10 +129,27 @@ MonoBehaviour:
   _graphPosition: {x: 0, y: 480}
   _weight: 1
   _moveSpeed: 12
-  _arrivalDistance: 5
+  _arrivalDistance: 100
   _sampleRadius: 2
   _timeout: 10
   _repathInterval: 0.1
+--- !u!114 &5744517827401968306
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4cbe5a88c45e5441b241c998b26bd1b, type: 3}
+  m_Name: PlayAnimationNode
+  m_EditorClassIdentifier: Assembly-CSharp::PlayAnimationNode
+  _guid: 22754e81c2fa43d994641a22680ded7a
+  _graphPosition: {x: 709.6, y: 742}
+  _weight: 1
+  _animationName: Base Layer.DropAnimation
+  _waitForCompletion: 1
 --- !u!114 &7057776913987929432
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -112,9 +166,11 @@ MonoBehaviour:
   _graphPosition: {x: 300, y: 240}
   _weight: 1
   _childNodes:
+  - {fileID: -2608985587918842261}
   - {fileID: 2116932166439036414}
-  - {fileID: -4241302477432288552}
+  - {fileID: -3610296090935715097}
   - {fileID: 8821609811789174155}
+  - {fileID: -6924782193006070825}
   - {fileID: -8177920106254883986}
 --- !u!114 &8821609811789174155
 MonoBehaviour:
@@ -129,6 +185,7 @@ MonoBehaviour:
   m_Name: WarpToTargetXZNode
   m_EditorClassIdentifier: Assembly-CSharp::WarpToTargetXZNode
   _guid: e3c528e4e3d2dde4cabd2e16802eddc4
-  _graphPosition: {x: 400, y: 480}
+  _graphPosition: {x: 407.99997, y: 496}
   _weight: 1
   _sampleRadius: 2
+  _useGroundHeight: 1

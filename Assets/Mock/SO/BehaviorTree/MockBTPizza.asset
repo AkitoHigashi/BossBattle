@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: AreaAttackNode
   m_EditorClassIdentifier: Assembly-CSharp::AreaAttackNode
   _guid: ed161c4efb6f83549a47ad40fa09a937
-  _graphPosition: {x: 200, y: 480}
+  _graphPosition: {x: 216, y: 496}
   _weight: 2
   _attackMultiplier: 1.5
   _overrideTimeToAttack: 1
