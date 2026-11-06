@@ -29,6 +29,8 @@ public class SkillCooldownView : MonoBehaviour
     [Tooltip("クールダウンの残りを表す覆い。時間とともに下へ縮む")]
     [SerializeField] private Color _overlayColor = new Color(0f, 0f, 0f, 0.6f);
     [SerializeField] private Color _textColor = Color.white;
+    [Tooltip("連撃の追加入力を受け付けている残り時間のバー")]
+    [SerializeField] private Color _inputWindowColor = new Color(0.3f, 1f, 1f, 1f);
 
     [Header("Shift 押下中")]
     [Tooltip("Shift 付きスキルを拡大する倍率")]
@@ -46,6 +48,7 @@ public class SkillCooldownView : MonoBehaviour
         public CanvasGroup Group;
         public Image Background;
         public RectTransform Overlay;
+        public RectTransform InputWindowBar;
         public Text RemainingText;
     }
 
@@ -91,9 +94,17 @@ public class SkillCooldownView : MonoBehaviour
         {
             slot.Background.color = _activeColor;
             slot.Overlay.anchorMax = new Vector2(1f, 0f);
-            slot.RemainingText.text = "IN USE";
+
+            // 連撃の追加入力を受け付けている間は、残り秒数とバーで「いつまでに押せばつながるか」を見せる。
+            bool hasWindow = _skillSystem.TryGetInputWindow(out float windowRemaining, out float windowDuration);
+            slot.InputWindowBar.gameObject.SetActive(hasWindow);
+            if (hasWindow)
+                slot.InputWindowBar.anchorMax = new Vector2(Mathf.Clamp01(windowRemaining / windowDuration), 1f);
+            slot.RemainingText.text = hasWindow ? windowRemaining.ToString("0.0") : "IN USE";
             return;
         }
+
+        slot.InputWindowBar.gameObject.SetActive(false);
 
         float remaining = _skillSystem.GetCooldownRemaing(slot.Skill);
         float cooldown = slot.Skill.Cooldown;
@@ -178,6 +189,16 @@ public class SkillCooldownView : MonoBehaviour
 
         // 上：スキル名、中央：残り秒数、下：入力キー
         CreateText(root, "Name", entry.Skill.SkillName, 11, TextAnchor.UpperCenter);
+        // 連撃の受付時間のバー。スロット上端の細い帯で、時間とともに右から縮む。
+        RectTransform inputWindowBar = CreateRect("InputWindowBar", root);
+        inputWindowBar.anchorMin = new Vector2(0f, 1f);
+        inputWindowBar.anchorMax = new Vector2(1f, 1f);
+        inputWindowBar.pivot = new Vector2(0f, 1f);
+        inputWindowBar.offsetMin = new Vector2(0f, -6f);
+        inputWindowBar.offsetMax = Vector2.zero;
+        CreateImage(inputWindowBar, _inputWindowColor);
+        inputWindowBar.gameObject.SetActive(false);
+
         Text remaining = CreateText(root, "Remaining", string.Empty, 26, TextAnchor.MiddleCenter);
         CreateText(root, "Key", entry.KeyLabel, 13, TextAnchor.LowerCenter);
 
@@ -189,6 +210,7 @@ public class SkillCooldownView : MonoBehaviour
             Group = group,
             Background = background,
             Overlay = overlay,
+            InputWindowBar = inputWindowBar,
             RemainingText = remaining
         };
     }

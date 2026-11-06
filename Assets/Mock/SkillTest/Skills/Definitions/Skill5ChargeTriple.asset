@@ -10,14 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 735bb0ec87a8a104f87dc15794ec669d, type: 3}
-  m_Name: Skill6ChargeSlash
+  m_Name: Skill5ChargeTriple
   m_EditorClassIdentifier: Assembly-CSharp::SkillDefinition
-  _skillName: ChargeSlash
+  _skillName: ChargeTriple
   _cooldown: 12
   _actions:
-  - {fileID: 11400000, guid: edaa61e47585f9d4af39967325003eac, type: 2}
-  - {fileID: 11400000, guid: 17a92b3208ed3447bdf3ff792eb5fa7a, type: 2}
-  - {fileID: 11400000, guid: 9795b42da91625d65d1ebdfbed39ca2f, type: 2}
+  - {fileID: 11400000, guid: 9e1e59719941ffbeff95ecdfba986cef, type: 2}
+  - {fileID: 11400000, guid: 6582956695e85628921e4a379be5a691, type: 2}
+  - {fileID: 11400000, guid: 8b6833bc5451c7eab4b0ee7ecf2fd111, type: 2}
+  - {fileID: 11400000, guid: cd5ff76ad520d1864a562e7b9fbce7be, type: 2}
   _cooldownPolicy: 1
   _canInterruptOthers: 0
   _canBeInterrupted: 1
+  _canMoveDuringSkill: 0

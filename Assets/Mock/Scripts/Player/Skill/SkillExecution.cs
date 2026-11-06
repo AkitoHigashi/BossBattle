@@ -47,6 +47,9 @@ public class SkillExecution : IDisposable
     public float DamageMultiplier { get; private set; } = 1f;
     // 同じくブレイク値の倍率。ダメージだけ強化するスキルもあるため、ダメージ倍率とは別に持つ。
     public float BreakMultiplier { get; private set; } = 1f;
+    // 連撃の追加入力など、「今押すと次が出る」受付時間の残り秒数と全体の長さ。受付中でなければ 0。UI 表示用。
+    public float InputWindowRemaining { get; private set; }
+    public float InputWindowDuration { get; private set; }
 
     private readonly CancellationTokenSource _cts = new();
     private readonly UniTaskCompletionSource _completionSource = new();
@@ -119,6 +122,27 @@ public class SkillExecution : IDisposable
     /// <summary>
     /// この実行で以降に出す攻撃のブレイク値倍率を設定する。負の値は 0 に切り上げる。
     /// </summary>
+    /// <summary>
+    /// 追加入力の受付時間を設定する。受付中は毎フレーム呼び、残り時間を更新する。
+    /// </summary>
+    public void SetInputWindow(float remaining, float duration)
+    {
+        if (_disposed)
+            return;
+
+        InputWindowRemaining = Mathf.Max(0f, remaining);
+        InputWindowDuration = Mathf.Max(0f, duration);
+    }
+
+    /// <summary>
+    /// 追加入力の受付が終わったことを記録する。
+    /// </summary>
+    public void ClearInputWindow()
+    {
+        InputWindowRemaining = 0f;
+        InputWindowDuration = 0f;
+    }
+
     public void SetBreakMultiplier(float multiplier)
     {
         if (_disposed)

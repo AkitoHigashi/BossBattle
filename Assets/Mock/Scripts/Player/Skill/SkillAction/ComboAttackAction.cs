@@ -58,13 +58,9 @@ public class ComboAttackAction : SkillAction
 
             Log($"{stage + 1}段目終了。次の段には合計{requiredPressCount}回の押下が必要（現在{execution.PressCount}回）");
 
-            // 押し直せる残り時間を頭上ゲージで見せる。ゲージがあると「いつまでに押せばつながるか」が分かる。
-            ChargeGauge gauge = context.ChargeGauge;
+            // 押し直せる残り時間を記録し、下のスキル枠に表示させる（いつまでに押せばつながるかを見せるため）。
             try
             {
-                if (execution.PressCount < requiredPressCount && _followUpWindow > 0f)
-                    gauge.Show(hasJustZone: false);
-
                 // PressCount は連撃全体で累積する。入力済みなら待たずに次の段へ進む。
                 // 例：1段目の間に合計3回押すと、2・3段目の両方が予約される。
                 while (execution.PressCount < requiredPressCount)
@@ -78,14 +74,14 @@ public class ComboAttackAction : SkillAction
                         return;
                     }
 
-                    gauge.SetProgress(1f - elapsed / _followUpWindow);
+                    execution.SetInputWindow(_followUpWindow - elapsed, _followUpWindow);
                     await UniTask.NextFrame(execution.Token);
                 }
             }
             finally
             {
-                // 次の段へ進む・猶予切れ・中断のどの場合も、待ち時間のゲージは消す。
-                gauge.Hide();
+                // 次の段へ進む・猶予切れ・中断のどの場合も、受付時間の表示を消す。
+                execution.ClearInputWindow();
             }
 
             Log($"{stage + 2}段目へ");

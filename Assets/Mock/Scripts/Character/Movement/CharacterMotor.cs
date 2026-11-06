@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
@@ -58,6 +59,12 @@ public class CharacterMotor : MonoBehaviour
     /// Override と違い、スキル自身の移動（SetOverrideVelocity）は止めない。
     /// </summary>
     private bool _isLocomotionLocked;
+
+    // すり抜け用：自分の体の Collider と、今すり抜けている相手の Collider
+    private Collider[] _bodyColliders = Array.Empty<Collider>();
+    private readonly HashSet<Collider> _passThroughTargets = new();
+    private readonly List<Collider> _restoreBuffer = new();
+    private bool _isPassingThrough;
     /// <summary>
     /// 通常移動の向きへ回転するときの速度（度/秒）。
     /// </summary>
@@ -70,6 +77,7 @@ public class CharacterMotor : MonoBehaviour
     private void Awake()
     {
         _rigidbody = GetComponent<Rigidbody>();
+        CollectBodyColliders();
     }
 
     /// <summary>
@@ -214,6 +222,47 @@ public class CharacterMotor : MonoBehaviour
     /// <summary>
     /// 通常移動（歩き）を止める・再開する。止めている間も入力された速度は保持し、再開するとすぐ歩き出せる。
     /// </summary>
+    /// <summary>
+    /// 指定した相手との衝突を無効にし、すり抜けられるようにする。EndPassThrough まで続く。
+    /// </summary>
+    public void BeginPassThrough(IEnumerable<Collider> targets)
+    {
+        foreach (Collider target in targets)
+        {
+            if (target == null || !_passThroughTargets.Add(target))
+                continue;
+            foreach (Collider body in _bodyColliders)
+                Physics.IgnoreCollision(body, target, true);
+        }
+        _isPassingThrough = true;
+    }
+
+    /// <summary>
+    /// すり抜けを終える。衝突は、相手と重ならなくなったものから順に元へ戻す。
+    /// </summary>
+    /// <remarks>
+    /// 相手の中にいるうちに衝突を戻すと、物理エンジンが体を押し出し、来た方向へ弾き戻されることがある。
+    /// そのため、重なりが解けるまで（体が抜け出るまで）は無効のままにしておく。
+    /// </remarks>
+    public void EndPassThrough()
+    {
+        _isPassingThrough = false;
+    }
+
+    /// <summary>
+    /// 自分の体の Collider 全体を囲む範囲。すり抜ける相手を探すときに使う。
+    /// </summary>
+    public Bounds GetBodyBounds()
+    {
+        if (_bodyColliders.Length == 0)
+            return new Bounds(transform.position, Vector3.one);
+
+        Bounds bounds = _bodyColliders[0].bounds;
+        for (int i = 1; i < _bodyColliders.Length; i++)
+            bounds.Encapsulate(_bodyColliders[i].bounds);
+        return bounds;
+    }
+
     public void SetLocomotionLocked(bool locked)
     {
         _isLocomotionLocked = locked;
@@ -221,6 +270,9 @@ public class CharacterMotor : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (!_isPassingThrough && _passThroughTargets.Count > 0)
+            RestorePassThrough(force: false);
+
         Vector3 locomotion = _isLocomotionLocked ? Vector3.zero : _locomotionVelocity;
         Vector3 horizontal = (_hasOverrideVelocity ? _overrideVelocity : locomotion) + _externalVelocity;
         Vector3 velocity = _rigidbody.linearVelocity;
@@ -280,5 +332,56 @@ public class CharacterMotor : MonoBehaviour
         ClearOverrideFacingDirection();
         ClearAimFacingDirection();
         _isLocomotionLocked = false;
+        // 無効化されたら、重なっていても衝突を必ず戻す（無視したまま残らないようにする）。
+        _isPassingThrough = false;
+        RestorePassThrough(force: true);
+    }
+
+    private void CollectBodyColliders()
+    {
+        var colliders = new List<Collider>();
+        foreach (Collider collider in GetComponentsInChildren<Collider>())
+        {
+            // トリガーは物理的な衝突に関わらないので対象外。
+            if (!collider.isTrigger)
+                colliders.Add(collider);
+        }
+        _bodyColliders = colliders.ToArray();
+    }
+
+    /// <summary>
+    /// すり抜けていた相手との衝突を元に戻す。force が false なら、まだ重なっている相手はそのままにする。
+    /// </summary>
+    private void RestorePassThrough(bool force)
+    {
+        _restoreBuffer.Clear();
+        foreach (Collider target in _passThroughTargets)
+        {
+            // 破棄された相手は、戻す必要がないので一覧から外すだけ。
+            if (target == null || force || !IsOverlapping(target))
+                _restoreBuffer.Add(target);
+        }
+
+        foreach (Collider target in _restoreBuffer)
+        {
+            _passThroughTargets.Remove(target);
+            if (target == null)
+                continue;
+            foreach (Collider body in _bodyColliders)
+                Physics.IgnoreCollision(body, target, false);
+        }
+    }
+
+    private bool IsOverlapping(Collider target)
+    {
+        foreach (Collider body in _bodyColliders)
+        {
+            if (Physics.ComputePenetration(
+                    body, body.transform.position, body.transform.rotation,
+                    target, target.transform.position, target.transform.rotation,
+                    out _, out _))
+                return true;
+        }
+        return false;
     }
 }

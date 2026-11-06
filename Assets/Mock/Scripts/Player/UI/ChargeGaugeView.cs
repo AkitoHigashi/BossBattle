@@ -50,21 +50,21 @@ public class ChargeGaugeView : MonoBehaviour
         _root.gameObject.SetActive(false);
     }
 
-    // キャラクターの移動（FixedUpdate）とカメラの移動が終わった後に位置を合わせ、ゲージが遅れて揺れるのを防ぐ。
+    private void OnEnable()
+    {
+        Canvas.willRenderCanvases += UpdatePosition;
+    }
+
+    // 塗り・色など、ゲージの中身を更新する。位置は UpdatePosition で別に合わせる。
     private void LateUpdate()
     {
         if (_gauge == null)
             return;
 
-        // 溜めていない、またはキャラクターが画面外（カメラの後ろ）なら表示しない。
-        Vector3 screenPosition = Vector3.zero;
-        bool visible = _gauge.IsVisible && TryGetScreenPosition(out screenPosition);
-        if (_root.gameObject.activeSelf != visible)
-            _root.gameObject.SetActive(visible);
-        if (!visible)
+        if (_root.gameObject.activeSelf != _gauge.IsVisible)
+            _root.gameObject.SetActive(_gauge.IsVisible);
+        if (!_gauge.IsVisible)
             return;
-
-        _root.position = screenPosition;
 
         // 塗りは幅を変えるのではなく、右端のアンカーを溜め量の位置へ動かして表現する。
         // Image の Filled タイプはスプライトが必要なため、スプライトなしで済むこの方法にしている。
@@ -77,6 +77,29 @@ public class ChargeGaugeView : MonoBehaviour
             _justZone.anchorMin = new Vector2(_gauge.JustZoneStart, 0f);
             _justZone.anchorMax = new Vector2(_gauge.JustZoneEnd, 1f);
         }
+    }
+
+    /// <summary>
+    /// キャラクターの頭上に位置を合わせる。UI を描く直前（Canvas.willRenderCanvases）に呼ばれる。
+    /// </summary>
+    /// <remarks>
+    /// カメラ（Cinemachine）は LateUpdate で動くため、同じ LateUpdate で位置を計算すると、
+    /// 実行順によっては動く前のカメラで計算してしまい、ゲージがカメラに遅れてガクつく。
+    /// UI を描く直前なら、キャラクターもカメラも位置が確定している。
+    /// </remarks>
+    private void UpdatePosition()
+    {
+        if (_gauge == null || !_root.gameObject.activeSelf)
+            return;
+
+        // キャラクターがカメラの後ろにいるときは、画面の反対側に出てしまうので隠す。
+        if (!TryGetScreenPosition(out Vector3 screenPosition))
+        {
+            _root.gameObject.SetActive(false);
+            return;
+        }
+
+        _root.position = screenPosition;
     }
 
     private bool TryGetScreenPosition(out Vector3 screenPosition)
@@ -151,6 +174,7 @@ public class ChargeGaugeView : MonoBehaviour
 
     private void OnDisable()
     {
+        Canvas.willRenderCanvases -= UpdatePosition;
         if (_root != null)
             _root.gameObject.SetActive(false);
     }

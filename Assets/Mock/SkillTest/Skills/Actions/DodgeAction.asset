@@ -10,8 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e1482f91072aee348bdaa948ddb72c77, type: 3}
-  m_Name: BlinkAction
+  m_Name: DodgeAction
   m_EditorClassIdentifier: Assembly-CSharp::BlinkAction
-  _direction: 1
-  _speed: 35
+  _direction: 3
+  _speed: 55
   _duration: 0.05
+  _aimRotationSpeed: 9000

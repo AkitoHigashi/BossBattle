@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 735bb0ec87a8a104f87dc15794ec669d, type: 3}
-  m_Name: Skill3LungeSlash
+  m_Name: NormalAttack
   m_EditorClassIdentifier: Assembly-CSharp::SkillDefinition
-  _skillName: LungeSlash
-  _cooldown: 16
+  _skillName: NormalAttack
+  _cooldown: 0.5
   _actions:
-  - {fileID: 11400000, guid: 515f248b5f4163e177fcadf8dd5f3ea4, type: 2}
-  - {fileID: 11400000, guid: c61f68272e1708fd627e312a4f06f4bc, type: 2}
+  - {fileID: 11400000, guid: 7954ed7a4d430504987152e2fcfb554e, type: 2}
   _cooldownPolicy: 0
   _canInterruptOthers: 0
   _canBeInterrupted: 1
+  _canMoveDuringSkill: 0

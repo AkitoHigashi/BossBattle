@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Skill4HoldThrustAction
   m_EditorClassIdentifier: Assembly-CSharp::HoldRepeatAttackAction
   _attack: {fileID: 11400000, guid: 26cd2667039fc9ed78a636b6336867c0, type: 2}
+  _alternateAttack: {fileID: 11400000, guid: d32dd38117d18031c9f404332be4a7f3, type: 2}
   _maxAttackCount: 0
   _maxHoldDuration: 4
   _interval: 0

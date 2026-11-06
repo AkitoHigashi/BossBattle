@@ -18,6 +18,9 @@ public class HoldRepeatAttackAction : SkillAction
     // PlayerAttackAction に限定せず SkillAction で受けるのは、波動付きの突き（ProjectileAttackAction）も繰り返せるようにするため。
     [Tooltip("1回分の突き。PlayerAttackAction（突きのみ）か ProjectileAttackAction（突き＋波動）を設定する")]
     [SerializeField] private SkillAction _attack;
+    [Tooltip("設定すると _attack と交互に出す。別の Animator State を交互に使うことで、" +
+        "攻撃のたびに立ち姿勢へ戻らず、なめらかにつながる")]
+    [SerializeField] private SkillAction _alternateAttack;
     [Tooltip("長押しを続けても、この回数で終了する（1発目を含む）。0なら回数制限なし（継続時間だけで終了）")]
     [SerializeField, Min(0)] private int _maxAttackCount = 0;
     [Tooltip("1発目の開始からこの秒数を過ぎたら、次の突きを出さずに終了する")]
@@ -71,7 +74,9 @@ public class HoldRepeatAttackAction : SkillAction
                         motor.SetOverrideVelocity(stepDirection.normalized * _stepSpeed, _stepDuration);
 
                     // 攻撃 State を抜けるまで待つため、次の突きが前の突きに重なることはない。
-                    await _attack.ExecuteAsync(context, execution);
+                    // 交互用が設定されていれば、偶数発目は _attack、奇数発目は _alternateAttack を出す。
+                    SkillAction attack = _alternateAttack != null && count % 2 == 1 ? _alternateAttack : _attack;
+                    await attack.ExecuteAsync(context, execution);
                 }
                 finally
                 {

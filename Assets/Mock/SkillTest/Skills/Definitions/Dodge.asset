@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 735bb0ec87a8a104f87dc15794ec669d, type: 3}
-  m_Name: BlinkSlash
+  m_Name: Dodge
   m_EditorClassIdentifier: Assembly-CSharp::SkillDefinition
-  _skillName: BlinkSlash
-  _cooldown: 11
+  _skillName: Dodge
+  _cooldown: 2
   _actions:
-  - {fileID: 11400000, guid: a7abe2ea3fee9344ba4c35b4a7bb24f3, type: 2}
-  - {fileID: 11400000, guid: c95231d3750d62441880f828006d06a2, type: 2}
+  - {fileID: 11400000, guid: ab36e81fd9e005340ace23eca7734fb7, type: 2}
   _cooldownPolicy: 0
-  _canInterruptOthers: 0
+  _canInterruptOthers: 1
   _canBeInterrupted: 0
+  _canMoveDuringSkill: 0
