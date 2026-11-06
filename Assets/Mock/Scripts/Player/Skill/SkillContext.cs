@@ -1,10 +1,11 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
 /// アビリティを実行するキャラクター固有の依存先をひとまとめにする。
 /// </summary>
-public sealed class SkillContext : System.IDisposable
+public sealed class SkillContext : IDisposable
 {
     public CharacterMotor CharacterMotor { get; private set; }
     public Animator Animator { get; private set; }

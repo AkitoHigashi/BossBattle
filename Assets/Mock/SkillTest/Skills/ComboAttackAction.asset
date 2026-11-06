@@ -20,3 +20,4 @@ MonoBehaviour:
   _forwardSpeed: 2
   _duration: 0.3
   _direction: 1
+  _logStages: 1

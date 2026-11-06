@@ -92,10 +92,6 @@ public class SkillExecution : IDisposable
         switch (phase)
         {
             case SkillInputPhase.Pressed:
-                // 押しっぱなしのまま Pressed が重ねて届いても、押下回数を二重に数えない。
-                if (IsHeld)
-                    return;
-
                 IsHeld = true;
                 PressCount++;
                 break;

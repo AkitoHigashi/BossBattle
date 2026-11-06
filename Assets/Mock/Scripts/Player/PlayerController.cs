@@ -55,6 +55,8 @@ public class PlayerController : MonoBehaviour
     private CancellationTokenSource _skillRequestCts;
     private bool _initialized;
     private bool _subscribed;
+    // 前フレームにスキルを使っていたか。スキルが終わった瞬間を検出するために使う。
+    private bool _wasUsingSkill;
 
     public void Initialize(InputBuffer inputBuffer, Character character, CharacterData data, SkillSystem skillSystem = null)
     {
@@ -107,9 +109,14 @@ public class PlayerController : MonoBehaviour
         if (hasAim)
             _skillSystem?.UpdateAimDirection(direction);
 
-        // OFF の設定でも、スキル中は攻撃をマウス方向へ向けるためマウス方向を向く。
         // スキルが終わると照準による回転を解除し、CharacterMovement が設定した進行方向の回転に戻る。
         bool isUsingSkill = _skillSystem?.CurrentSkill != null;
+
+        // 今向いている方向を「進行方向」として登録し直す。
+        if (_wasUsingSkill && !isUsingSkill && !_faceMouseCursor)
+            _motor.SetFacingDirection(transform.forward, _characterData.RotationSpeed);
+        _wasUsingSkill = isUsingSkill;
+
         bool faceMouse = _faceMouseCursor || isUsingSkill;
         if (!faceMouse || !hasAim)
         {
@@ -361,8 +368,58 @@ public class PlayerController : MonoBehaviour
             return;
 
         // キー表示は InputAction の Binding から作る。キーを変更すると表示も自動で追従する。
-        string keyLabel = action != null ? action.GetBindingDisplayString() : string.Empty;
-        slots.Add(new SkillSlot(skill, keyLabel));
+        string keyLabel = BuildKeyLabel(action, out bool usesShift);
+        slots.Add(new SkillSlot(skill, keyLabel, usesShift));
+    }
+
+    /// <summary>
+    /// Binding のパスから「Shift+RMB」のようなキー表示を作る。Shift 付きの組み合わせかどうかも返す。
+    /// </summary>
+    /// <remarks>
+    /// action.GetBindingDisplayString() は、Binding が現在の操作スキーム（Keyboard&amp;Mouse など）に
+    /// 属していないと空文字を返すことがある。このプロジェクトのスキル用 Binding はスキーム未所属のため、
+    /// スキームに左右されないよう Binding のパスから直接作っている。
+    /// </remarks>
+    private static string BuildKeyLabel(InputAction action, out bool usesShift)
+    {
+        usesShift = false;
+        if (action == null)
+            return string.Empty;
+
+        var bindings = action.bindings;
+        for (int i = 0; i < bindings.Count; i++)
+        {
+            InputBinding binding = bindings[i];
+
+            // 「Shift+キー」のような組み合わせ（Composite）は、続く部品を「+」でつなぐ。
+            if (binding.isComposite)
+            {
+                var parts = new List<string>();
+                for (int part = i + 1; part < bindings.Count && bindings[part].isPartOfComposite; part++)
+                {
+                    string path = bindings[part].effectivePath;
+                    if (bindings[part].name == "modifier" && path.Contains("shift"))
+                        usesShift = true;
+                    parts.Add(ToShortName(path));
+                }
+                return string.Join("+", parts);
+            }
+
+            if (!binding.isPartOfComposite && !string.IsNullOrEmpty(binding.effectivePath))
+                return ToShortName(binding.effectivePath);
+        }
+
+        return string.Empty;
+    }
+
+    /// <summary>
+    /// "&lt;Mouse&gt;/rightButton" を "RMB" のような短い表示名に変換する。
+    /// </summary>
+    private static string ToShortName(string path)
+    {
+        return InputControlPath.ToHumanReadableString(path,
+            InputControlPath.HumanReadableStringOptions.OmitDevice
+            | InputControlPath.HumanReadableStringOptions.UseShortNames);
     }
 
     /// <summary>

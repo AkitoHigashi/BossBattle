@@ -11,10 +11,13 @@ public readonly struct SkillSlot
     public SkillDefinition Skill { get; }
     /// <summary>入力キーの表示名（例：Shift+Q）。InputAction の Binding から作る。</summary>
     public string KeyLabel { get; }
+    /// <summary>Shift を押しながら使うスキルか。UI で Shift 押下中の表示を切り替えるのに使う。</summary>
+    public bool UsesShift { get; }
 
-    public SkillSlot(SkillDefinition skill, string keyLabel)
+    public SkillSlot(SkillDefinition skill, string keyLabel, bool usesShift)
     {
         Skill = skill;
         KeyLabel = keyLabel ?? string.Empty;
+        UsesShift = usesShift;
     }
 }

@@ -12,6 +12,8 @@ public class ComboAttackAction : SkillAction
     [SerializeField, Min(0f)] private float _forwardSpeed = 2f;
     [SerializeField, Min(0f)] private float _duration = 0.3f;
     [SerializeField] private MoveDirectionMode _direction;
+    [Tooltip("各段の開始・入力待ち・猶予切れを Console に出す（連撃のつながりを確認するとき用）")]
+    [SerializeField] private bool _logStages = false;
 
     public override async UniTask ExecuteAsync(SkillContext context, SkillExecution execution)
     {
@@ -54,17 +56,45 @@ public class ComboAttackAction : SkillAction
             // 猶予の計測は各段の終了後から開始する（攻撃中の再生時間は含めない）。
             float waitStartedAt = Time.time;
 
-            // PressCount は連撃全体で累積する。入力済みなら待たずに次の段へ進む。
-            // 例：1段目の間に合計3回押すと、2・3段目の両方が予約される。
-            while (execution.PressCount < requiredPressCount)
+            Log($"{stage + 1}段目終了。次の段には合計{requiredPressCount}回の押下が必要（現在{execution.PressCount}回）");
+
+            // 押し直せる残り時間を頭上ゲージで見せる。ゲージがあると「いつまでに押せばつながるか」が分かる。
+            ChargeGauge gauge = context.ChargeGauge;
+            try
             {
-                execution.Token.ThrowIfCancellationRequested();
+                if (execution.PressCount < requiredPressCount && _followUpWindow > 0f)
+                    gauge.Show(hasJustZone: false);
 
-                if (Time.time - waitStartedAt >= _followUpWindow)
-                    return;
+                // PressCount は連撃全体で累積する。入力済みなら待たずに次の段へ進む。
+                // 例：1段目の間に合計3回押すと、2・3段目の両方が予約される。
+                while (execution.PressCount < requiredPressCount)
+                {
+                    execution.Token.ThrowIfCancellationRequested();
 
-                await UniTask.NextFrame(execution.Token);
+                    float elapsed = Time.time - waitStartedAt;
+                    if (elapsed >= _followUpWindow)
+                    {
+                        Log($"猶予{_followUpWindow}秒以内に押されなかったため、{stage + 1}段で終了");
+                        return;
+                    }
+
+                    gauge.SetProgress(1f - elapsed / _followUpWindow);
+                    await UniTask.NextFrame(execution.Token);
+                }
             }
+            finally
+            {
+                // 次の段へ進む・猶予切れ・中断のどの場合も、待ち時間のゲージは消す。
+                gauge.Hide();
+            }
+
+            Log($"{stage + 2}段目へ");
         }
+    }
+
+    private void Log(string message)
+    {
+        if (_logStages)
+            Debug.Log($"[ComboAttackAction] {message}");
     }
 }
