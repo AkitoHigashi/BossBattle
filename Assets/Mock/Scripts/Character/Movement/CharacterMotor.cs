@@ -220,9 +220,6 @@ public class CharacterMotor : MonoBehaviour
     }
 
     /// <summary>
-    /// 通常移動（歩き）を止める・再開する。止めている間も入力された速度は保持し、再開するとすぐ歩き出せる。
-    /// </summary>
-    /// <summary>
     /// 指定した相手との衝突を無効にし、すり抜けられるようにする。EndPassThrough まで続く。
     /// </summary>
     public void BeginPassThrough(IEnumerable<Collider> targets)
@@ -263,6 +260,9 @@ public class CharacterMotor : MonoBehaviour
         return bounds;
     }
 
+    /// <summary>
+    /// 通常移動（歩き）を止める・再開する。止めている間も入力された速度は保持し、再開するとすぐ歩き出せる。
+    /// </summary>
     public void SetLocomotionLocked(bool locked)
     {
         _isLocomotionLocked = locked;

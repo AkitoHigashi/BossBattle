@@ -120,9 +120,6 @@ public class SkillExecution : IDisposable
     }
 
     /// <summary>
-    /// この実行で以降に出す攻撃のブレイク値倍率を設定する。負の値は 0 に切り上げる。
-    /// </summary>
-    /// <summary>
     /// 追加入力の受付時間を設定する。受付中は毎フレーム呼び、残り時間を更新する。
     /// </summary>
     public void SetInputWindow(float remaining, float duration)
@@ -143,6 +140,9 @@ public class SkillExecution : IDisposable
         InputWindowDuration = 0f;
     }
 
+    /// <summary>
+    /// この実行で以降に出す攻撃のブレイク値倍率を設定する。負の値は 0 に切り上げる。
+    /// </summary>
     public void SetBreakMultiplier(float multiplier)
     {
         if (_disposed)
