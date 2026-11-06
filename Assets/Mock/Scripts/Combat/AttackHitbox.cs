@@ -43,7 +43,7 @@ public class AttackHitbox : MonoBehaviour
     /// 攻撃者のルート。自身や子オブジェクトの Collider を命中対象から除外するために使う。
     /// </summary>
     private Transform _ownerRoot;
-    private int _damage;
+    private AttackData _attackData;
     private bool _active;
 
     public void Init(Transform owner)
@@ -60,12 +60,12 @@ public class AttackHitbox : MonoBehaviour
     /// <summary>
     /// 攻撃の当たり判定を開始する。攻撃の対象となるオブジェクトにダメージを与えるために使用される。
     /// </summary>
-    /// <param name="damage"></param>
-    public void BeginHit(int damage)
+    /// <param name="attackData">命中した相手に与える内容。</param>
+    public void BeginHit(AttackData attackData)
     {
         if (_previous == null || _ownerRoot == null)
             throw new System.InvalidOperationException("AttackHitbox.Initを先に呼び出してください。");
-        _damage = damage;
+        _attackData = attackData;
         _active = true;
         // 命中履歴は判定開始ごとにリセットするため、次の段では同じ敵に再びダメージを与えられる。
         _hitTargets.Clear();
@@ -164,7 +164,7 @@ public class AttackHitbox : MonoBehaviour
         {
             if (_hitTargets.Add(damageable))
             {
-                damageable.TakeDamage(_damage);
+                _attackData.ApplyTo(damageable);
             }
         }
     }
