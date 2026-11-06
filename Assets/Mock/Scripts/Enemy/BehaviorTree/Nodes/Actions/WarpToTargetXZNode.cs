@@ -2,10 +2,13 @@ using UnityEngine;
 using UnityEngine.AI;
 
 /// <summary>現在のY座標を保ち、プレイヤーのXZ座標にワープする。</summary>
-[CreateAssetMenu(fileName = "WarpToTargetXZNode", menuName = "Behavior Tree/Mock/Nodes/Action Nodes/WarpToTargetXZNode")]
 public sealed class WarpToTargetXZNode : ActionNode
 {
-    [SerializeField, Min(0.01f)] private float _sampleRadius = 2f;
+    public override string Description => DescriptionText;
+    private const string DescriptionText =
+        "高さを保ったまま、ターゲットの真上（XZ座標）へ一瞬でワープする。\nターゲットの位置がNavMeshの外ならFailure。";
+
+    [SerializeField, Min(0.01f), Tooltip("ターゲットの真下のNavMeshを探す半径")] private float _sampleRadius = 2f;
 
     protected override NodeStatus OnUpdate()
     {

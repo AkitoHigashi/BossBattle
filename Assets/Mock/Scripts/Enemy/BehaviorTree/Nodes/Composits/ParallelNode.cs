@@ -1,36 +1,28 @@
-using System.Collections.Generic;
-using UnityEngine;
-
 /// <summary>全ての子を並列実行するノード</summary>
-[CreateAssetMenu(fileName = "ParallelNode", menuName = "Behavior Tree/Mock/Nodes/Composite Nodes/Parallel Node")]
 public class ParallelNode : CompositeNode
 {
-    private NodeStatus[] _results;
-    private bool _isRunning;
+    public override string Description => DescriptionText;
+    private const string DescriptionText =
+        "全ての子ノードを同時に実行する。\n全ての子が終わるまでRunning。1つでも失敗していればFailure、全て成功ならSuccess。";
 
-    public override BtNode Clone(List<BtNode> clones)
+    private NodeStatus[] _results;
+
+    protected override void OnStart()
     {
-        var clone = (ParallelNode)base.Clone(clones);
-        clone._results = null;
-        clone._isRunning = false;
-        return clone;
+        if (_childNodes == null)
+            return;
+
+        if (_results == null || _results.Length != _childNodes.Length)
+            _results = new NodeStatus[_childNodes.Length];
+
+        for (int i = 0; i < _results.Length; i++)
+            _results[i] = NodeStatus.Running;
     }
 
     protected override NodeStatus OnUpdate()
     {
         if (_childNodes == null || _childNodes.Length == 0)
             return NodeStatus.Failure;
-
-        if (!_isRunning)
-        {
-            if (_results == null || _results.Length != _childNodes.Length)
-                _results = new NodeStatus[_childNodes.Length];
-
-            for (int i = 0; i < _results.Length; i++)
-                _results[i] = NodeStatus.Running;
-
-            _isRunning = true;
-        }
 
         bool hasRunning = false;
         bool hasFailure = false;
@@ -47,7 +39,6 @@ public class ParallelNode : CompositeNode
         if (hasRunning)
             return NodeStatus.Running;
 
-        _isRunning = false;
         return hasFailure ? NodeStatus.Failure : NodeStatus.Success;
     }
 }

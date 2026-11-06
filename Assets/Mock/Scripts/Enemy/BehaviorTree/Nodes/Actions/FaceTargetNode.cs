@@ -3,9 +3,12 @@ using UnityEngine;
 /// <summary>
 /// ターゲットの方向を向くノード
 /// </summary>
-[CreateAssetMenu(fileName = "FaceTargetNode", menuName = "Behavior Tree/Mock/Nodes/Action Nodes/FaceTargetNode")]
 public class FaceTargetNode : ActionNode
 {
+    public override string Description => DescriptionText;
+    private const string DescriptionText =
+        "ターゲットの方向へ水平に向きを変える。すぐにSuccessを返す。";
+
 
     protected override NodeStatus OnUpdate()
     {
@@ -21,6 +24,8 @@ public class FaceTargetNode : ActionNode
             target.transform.position - agent.transform.position;
 
         direction.y = 0f;
+        if (direction.sqrMagnitude < 0.0001f)
+            return NodeStatus.Success;// 真上・真下にいる時は向きを変えない
 
         agent.transform.rotation =
             Quaternion.LookRotation(direction, Vector3.up);

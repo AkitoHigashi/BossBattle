@@ -3,7 +3,7 @@ using UnityEngine;
 
 public abstract class CompositeNode : BtNode
 {
-    [SerializeField] protected BtNode[] _childNodes;
+    [SerializeField, Tooltip("子ノード。左（配列の先頭）から順に評価する。グラフエディタの線で設定する")] protected BtNode[] _childNodes;
 
     public override BtNode Clone(List<BtNode> clones)
     {

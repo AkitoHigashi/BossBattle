@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class BtNode : ScriptableObject
@@ -9,12 +9,47 @@ public abstract class BtNode : ScriptableObject
     public NodeStatus Status { get; private set; } = NodeStatus.Running;
 
     /// <summary>
+    /// 最後に評価されたフレーム。エディタのデバッグ表示で「今動いているか」の判定に使う
+    /// </summary>
+    public int LastEvaluatedFrame { get; private set; } = -1;
+
+    /// <summary>
+    /// グラフエディタ上でNodeを識別するID。Instantiateで複製しても同じ値になる
+    /// </summary>
+    public string Guid => _guid;
+
+    /// <summary>
+    /// Nodeの説明文。グラフエディタの詳細パネルに表示する
+    /// 種類ごとに固定なので、各Nodeクラスの const で書く
+    /// </summary>
+    public abstract string Description { get; }
+
+    /// <summary>
+    /// 前回の評価でRunningを返し、まだ処理の途中かどうか
+    /// </summary>
+    public bool IsRunning { get; private set; }
+    /// <summary>
+    /// WeightedRandamNodeで使う重み
+    /// </summary>
+    public int Weight => _weight;
+
+    /// <summary>
     /// Nodeを評価し、結果を記録して親へ返す
     /// </summary>
     /// <returns>評価結果</returns>
     public NodeStatus Evaluate()
     {
+        LastEvaluatedFrame = Time.frameCount;
+
+        // OnUpdate中の通知から再評価されても二重に開始しないよう、先に立てる
+        if (!_isStarted)
+        {
+            _isStarted = true;
+            OnStart();
+        }
+
         Status = OnUpdate();
+        IsRunning = Status == NodeStatus.Running;
 
         if (Status == NodeStatus.Success)
         {
@@ -25,7 +60,39 @@ public abstract class BtNode : ScriptableObject
             OnFailure();
         }
 
+        if (!IsRunning)
+        {
+            End();
+        }
+
         return Status;
+    }
+
+    /// <summary>
+    /// 処理の途中で親から呼ばれなくなったNodeを中断する
+    /// 途中の状態を捨てて、次に評価された時は最初からやり直させる
+    /// </summary>
+    public void Abort()
+    {
+        if (!IsRunning)
+        {
+            return;
+        }
+
+        IsRunning = false;
+        OnAbort();
+        End();
+    }
+
+    private void End()
+    {
+        if (!_isStarted)
+        {
+            return;
+        }
+
+        _isStarted = false;
+        OnEnd();
     }
 
     public void Initialize(BlackBoard blackBoard)
@@ -46,8 +113,32 @@ public abstract class BtNode : ScriptableObject
         return clone;
     }
 
+    /// <summary>
+    /// Running以外の状態から評価された時、OnUpdateの前に1回だけ呼ばれる。途中の状態の初期化を書く
+    /// </summary>
+    protected virtual void OnStart() { }
+
     protected abstract NodeStatus OnUpdate();
     protected virtual void OnSuccess() { }
     protected virtual void OnFailure() { }
+
+    /// <summary>
+    /// 中断された時に呼ばれる。途中の状態のリセットや、動かしていたものの停止を書く
+    /// </summary>
+    protected virtual void OnAbort() { }
+
+    /// <summary>
+    /// 成功・失敗・中断のどれで終わっても、OnSuccess/OnFailure/OnAbortの後に1回だけ呼ばれる
+    /// 共通の後片付けはここに書く
+    /// </summary>
+    protected virtual void OnEnd() { }
+
     protected BlackBoard _blackBoard;
+    private bool _isStarted;
+
+    // グラフエディタが書き込む。ランタイムの評価には使わない
+    [SerializeField, HideInInspector] private string _guid;
+    [SerializeField, HideInInspector] private Vector2 _graphPosition;
+    [SerializeField, Tooltip("Nodeの重み ランダム選択に使用"), Min(0)] private int _weight = 1;
+
 }
