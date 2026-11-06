@@ -54,6 +54,11 @@ public class CharacterMotor : MonoBehaviour
     /// </summary>
     private bool _hasAimFacingDirection;
     /// <summary>
+    /// 通常移動（歩き）を止めているか。スキル中に歩けない設定のときに使う。
+    /// Override と違い、スキル自身の移動（SetOverrideVelocity）は止めない。
+    /// </summary>
+    private bool _isLocomotionLocked;
+    /// <summary>
     /// 通常移動の向きへ回転するときの速度（度/秒）。
     /// </summary>
     private float _rotationSpeed;
@@ -206,9 +211,18 @@ public class CharacterMotor : MonoBehaviour
         _hasAimFacingDirection = false;
     }
 
+    /// <summary>
+    /// 通常移動（歩き）を止める・再開する。止めている間も入力された速度は保持し、再開するとすぐ歩き出せる。
+    /// </summary>
+    public void SetLocomotionLocked(bool locked)
+    {
+        _isLocomotionLocked = locked;
+    }
+
     private void FixedUpdate()
     {
-        Vector3 horizontal = (_hasOverrideVelocity ? _overrideVelocity : _locomotionVelocity) + _externalVelocity;
+        Vector3 locomotion = _isLocomotionLocked ? Vector3.zero : _locomotionVelocity;
+        Vector3 horizontal = (_hasOverrideVelocity ? _overrideVelocity : locomotion) + _externalVelocity;
         Vector3 velocity = _rigidbody.linearVelocity;
         // 時間制限付きOverrideの残り時間を更新
         if (_hasOverrideVelocity && _overrideVelocityRemaining >= 0f)
@@ -265,5 +279,6 @@ public class CharacterMotor : MonoBehaviour
         ClearOverrideVelocity();
         ClearOverrideFacingDirection();
         ClearAimFacingDirection();
+        _isLocomotionLocked = false;
     }
 }

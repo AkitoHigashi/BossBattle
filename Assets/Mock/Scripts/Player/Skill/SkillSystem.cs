@@ -159,6 +159,8 @@ public class SkillSystem : ISkillSystem, IDisposable
         _currentExecution = execution;
         if (definition.CooldownPolicy == CooldownStartPolicy.OnStart)
             _nextUsableTimes[definition] = Time.time + definition.Cooldown;
+        // 歩けないスキルの間は通常移動を止める。解除は終了時の AbortActiveAction で行う。
+        _skillContext.CharacterMotor.SetLocomotionLocked(!definition.CanMoveDuringSkill);
         _isExecuting.Value = true;
         ExecutAsync(execution).Forget();
     }

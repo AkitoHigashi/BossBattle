@@ -69,6 +69,7 @@ public sealed class SkillContext : IDisposable
 
         CharacterMotor.ClearOverrideVelocity();
         CharacterMotor.ClearOverrideFacingDirection();
+        CharacterMotor.SetLocomotionLocked(false);
     }
 
     /// <summary>

@@ -237,10 +237,8 @@ public class PlayerController : MonoBehaviour
 
         bool isUsingSkill = _skillSystem?.CurrentSkill != null;
 
-        // OFF の設定でスキルが終わったら、今の向きを進行方向として登録し直す。
-        // しないと、立ち止まっていてもスキル前に歩いていた方向へ振り向いてしまう。
         if (_wasUsingSkill && !isUsingSkill && !_faceMouseCursor)
-            _motor.SetFacingDirection(transform.forward, _characterData.RotationSpeed);
+            RestoreFacingAfterSkill();
         _wasUsingSkill = isUsingSkill;
 
         bool faceMouse = _faceMouseCursor || isUsingSkill;
@@ -251,6 +249,17 @@ public class PlayerController : MonoBehaviour
         }
 
         _motor.SetAimFactingDirection(direction, _characterData.MouseRotationSpeed);
+    }
+
+    /// <summary>
+    /// スキル終了時（OFF の設定）の向きを決める。キーを押していればその方向、押していなければ今の向きのまま。
+    /// </summary>
+    private void RestoreFacingAfterSkill()
+    {
+        if (_appliedMoveInput.sqrMagnitude > 0.0001f)
+            _character.Move(new MovementData(new Vector3(_appliedMoveInput.x, 0f, _appliedMoveInput.y)));
+        else
+            _motor.SetFacingDirection(transform.forward, _characterData.RotationSpeed);
     }
 
     private void OnMove(InputAction.CallbackContext context)
@@ -307,17 +316,28 @@ public class PlayerController : MonoBehaviour
         _skillSystem.HandleSkillInput(_normalAttack, SkillInputPhase.Released, direction);
     }
 
-    private void OnSkill1Performed(InputAction.CallbackContext context) => SendSkillInput(_skill1, SkillInputPhase.Pressed);
+    // RMB・Q・E には Shift 付きの別スキル（4〜6）があるため、Shift 押下中は Shift なしのスキル（1〜3）を発動しない。
+    // 解放（Canceled）は止めない。止めると実行中のスキルが「押したまま」と記録され続けてしまう。
+    private void OnSkill1Performed(InputAction.CallbackContext context)
+    {
+        if (IsShiftHeld())
+            return;
+        SendSkillInput(_skill1, SkillInputPhase.Pressed);
+    }
     private void OnSkill1Canceled(InputAction.CallbackContext context) => SendSkillInput(_skill1, SkillInputPhase.Released);
 
     private void OnSkill2(InputAction.CallbackContext context)
     {
+        if (IsShiftHeld())
+            return;
         Vector3 direction = TryGetMouseDirection(out var mouseDirectoin) ? mouseDirectoin : transform.forward;
         UseSkill(_skill2, direction);
     }
 
     private void OnSkill3(InputAction.CallbackContext context)
     {
+        if (IsShiftHeld())
+            return;
         Vector3 direction = TryGetMouseDirection(out var mouseDirection) ? mouseDirection : transform.forward;
         UseSkill(_skill3, direction);
     }
@@ -456,6 +476,15 @@ public class PlayerController : MonoBehaviour
     }
 
     // ───────────── 補助 ─────────────
+
+    /// <summary>
+    /// Shift を押しているか。Shift なし／ありのスキルの振り分けに使う。
+    /// なぜか一部の人がQスキルが優先などのバグが起きるため。
+    /// </summary>
+    private static bool IsShiftHeld()
+    {
+        return Keyboard.current != null && Keyboard.current.shiftKey.isPressed;
+    }
 
     /// <summary>
     /// マウスカーソルが指す地面上の点への、水平な方向を求める。
