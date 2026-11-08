@@ -542,10 +542,6 @@ PrefabInstance:
       propertyPath: _target
       value: 
       objectReference: {fileID: 1830356993}
-    - target: {fileID: 758051665759192159, guid: 2353347b0a3ce4d4d8bece2460670bb1, type: 3}
-      propertyPath: _destroyDelay
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 778766374806982327, guid: 2353347b0a3ce4d4d8bece2460670bb1, type: 3}
       propertyPath: m_LocalPosition.x
       value: 10.915045
@@ -593,31 +589,8 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 3215137012722501895, guid: 2353347b0a3ce4d4d8bece2460670bb1, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 852552090}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2353347b0a3ce4d4d8bece2460670bb1, type: 3}
---- !u!1 &852552089 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3215137012722501895, guid: 2353347b0a3ce4d4d8bece2460670bb1, type: 3}
-  m_PrefabInstance: {fileID: 852552088}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &852552090
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 852552089}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bcc58e281321d6b42b208df7ad5967e8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyDamageReceiver
-  _accumulatedBreak: 3
-  _showPopup: 1
-  _popupOffset: {x: 0, y: 2, z: 0}
 --- !u!1 &1091152536
 GameObject:
   m_ObjectHideFlags: 0
@@ -857,6 +830,10 @@ PrefabInstance:
       propertyPath: _camera
       value: 
       objectReference: {fileID: 777683189}
+    - target: {fileID: 7101689627837375759, guid: 88c6a6a6cbe92b2409d4443dd08c931e, type: 3}
+      propertyPath: _faceMouseCursor
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7300256049569509881, guid: 88c6a6a6cbe92b2409d4443dd08c931e, type: 3}
       propertyPath: m_Name
       value: Player
