@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 [DisallowMultipleComponent]
 public class AttackAnimationEvents : MonoBehaviour
@@ -8,8 +9,13 @@ public class AttackAnimationEvents : MonoBehaviour
     /// Animator の再生中フラグではなく、攻撃判定が開いているかとも別。
     /// </summary>
     public bool IsPlaying { get; private set; } = false;
+    /// <summary>
+    /// 攻撃判定が開いた瞬間（OnHitBegin）に通知する。
+    /// 剣を振った瞬間に飛び道具を出すなど、アニメーションのタイミングに合わせたい処理が購読する。
+    /// </summary>
+    public event Action HitStarted;
     private AttackHitbox _hitbox;
-    private int _damage;
+    private AttackData _attackData;
 
     public void Init(AttackHitbox hitbox)
     {
@@ -19,11 +25,11 @@ public class AttackAnimationEvents : MonoBehaviour
     /// <summary>
     /// 新しい攻撃の開始前に前回の命中状態をリセットする。
     /// </summary>
-    /// <param name="damage"></param>
-    public void PrepareAttack(int damage)
+    /// <param name="attackData">この攻撃が命中したときに与える内容。</param>
+    public void PrepareAttack(AttackData attackData)
     {
         CancelAttack();
-        _damage = damage;
+        _attackData = attackData;
         IsPlaying = true;
     }
 
@@ -32,7 +38,9 @@ public class AttackAnimationEvents : MonoBehaviour
     /// </summary>
     public void OnHitBegin()
     {
-        if (IsPlaying) _hitbox.BeginHit(_damage);
+        if (!IsPlaying) return;
+        _hitbox.BeginHit(_attackData);
+        HitStarted?.Invoke();
     }
 
     /// <summary>
