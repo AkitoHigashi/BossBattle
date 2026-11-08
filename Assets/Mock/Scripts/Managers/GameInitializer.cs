@@ -28,11 +28,27 @@ public class GameInitializer : MonoBehaviour
         if (_skillCooldownView != null && _characterComposition.SkillSystem != null)
             _skillCooldownView.Initialize(_characterComposition.SkillSystem, _playerController.GetSkillSlots());
 
+        _characterComposition.Character.Health.OnDied += OnPlayerDied;
+
         IsInitialized = true;
     }
 
     private void Start()
     {
         Initialize();
+    }
+
+    private void OnPlayerDied()
+    {
+        // 入力を先に止める。PlayerControllerのOnDisableで購読解除・停止・スキル中断まで行われる
+        _playerController.enabled = false;
+        Debug.Log("[Player] 死亡", _characterComposition);
+        Destroy(_characterComposition.gameObject);
+    }
+
+    private void OnDestroy()
+    {
+        if (_characterComposition != null && _characterComposition.Character != null)
+            _characterComposition.Character.Health.OnDied -= OnPlayerDied;
     }
 }
