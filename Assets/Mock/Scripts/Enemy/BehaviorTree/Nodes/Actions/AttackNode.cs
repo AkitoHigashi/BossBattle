@@ -24,6 +24,9 @@ public abstract class AttackNode : ActionNode
     [SerializeField, Tooltip("予兆の範囲。そのまま当たり判定になる。未設定なら予兆を出さず、即時攻撃になる")]
     private SectorRangeSettings _warningArea;
 
+    [SerializeField, Tooltip("敵の正面を0度とする攻撃範囲の水平回転。90度で右、180度で後ろ、270度で左。")]
+    private float _yawOffset;
+
     [FormerlySerializedAs("_sampleRadius")]
     [SerializeField, Min(0.01f), Tooltip("足元の地面を探す半径")]
     private float _groundSearchRadius = 2f;
@@ -183,7 +186,9 @@ public abstract class AttackNode : ActionNode
 
         // 位置・向きを一度だけ確定し、表示と命中判定で同じ値を使う
         origin.y = hit.position.y;
-        _pose = new AttackPose(origin, owner.forward);
+        Vector3 forward = SectorRange.GetHorizontalForward(owner.forward);
+        forward = Quaternion.AngleAxis(_yawOffset, Vector3.up) * forward;
+        _pose = new AttackPose(origin, forward);
         return true;
     }
 }

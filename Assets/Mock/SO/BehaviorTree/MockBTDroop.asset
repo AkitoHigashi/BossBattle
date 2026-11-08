@@ -1,0 +1,134 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8177920106254883986
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8bbe2f344191d3df035aff13e3dd264, type: 3}
+  m_Name: DropAttackNode
+  m_EditorClassIdentifier: Assembly-CSharp::DropAttackNode
+  _guid: 24e8987fe6f8daa4dacaa56e08d9aa81
+  _graphPosition: {x: 600, y: 480}
+  _weight: 1
+  _attackMultiplier: 1.5
+  _overrideTimeToAttack: 0
+  _timeToAttack: 0
+  _warningArea: {fileID: 11400000, guid: fd3771dfb725af94fae8bc094620c508, type: 2}
+  _yawOffset: 0
+  _groundSearchRadius: 2
+  _recoveryTime: 0
+  _fallSpeed: 24
+--- !u!114 &-4241302477432288552
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03bbf281f5b44074886f5d6a919dc3d8, type: 3}
+  m_Name: MoveUpNode
+  m_EditorClassIdentifier: Assembly-CSharp::MoveUpNode
+  _guid: 09cfcc889c27e2348ada52e6b3084060
+  _graphPosition: {x: 200, y: 480}
+  _weight: 1
+  _moveDistance: 5
+  _moveSpeed: 10
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35d764e077a1eff4481212b2ace53cc6, type: 3}
+  m_Name: MockBTDroop
+  m_EditorClassIdentifier: Assembly-CSharp::BehaviorTree
+  _rootNode: {fileID: 2094587108836020744}
+  _nodes:
+  - {fileID: 2094587108836020744}
+  - {fileID: -8177920106254883986}
+  - {fileID: -4241302477432288552}
+  - {fileID: 8821609811789174155}
+  - {fileID: 7057776913987929432}
+  - {fileID: 2116932166439036414}
+--- !u!114 &2094587108836020744
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 769c7c8dcd3799a449e453e603a71cbf, type: 3}
+  m_Name: RootNode
+  m_EditorClassIdentifier: Assembly-CSharp::RootNode
+  _guid: 6ae534e338f35a043993ef767a92b8df
+  _graphPosition: {x: 300, y: 0}
+  _weight: 0
+  _childNode: {fileID: 7057776913987929432}
+--- !u!114 &2116932166439036414
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fc0142d0f4ff4477fc0a5ef8a0e083d, type: 3}
+  m_Name: MoveToTargetPositionNode
+  m_EditorClassIdentifier: Assembly-CSharp::MoveToTargetPositionNode
+  _guid: f04994a3ad9a7ba43ae1559c20447343
+  _graphPosition: {x: 0, y: 480}
+  _weight: 1
+  _moveSpeed: 12
+  _arrivalDistance: 5
+  _sampleRadius: 2
+  _timeout: 10
+  _repathInterval: 0.1
+--- !u!114 &7057776913987929432
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aefcc002a437a4f48ab196345602a76c, type: 3}
+  m_Name: SequenceNode
+  m_EditorClassIdentifier: Assembly-CSharp::SequenceNode
+  _guid: ab80c626e92b8a747b5d09e36207ae63
+  _graphPosition: {x: 300, y: 240}
+  _weight: 1
+  _childNodes:
+  - {fileID: 2116932166439036414}
+  - {fileID: -4241302477432288552}
+  - {fileID: 8821609811789174155}
+  - {fileID: -8177920106254883986}
+--- !u!114 &8821609811789174155
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28c08bce39814b7c8edf4270f51a6302, type: 3}
+  m_Name: WarpToTargetXZNode
+  m_EditorClassIdentifier: Assembly-CSharp::WarpToTargetXZNode
+  _guid: e3c528e4e3d2dde4cabd2e16802eddc4
+  _graphPosition: {x: 400, y: 480}
+  _weight: 1
+  _sampleRadius: 2
