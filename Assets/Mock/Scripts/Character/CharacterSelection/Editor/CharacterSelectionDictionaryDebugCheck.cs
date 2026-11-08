@@ -6,6 +6,7 @@ using NetworkTest_Yajima;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace NCG.Character.Selection.Editor
@@ -19,6 +20,7 @@ namespace NCG.Character.Selection.Editor
         private static double _deadline, _after;
         private static NetworkManager _network;
         private static RoomClient _rooms;
+        private static CharacterSelectionDictionaryDebugUI _monitor;
 
         static CharacterSelectionDictionaryDebugCheck()
         {
@@ -53,9 +55,16 @@ namespace NCG.Character.Selection.Editor
 
         private static string Display()
         {
-            var ui = UnityEngine.Object.FindAnyObjectByType<CharacterSelectionDictionaryDebugUI>();
-            if (ui == null) throw new Exception("Monitor disappeared");
-            return ui.GetComponentsInChildren<Text>().Single(t => t.name == "ActualDictionary").text;
+            if (_monitor == null || _monitor.gameObject.scene != SceneManager.GetActiveScene())
+            {
+                if (_monitor != null) UnityEngine.Object.Destroy(_monitor.gameObject);
+                _monitor = new GameObject("Dictionary monitor check").AddComponent<CharacterSelectionDictionaryDebugUI>();
+                var settings = new SerializedObject(_monitor);
+                settings.FindProperty("_showDictionary").boolValue = true;
+                settings.ApplyModifiedPropertiesWithoutUndo();
+            }
+
+            return _monitor.GetComponentsInChildren<Text>().SingleOrDefault(t => t.name == "ActualDictionary")?.text ?? "";
         }
 
         private static void Tick()
@@ -121,6 +130,7 @@ namespace NCG.Character.Selection.Editor
                         _network.ServerManager.StartConnection(18534); _step++; break;
                     case 8:
                         if (!_network.ServerManager.Started) return;
+                        if (Display().Length == 0) return;
                         if (!Display().Contains("_selections.Count: 0")) throw new Exception("Restart retained entries");
                         _network.ServerManager.StopConnection(true);
                         _step++; break;
