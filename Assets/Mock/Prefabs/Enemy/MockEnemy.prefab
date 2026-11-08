@@ -127,6 +127,7 @@ GameObject:
   - component: {fileID: 7292436885110642805}
   - component: {fileID: 758051665759192159}
   - component: {fileID: 4050041104593317870}
+  - component: {fileID: 8211530285858615194}
   m_Layer: 0
   m_Name: MockEnemy
   m_TagString: Untagged
@@ -268,7 +269,7 @@ MonoBehaviour:
   _behaviorTree: {fileID: 11400000, guid: 6d889c5f24aa3e142968a16693e40f0b, type: 2}
   _attackDamage: 10
   _target: {fileID: 0}
-  _destroyDelay: 0
+  _destroyDelay: 1
 --- !u!114 &4050041104593317870
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -286,3 +287,18 @@ MonoBehaviour:
   _lineWidth: 0.06
   _outlineColor: {r: 1, g: 0.8, b: 0.1, a: 1}
   _fillColor: {r: 1, g: 0.15, b: 0.05, a: 0.35}
+--- !u!114 &8211530285858615194
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3215137012722501895}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bcc58e281321d6b42b208df7ad5967e8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyDamageReceiver
+  _accumulatedBreak: 3
+  _showPopup: 1
+  _popupOffset: {x: 0, y: 2, z: 0}
