@@ -129,18 +129,15 @@ public abstract class AttackNode : ActionNode
         if (_warningArea != null &&
             !_warningArea.Contains(_pose.Origin, _pose.Forward, target.transform.position))
             return;
-        if (!target.TryGetComponent(out CharacterComposition composition) || composition.Character == null)
+        if (!target.TryGetComponent(out IDamageable damageable))
         {
-            Debug.LogWarning("攻撃対象に初期化済みのCharacterCompositionがありません。", target);
+            Debug.LogWarning("攻撃対象にIDamageableがありません。", target);
             return;
         }
 
-        var character = composition.Character;
-        if (character.Health.CurrentValue <= 0)
-            return;
-
+        // プレイヤーの攻撃と同じAttackData経由で渡す。敵の攻撃にブレイク値はない
         int damage = Mathf.RoundToInt(Damage);
-        character.TakeDamage(damage);
+        new AttackData(damage, 0f).ApplyTo(damageable);
         Debug.Log($"{name}：{damage}ダメージ", target);
     }
 

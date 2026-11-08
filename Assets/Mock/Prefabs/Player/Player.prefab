@@ -133,6 +133,7 @@ GameObject:
   - component: {fileID: 8385591715736248342}
   - component: {fileID: 566513477152607784}
   - component: {fileID: 1056625912491231288}
+  - component: {fileID: 8063710274584561694}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -471,7 +472,7 @@ MonoBehaviour:
   _skill5: {fileID: 11400000, guid: 8eff63fe7f7d8daee4d5fd643fc84052, type: 2}
   _skill6: {fileID: 11400000, guid: e6d69949728f116393c925a8b817d3c6, type: 2}
   _dodge: {fileID: 11400000, guid: 2f4631abf1352e943b694d3aad355fa6, type: 2}
-  _faceMouseCursor: 0
+  _faceMouseCursor: 1
   _diagonalReleaseGrace: 0.1
   _camera: {fileID: 0}
   _logSkillResults: 1
@@ -537,6 +538,19 @@ MonoBehaviour:
   _shiftHighlightScale: 1.12
   _shiftDimmedAlpha: 0.3
   _shiftBannerColor: {r: 0.2, g: 0.55, b: 1, a: 0.9}
+--- !u!114 &8063710274584561694
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7300256049569509881}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5b3196b8dfc23a4e99ed307b90d5470, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerHealthView
+  _healthBar: {fileID: 0}
 --- !u!1 &8325937685036593028
 GameObject:
   m_ObjectHideFlags: 0
