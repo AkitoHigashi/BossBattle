@@ -8,8 +8,12 @@ public class GameInitializer : MonoBehaviour
     [SerializeField] private PlayerController _playerController;
     [Tooltip("全スキルのクールダウン表示（任意）。未設定でもゲームは動作し、表示が出ないだけ")]
     [SerializeField] private SkillCooldownView _skillCooldownView;
+    [Tooltip("プレイヤーのHPバー（任意）。未設定でもゲームは動作し、表示が出ないだけ")]
+    [SerializeField] private PlayerHealthView _playerHealthView;
 
     public bool IsInitialized { get; private set; }
+    // プレイヤーがDestroyされた後でも購読を解除できるよう、HP自体を保持する
+    private HealthEntity _playerHealth;
 
     public void Initialize()
     {
@@ -28,7 +32,11 @@ public class GameInitializer : MonoBehaviour
         if (_skillCooldownView != null && _characterComposition.SkillSystem != null)
             _skillCooldownView.Initialize(_characterComposition.SkillSystem, _playerController.GetSkillSlots());
 
-        _characterComposition.Character.Health.OnDied += OnPlayerDied;
+        _playerHealth = _characterComposition.Character.Health;
+        _playerHealth.OnHealthChanged += OnPlayerHealthChanged;
+        _playerHealth.OnDied += OnPlayerDied;
+        // 被弾前から満タンの表示にしておく
+        OnPlayerHealthChanged(_playerHealth.CurrentValue);
 
         IsInitialized = true;
     }
@@ -36,6 +44,12 @@ public class GameInitializer : MonoBehaviour
     private void Start()
     {
         Initialize();
+    }
+
+    private void OnPlayerHealthChanged(int value)
+    {
+        if (_playerHealthView != null)
+            _playerHealthView.UpdateHealth((float)value / _playerHealth.MaxValue);
     }
 
     private void OnPlayerDied()
@@ -48,7 +62,10 @@ public class GameInitializer : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (_characterComposition != null && _characterComposition.Character != null)
-            _characterComposition.Character.Health.OnDied -= OnPlayerDied;
+        if (_playerHealth != null)
+        {
+            _playerHealth.OnHealthChanged -= OnPlayerHealthChanged;
+            _playerHealth.OnDied -= OnPlayerDied;
+        }
     }
 }
