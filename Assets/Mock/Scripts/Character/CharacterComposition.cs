@@ -2,7 +2,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(CharacterMotor))]
 [DisallowMultipleComponent]
-public class CharacterComposition : MonoBehaviour
+public class CharacterComposition : MonoBehaviour, IDamageable
 {
     public CharacterData CharacterData => _characterData;
     public Character Character { get; private set; }
@@ -49,6 +49,18 @@ public class CharacterComposition : MonoBehaviour
                 _chargeGaugeView.Initialize(context.ChargeGauge, transform);
         }
         Character = new Character(health, status, movement);
+    }
+
+    /// <summary>
+    /// 敵の攻撃などから呼ばれる被弾の窓口。初期化前と死亡後は何もしない。
+    /// </summary>
+    public void TakeDamage(int damage)
+    {
+        if (Character == null || Character.Health.IsDead)
+            return;
+
+        Character.TakeDamage(damage);
+        Debug.Log($"[Player] {name}: damage={damage}, HP={Character.Health.CurrentValue}/{Character.Health.MaxValue}", this);
     }
 
     private void OnDisable() => SkillSystem?.CancelActiveSkill();
