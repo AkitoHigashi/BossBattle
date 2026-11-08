@@ -617,6 +617,10 @@ PrefabInstance:
       propertyPath: _target
       value: 
       objectReference: {fileID: 1830356993}
+    - target: {fileID: 758051665759192159, guid: 2353347b0a3ce4d4d8bece2460670bb1, type: 3}
+      propertyPath: _healthView
+      value: 
+      objectReference: {fileID: 852552099}
     - target: {fileID: 778766374806982327, guid: 2353347b0a3ce4d4d8bece2460670bb1, type: 3}
       propertyPath: m_LocalPosition.x
       value: 10.915045
@@ -876,7 +880,7 @@ MonoBehaviour:
   m_Type: 3
   m_PreserveAspect: 0
   m_FillCenter: 1
-  m_FillMethod: 1
+  m_FillMethod: 0
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
