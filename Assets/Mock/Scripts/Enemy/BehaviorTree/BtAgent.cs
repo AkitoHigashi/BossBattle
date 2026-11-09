@@ -24,6 +24,8 @@ public class BtAgent : MonoBehaviour
     [SerializeField] private CharacterMotor _target;
     [SerializeField, Min(0f), Tooltip("死亡してからDestroyするまでの秒数")]
     private float _destroyDelay;
+    [SerializeField, Tooltip("敵のHPバー（任意）。未設定でも動作し、表示が出ないだけ")]
+    private EnemyHealthView _healthView;
 
     private HealthEntity _healthEntity;
     // ノードが購読できるよう、HealthEntityの値をReactivePropertyへ流す
@@ -42,6 +44,8 @@ public class BtAgent : MonoBehaviour
         _health = new ReactiveProperty<float>(_healthEntity.CurrentValue);
         _healthEntity.OnHealthChanged += OnHealthChanged;
         _healthEntity.OnDied += OnDied;
+        // 被弾前から満タンの表示にしておく
+        UpdateHealthView();
 
         if (_behaviorTree == null)
         {
@@ -53,6 +57,7 @@ public class BtAgent : MonoBehaviour
         _navMeshAgent = GetComponent<NavMeshAgent>();
         _animator = GetComponent<Animator>();
         _predictionView = GetComponent<AttackPredictionView>();
+        _healthView = GetComponent<EnemyHealthView>();
         _runtimeTree = _behaviorTree.Clone();
     }
 
@@ -79,6 +84,13 @@ public class BtAgent : MonoBehaviour
     private void OnHealthChanged(int value)
     {
         _health.Value = value;
+        UpdateHealthView();
+    }
+
+    private void UpdateHealthView()
+    {
+        if (_healthView != null)
+            _healthView.UpdateHealth((float)_healthEntity.CurrentValue / _healthEntity.MaxValue);
     }
 
     private void OnDied()
