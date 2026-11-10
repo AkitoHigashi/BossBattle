@@ -45,7 +45,7 @@ RoomClient.StateChangedは入室専用イベントではなく、Ready変更や�
 | CharacterSelectionManager | サーバーの正式なキャラクター選択データと、その通信を管理する | `_selections`にClientIdとCharacterTypeの対応を保持。JoinRoomでサーバー側のデフォルト値を登録し、LeaveRoomで削除。選択依頼を受信して値を更新し、一覧を配信する。サーバー停止時に辞書をクリアする |
 | LobbyCharacterSelectionBridge | 部屋・キャラクター選択・UIを連携する | MemberJoinedをJoinRoomへ、MemberLeftをLeaveRoomへ渡す。選択結果をRoomManagerの表示・Ready管理にも反映する。受信一覧をUI向けのChangedイベントへ変換する |
 | ILobbyCharacterSelection | UIから利用するキャラクター選択の窓口 | Select、RequestList、Changedを定義する。UIは具体的なCharacterSelectionManagerを直接参照せず、このインターフェースを使う。定義ファイルはNetwork/Yajimaにある |
-| CharacterSelectionDictionaryDebugUI | ローカルプロセス内の実辞書を観察する | 件数、全キー・値、接続状態、変更履歴を表示。切断・シーン移動後も表示を残す。辞書は読み取るだけで変更しない |
+| CharacterSelectionDictionaryDebugUI | ローカルプロセス内の実辞書を観察する | 初期状態は非表示。Inspector の Show Dictionary を有効にすると、配置したシーンがアクティブな間だけ件数、全キー・値、接続状態、変更履歴を表示する |
 
 CharacterTypeは選択できる種類を表す列挙型で、`Assets/Mock/Scripts/Character/CharacterType.cs`にある。
 

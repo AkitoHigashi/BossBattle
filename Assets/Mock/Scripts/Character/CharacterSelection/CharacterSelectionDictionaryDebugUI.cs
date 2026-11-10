@@ -6,17 +6,20 @@ using System.Text;
 using FishNet.Managing;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace NCG.Character.Selection
 {
     /// <summary>
-    /// ローカルプロセス内の実辞書を読み取る常設モニター。通信・選択・クリア処理は行わない。
+    /// 配置したシーンでローカルプロセス内の実辞書を観察するモニター。
     /// 非公開フィールドへのアクセスはこの読み取り専用アダプターに限定する。
     /// </summary>
     public sealed class CharacterSelectionDictionaryDebugUI : MonoBehaviour
     {
-        private static CharacterSelectionDictionaryDebugUI _instance;
+        [SerializeField, Tooltip("このシーンがアクティブなときに、キャラクター選択の辞書を表示します。")]
+        private bool _showDictionary;
+
         private static readonly FieldInfo SelectionsField = typeof(CharacterSelectionManager)
             .GetField("_selections", BindingFlags.Instance | BindingFlags.NonPublic);
         private readonly Dictionary<string, Observation> _previous = new();
@@ -33,32 +36,32 @@ namespace NCG.Character.Selection
             public int Count;
         }
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void ResetInstance() => _instance = null;
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void Install()
-        {
-            if (_instance != null) return;
-            _instance = FindAnyObjectByType<CharacterSelectionDictionaryDebugUI>();
-            if (_instance != null) return;
-            new GameObject("CharacterSelectionDictionaryDebugUI").AddComponent<CharacterSelectionDictionaryDebugUI>();
-        }
-
-        private void Awake()
-        {
-            if (_instance != null && _instance != this) { Destroy(gameObject); return; }
-            _instance = this;
-            DontDestroyOnLoad(gameObject);
-            BuildUI();
-            Poll();
-        }
-
         private void Update()
         {
+            if (!_showDictionary || gameObject.scene != SceneManager.GetActiveScene())
+            {
+                HideUI();
+                return;
+            }
+
+            if (_canvas == null) BuildUI();
+            if (!_canvas.gameObject.activeSelf)
+            {
+                _canvas.gameObject.SetActive(true);
+                _nextPoll = 0;
+            }
+
             if (Time.unscaledTime < _nextPoll) return;
             _nextPoll = Time.unscaledTime + 0.2f;
             Poll();
+        }
+
+        private void OnDisable() => HideUI();
+
+        private void HideUI()
+        {
+            if (_canvas != null && _canvas.gameObject.activeSelf)
+                _canvas.gameObject.SetActive(false);
         }
 
         private void Poll()
@@ -200,11 +203,6 @@ namespace NCG.Character.Selection
             text.raycastTarget = false;
             text.text = value;
             return text;
-        }
-
-        private void OnDestroy()
-        {
-            if (_instance == this) _instance = null;
         }
     }
 }

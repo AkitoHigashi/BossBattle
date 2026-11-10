@@ -5,18 +5,28 @@ using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
+/// <summary>
+/// スキルの発動・実行・中断を管理する（全スキル共通）。個々のスキルの中身は SkillAction が持つ。
+/// </summary>
+/// <remarks>
+/// 読む順番：
+/// 1. 発動：TryUseSkill / HandleSkillInput / TryUseSkillAsync（割り込み）
+/// 2. 実行：StartSkill → ExecuteAsync（Actions を順に実行）→ FinishExecution（後片付け）
+/// 3. 中断・破棄：CancelActiveSkill / Dispose
+/// </remarks>
 public class SkillSystem : ISkillSystem, IDisposable
 {
-    /// <summary>
-    /// 現在スキルが実行中かどうかを外部へ通知する
-    /// </summary>
+    /// <summary>スキルを実行中かどうかの通知。</summary>
     public Observable<bool> IsExecuting => _isExecuting;
+    /// <summary>実行中のスキル。実行していなければ null。UI などが読み取り専用で使う。</summary>
+    public SkillDefinition CurrentSkill => _currentExecution?.Definition;
+
     private readonly SkillContext _skillContext;
     private readonly Dictionary<SkillDefinition, float> _nextUsableTimes = new Dictionary<SkillDefinition, float>();
     private readonly ReactiveProperty<bool> _isExecuting = new ReactiveProperty<bool>(false);
     private SkillExecution _currentExecution;
     private bool _disposed;
-    // 中断の後片付けを待つ間、新しい発動要求や追加入力が入り込むのを防ぐ。
+    // 割り込みで前のスキルの後片付けを待つ間、新しい発動や入力が入り込むのを防ぐ。
     private bool _isInterrupting;
 
     public SkillSystem(SkillContext skillContext)
@@ -25,237 +35,227 @@ public class SkillSystem : ISkillSystem, IDisposable
     }
 
     /// <summary>
-    /// 使用条件に加え、現在ほかのスキルを実行していないか
+    /// スキルを発動する。クールダウン中・実行中・割り込み処理中なら発動せず false。
     /// </summary>
-    /// <param name="definition"></param>
-    /// <returns></returns>
     public bool TryUseSkill(SkillDefinition definition, Vector3 direction)
     {
         if (!CanUseSkill(definition) || _isExecuting.Value || _isInterrupting)
             return false;
+
         StartSkill(definition, direction);
         return true;
     }
 
     /// <summary>
-    /// スキルの入力を処理する。
-    /// 実行中なら現在のSkillExecutionへ入力を通知
-    /// 未実行ならPressedを新規発動要求として扱う。
+    /// 押下・解放の入力を処理する。
+    /// 同じスキルを実行中ならその入力として記録し、何も実行していなければ押下を発動要求として扱う。
     /// </summary>
-    /// <param name="definition"></param>
-    /// <param name="phase"></param>
-    /// <param name="direction"></param>
-    /// <returns></returns>
     public bool HandleSkillInput(SkillDefinition definition, SkillInputPhase phase, Vector3 direction)
     {
         if (_disposed || definition == null || _isInterrupting)
             return false;
 
-        if (_currentExecution != null)
-        {
-            // 同じスキルへの入力は再発動せず、実行中の押下状態・押下回数に反映する。
-            // 別スキルによる割り込みは TryUseSkillAsync で扱う。
-            if (_currentExecution.Definition == definition)
-                _currentExecution.ReceiveInput(phase);
-            else
-                return false;
-        }
-        else
-        {
-            // Pressedの場合は新規発動を試みる
-            if (phase == SkillInputPhase.Released)
-                return false;
+        if (_currentExecution == null)
+            return phase == SkillInputPhase.Pressed && TryUseSkill(definition, direction);
 
-            return TryUseSkill(definition, direction);
-        }
+        // 別のスキルを実行中なら受け付けない（割り込みは TryUseSkillAsync が扱う）。
+        if (_currentExecution.Definition != definition)
+            return false;
 
+        // 同じスキルへの入力は再発動せず、押下状態・押下回数に反映する（連撃・長押し用）。
+        _currentExecution.ReceiveInput(phase);
         return true;
     }
 
     /// <summary>
-    /// クールダウンの残り時間を取得します。
+    /// 割り込みつきの発動（回避など）。割り込めるなら、前のスキルの後片付けが終わるのを待ってから発動する。
     /// </summary>
-    /// <param name="definition"></param>
-    /// <returns></returns>
+    public async UniTask<bool> TryUseSkillAsync(SkillDefinition definition, Vector3 direction, CancellationToken requestToken)
+    {
+        // 発動要求元が無効化されていたら、実行中のスキルにも触れない。
+        if (requestToken.IsCancellationRequested || _isInterrupting || !CanUseSkill(definition))
+            return false;
+
+        if (_currentExecution == null)
+            return TryUseSkill(definition, direction);
+
+        if (!CanInterrupt(definition, _currentExecution))
+            return false;
+
+        return await InterruptAndStartAsync(definition, direction, requestToken);
+    }
+
+    /// <summary>
+    /// 実行中のスキルを中断し、後片付けの完了を待ってから次のスキルを始める。
+    /// </summary>
+    private async UniTask<bool> InterruptAndStartAsync(SkillDefinition definition, Vector3 direction, CancellationToken requestToken)
+    {
+        _isInterrupting = true;
+        try
+        {
+            // Cancel は中断の要求だけ。当たり判定や移動の解除まで終わるのを Completion で待つ。
+            SkillExecution oldExecution = _currentExecution;
+            oldExecution.Cancel();
+            await oldExecution.Completion;
+
+            // 待っている間に要求元が無効化されたら、遅れて発動させない。
+            if (requestToken.IsCancellationRequested)
+                return false;
+            // 待っている間に状態が変わり得るので、発動できるか確認し直す。
+            if (!CanUseSkill(definition) || _currentExecution != null || _isExecuting.Value)
+                return false;
+
+            StartSkill(definition, direction);
+            return true;
+        }
+        finally
+        {
+            // 発動・途中の return・例外のどれでも、入力の受付を再開する。
+            _isInterrupting = false;
+        }
+    }
+
+
+    public void UpdateAimDirection(Vector3 direction)
+    {
+        if (_disposed)
+            return;
+
+        _currentExecution?.SetAimDirection(direction);
+    }
+
+    /// <summary>
+    /// クールダウンの残り秒数。クールダウン中でなければ 0。
+    /// </summary>
     public float GetCooldownRemaing(SkillDefinition definition)
     {
         if (definition == null || !_nextUsableTimes.TryGetValue(definition, out float nextUsableTime))
-        {
             return 0f;
-        }
+
         return Mathf.Max(0f, nextUsableTime - Time.time);
     }
 
     /// <summary>
-    /// 割り込みが許可されていれば、現在のスキルの後片付け完了を待って次を開始する。
+    /// 実行中のスキルが追加入力を受け付けている残り時間（連撃の猶予など）。受付中でなければ false。
     /// </summary>
-    /// <param name="definition"></param>
-    /// <param name="direction"></param>
-    /// <returns></returns>
-    public async UniTask<bool> TryUseSkillAsync(SkillDefinition definition, Vector3 direction, CancellationToken requestToken)
+    public bool TryGetInputWindow(out float remaining, out float duration)
     {
-        // 発動要求元が無効化されていたら、実行中のスキルにも触れない。
-        if (requestToken.IsCancellationRequested)
-            return false;
-        if (_isInterrupting || !CanUseSkill(definition))
-            return false;
-
-        if (_currentExecution == null)
-        {
-            return TryUseSkill(definition, direction);
-        }
-        else if (CanInterrupt(definition, _currentExecution) && !_isInterrupting)
-        {
-            try
-            {
-                _isInterrupting = true;
-                SkillExecution oldExecution = _currentExecution;
-                // Cancel は中断要求のみ。判定・移動の解除や実行状態の更新まで待ってから次へ進む。
-                oldExecution.Cancel();
-                await oldExecution.Completion;
-                // 待機中に要求元が無効化された場合、遅れて次のスキルを発動させない。
-                if (requestToken.IsCancellationRequested)
-                    return false;
-                // await を挟むと状態が変わり得るため、使用条件と実行状態を再確認する。
-                if (!CanUseSkill(definition) || _currentExecution != null || _isExecuting.Value)
-                    return false;
-
-                StartSkill(definition, direction);
-                return true;
-            }
-            finally
-            {
-                // 発動成功・途中の return・例外のいずれでも、割り込み中の入力制限を解除する。
-                _isInterrupting = false;
-            }
-        }
-        else
-            return false;
+        remaining = _currentExecution?.InputWindowRemaining ?? 0f;
+        duration = _currentExecution?.InputWindowDuration ?? 0f;
+        return duration > 0f;
     }
 
-    /// <summary>
-    /// スキルの実行を開始し、必要に応じてクールダウンを設定します。
-    /// </summary>
-    /// <param name="definition">実行するスキルの定義。</param>
-    /// <param name="direction">スキルの発動方向。</param>
+
     private void StartSkill(SkillDefinition definition, Vector3 direction)
     {
         var execution = new SkillExecution(definition, direction);
-        // 発動のきっかけとなった最初の押下も、この実行の入力として数える。
+        // 発動のきっかけになった押下も、この実行の1回目の押下として数える。
         execution.ReceiveInput(SkillInputPhase.Pressed);
         _currentExecution = execution;
+
         if (definition.CooldownPolicy == CooldownStartPolicy.OnStart)
-            _nextUsableTimes[definition] = Time.time + definition.Cooldown;
+            StartCooldown(definition);
+        // 歩けないスキルの間は通常移動を止める。解除は終了時の AbortActiveAction で行う。
+        _skillContext.CharacterMotor.SetLocomotionLocked(!definition.CanMoveDuringSkill);
         _isExecuting.Value = true;
-        ExecutAsync(execution).Forget();
+
+        ExecuteAsync(execution).Forget();
     }
 
     /// <summary>
-    /// スキルの設定・Cooldownなどの使用条件
+    /// スキルを実行し、どう終わっても後片付けする。
     /// </summary>
-    /// <param name="definition"></param>
-    /// <returns></returns>
-    private bool CanUseSkill(SkillDefinition definition)
-    {
-        // 破棄済み、定義なし、実行する Action なしの場合は使用不可。
-        // 実行中かどうかは呼び出し元で判断する（割り込み可否と区別するため）。
-        if (_disposed || definition == null || definition.Actions == null || definition.Actions.Length == 0)
-        {
-            return false;
-        }
-        //クールダウン中なら使用不可。
-        if (_nextUsableTimes.TryGetValue(definition, out float nextUsableTime) && Time.time < nextUsableTime)
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    /// <summary>
-    /// 割り込みが可能か。
-    /// </summary>
-    /// <param name="nextSkill"></param>
-    /// <param name="currentExecution"></param>
-    /// <returns></returns>
-    private bool CanInterrupt(SkillDefinition nextSkill, SkillExecution currentExecution)
-    {
-        if (nextSkill == null || currentExecution == null)
-            return false;
-
-        // 次のスキルの「割り込める」と、現在のスキルの「中断されてもよい」の両方が必要。
-        return nextSkill.CanInterruptOthers && currentExecution.Definition.CanBeInterrupted;
-    }
-
-    /// <summary>
-    /// スキルの実行を非同期で行います。
-    /// </summary>
-    /// <returns></returns>
-    private async UniTask ExecutAsync(SkillExecution execution)
+    private async UniTask ExecuteAsync(SkillExecution execution)
     {
         try
         {
-            // Action は定義された順に1つずつ実行する。例：移動が完了してから斬撃を開始する。
-            foreach (var action in execution.Definition.Actions)
-            {
-                // Action の切り替わりでも中断を確認し、次の Action が始まるのを防ぐ。
-                execution.Token.ThrowIfCancellationRequested();
-                if (action == null)
-                {
-                    throw new InvalidOperationException($"スキルが設定されていない   {execution.Definition.SkillName}");
-                }
-                await action.ExecuteAsync(_skillContext, execution);
-            }
+            await RunActionsAsync(execution);
         }
         catch (OperationCanceledException)
         {
-            // 回避による割り込みや無効化に伴う中断は、通常の終了経路として扱う。
+            // 回避による割り込みや無効化での中断は、通常の終了として扱う。
             Debug.Log($"スキルの実行がキャンセルされました。{execution.Definition.SkillName}");
         }
         catch (Exception ex)
         {
-            // 設定不備などの予期しない失敗は、対象スキルと例外を記録して調査できるようにする。
+            // 設定ミスなど予期しない失敗は、どのスキルで起きたか分かるよう記録する。
             Debug.LogError($"スキルの実行中にエラーが発生しました。{execution.Definition.SkillName} {ex}");
         }
         finally
         {
-            // 正常終了・中断・エラーのすべてで後片付けする。
-            // finally を重ねることで、ある段階で例外が出ても次の後片付けへ進む。
-            try
-            {
-                // 攻撃判定や移動の上書きなど、Action が残した状態を解除する。
-                _skillContext.AbortActiveAction();
-            }
-            finally
-            {
-                try
-                {
-                    // 終了時開始の設定なら、中断やエラーの場合もここからクールダウンを計算する。
-                    if (execution.Definition.CooldownPolicy == CooldownStartPolicy.OnEnd)
-                        _nextUsableTimes[execution.Definition] = Time.time + execution.Definition.Cooldown;
-                    execution.Dispose();
-                    // この実行がまだ現在の実行である場合だけ解除し、別の実行の状態を消さない。
-                    if (ReferenceEquals(_currentExecution, execution))
-                    {
-                        _currentExecution = null;
-
-                        // SkillSystem の破棄後は、破棄済みの通知用プロパティを更新しない。
-                        if (!_disposed)
-                            _isExecuting.Value = false;
-                    }
-                }
-                finally
-                {
-                    // 後片付けで例外が出ても完了を通知し、割り込み側の Completion 待機を終わらせる。
-                    // 完了通知は成功を表すものではなく、この実行の終了を表す。
-                    execution.NotifyCompleted();
-                }
-            }
+            FinishExecution(execution);
         }
     }
 
     /// <summary>
-    /// スキルの実行をキャンセルします。
+    /// SkillDefinition の Actions を上から順に1つずつ実行する（例：移動が終わってから斬撃）。
+    /// </summary>
+    private async UniTask RunActionsAsync(SkillExecution execution)
+    {
+        foreach (SkillAction action in execution.Definition.Actions)
+        {
+            // Action の切り替わりでも中断を確認し、中断後に次の Action が始まらないようにする。
+            execution.Token.ThrowIfCancellationRequested();
+            if (action == null)
+                throw new InvalidOperationException($"スキルが設定されていない   {execution.Definition.SkillName}");
+
+            await action.ExecuteAsync(_skillContext, execution);
+        }
+    }
+
+    /// <summary>
+    /// 実行の後片付け。正常終了・中断・エラーのどれでも呼ばれる。
+    /// </summary>
+    /// <remarks>
+    /// finally を重ねているのは、ある段階で例外が出ても次の段階を必ず行うため。
+    /// 特に最後の NotifyCompleted が漏れると、割り込み側（InterruptAndStartAsync）が待ち続けてしまう。
+    /// </remarks>
+    private void FinishExecution(SkillExecution execution)
+    {
+        try
+        {
+            // 1. 当たり判定・強制移動・歩き停止など、Action が残した状態を解除する。
+            _skillContext.AbortActiveAction();
+        }
+        finally
+        {
+            try
+            {
+                // 2. クールダウンを始め、実行中の状態を解除する。
+                ReleaseExecution(execution);
+            }
+            finally
+            {
+                // 3. この実行が終わったことを通知する（成功の意味ではなく「終わった」の意味）。
+                execution.NotifyCompleted();
+            }
+        }
+    }
+
+    private void ReleaseExecution(SkillExecution execution)
+    {
+        // 終了時開始の設定なら、中断やエラーで終わった場合もここからクールダウンを始める。
+        if (execution.Definition.CooldownPolicy == CooldownStartPolicy.OnEnd)
+            StartCooldown(execution.Definition);
+        execution.Dispose();
+
+        // まだ「現在の実行」のときだけ解除する。割り込みで次の実行が始まっていたら、その状態は消さない。
+        if (!ReferenceEquals(_currentExecution, execution))
+            return;
+
+        _currentExecution = null;
+        // 破棄後は、破棄済みの通知用プロパティを触らない。
+        if (!_disposed)
+            _isExecuting.Value = false;
+    }
+
+    private void StartCooldown(SkillDefinition definition)
+    {
+        _nextUsableTimes[definition] = Time.time + definition.Cooldown;
+    }
+
+    /// <summary>
+    /// 実行中のスキルを中断する（キャラクターの無効化時など）。
     /// </summary>
     public void CancelActiveSkill()
     {
@@ -264,33 +264,55 @@ public class SkillSystem : ISkillSystem, IDisposable
 
         try
         {
-            // 非同期実行へ中断を要求する。実行状態の解除・完了通知は ExecutAsync 側が担当する。
+            // 中断を要求する。実行状態の解除・完了通知は FinishExecution が行う。
             _currentExecution?.Cancel();
         }
         finally
         {
-            // 実行側が中断を検知するのを待たず、残っている判定や移動の上書きを解除する。
+            // 実行側が中断に気づくのを待たず、残っている判定や移動の上書きをすぐ解除する。
             _skillContext.AbortActiveAction();
         }
     }
 
     /// <summary>
-    /// 新規発動を禁止し、実行中のスキルの中断と共有状態・通知リソースの後片付けを行う。
+    /// 新しい発動を止め、実行中のスキルを中断して後片付けする。
     /// </summary>
     public void Dispose()
     {
-        if (_disposed) return;
-        // 中断に伴う処理が動く前に破棄済みにし、新規発動や終了時の実行状態通知を抑止する。
-            _disposed = true;
+        if (_disposed)
+            return;
+        // 中断処理が動く前に破棄済みにして、新しい発動や終了時の通知を止める。
+        _disposed = true;
         try
         {
             _currentExecution?.Cancel();
         }
         finally
         {
-            // 中断要求中に例外が出た場合も、共有状態の解除を試みる。
             _skillContext.AbortActiveAction();
             _isExecuting.Dispose();
         }
+    }
+
+    /// <summary>
+    /// スキルの設定とクールダウンから、発動できるか判定する。実行中かどうかは呼び出し元が判断する。
+    /// </summary>
+    private bool CanUseSkill(SkillDefinition definition)
+    {
+        if (_disposed || definition == null || definition.Actions == null || definition.Actions.Length == 0)
+            return false;
+
+        return !_nextUsableTimes.TryGetValue(definition, out float nextUsableTime) || Time.time >= nextUsableTime;
+    }
+
+    /// <summary>
+    /// 次のスキルの「割り込める」と、今のスキルの「中断されてもよい」が両方そろえば割り込める。
+    /// </summary>
+    private bool CanInterrupt(SkillDefinition nextSkill, SkillExecution currentExecution)
+    {
+        if (nextSkill == null || currentExecution == null)
+            return false;
+
+        return nextSkill.CanInterruptOthers && currentExecution.Definition.CanBeInterrupted;
     }
 }

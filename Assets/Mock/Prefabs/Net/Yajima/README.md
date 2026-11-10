@@ -12,7 +12,7 @@
 選択辞書はCharacterSelectionManager、入退出・UIとの連携はLobbyCharacterSelectionBridgeが担当します。
 生成側のNCG.Player.Spawn.PlayerSpawnManagerは選択辞書からCharacterTypeを取得し、CharacterDataListで対応プレハブを選びます。利用には生成側の参照設定が必要です。
 
-左上の常設デバッグUIでは実辞書と接続状態を確認できます。見出しをドラッグすると移動できます。
+実辞書と接続状態を確認するには、IngameTest の IngameRoomUI を選び、Inspector の Character Selection Dictionary Debug UI で Show Dictionary を有効にします。他のシーンで確認したい場合は、そのシーンに同じコンポーネントを追加して有効にします。表示中は見出しをドラッグして移動できます。
 現在の部屋は独自のRoomManagerで管理しており、EOSロビーの検索・参加はまだ連携していません。
 
 接続管理、部屋管理、キャラクター選択、UI、プレイヤー生成の詳しい役割と処理の流れは、
