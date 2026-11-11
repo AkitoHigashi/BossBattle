@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: AreaAttackNode
   m_EditorClassIdentifier: Assembly-CSharp::AreaAttackNode
   _guid: 24e8987fe6f8daa4dacaa56e08d9aa81
-  _graphPosition: {x: 909.6, y: 512}
+  _graphPosition: {x: 925.60004, y: 529.60004}
   _weight: 1
   _attackMultiplier: 1.5
   _overrideTimeToAttack: 1
@@ -35,7 +35,7 @@ MonoBehaviour:
   m_Name: AttackWarningNode
   m_EditorClassIdentifier: Assembly-CSharp::AttackWarningNode
   _guid: af68deea3fda4236af979dd61b8a8c7a
-  _graphPosition: {x: 725.6, y: 528}
+  _graphPosition: {x: 747.19995, y: 545.60004}
   _weight: 1
   _childNode: {fileID: 5744517827401968306}
   _warningArea: {fileID: 11400000, guid: fd3771dfb725af94fae8bc094620c508, type: 2}
@@ -146,7 +146,7 @@ MonoBehaviour:
   m_Name: PlayAnimationNode
   m_EditorClassIdentifier: Assembly-CSharp::PlayAnimationNode
   _guid: 22754e81c2fa43d994641a22680ded7a
-  _graphPosition: {x: 709.6, y: 742}
+  _graphPosition: {x: 731.2, y: 751.2}
   _weight: 1
   _animationName: Base Layer.DropAnimation
   _waitForCompletion: 1
@@ -188,4 +188,3 @@ MonoBehaviour:
   _graphPosition: {x: 407.99997, y: 496}
   _weight: 1
   _sampleRadius: 2
-  _useGroundHeight: 1
