@@ -373,6 +373,20 @@ public class CharacterMotor : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// すり抜け中の相手のどれかと、今も体が重なっているか。
+    /// ブリンクの終わりに敵の中に埋まっていないかを調べるために使う。
+    /// </summary>
+    public bool IsOverlappingPassThroughTargets()
+    {
+        foreach (Collider target in _passThroughTargets)
+        {
+            if (target != null && IsOverlapping(target))
+                return true;
+        }
+        return false;
+    }
+
     private bool IsOverlapping(Collider target)
     {
         foreach (Collider body in _bodyColliders)

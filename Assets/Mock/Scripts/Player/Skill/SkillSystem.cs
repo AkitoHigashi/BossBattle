@@ -87,13 +87,16 @@ public class SkillSystem : ISkillSystem, IDisposable
     public async UniTask<bool> TryUseSkillAsync(SkillDefinition definition, Vector3 direction, CancellationToken requestToken)
     {
         // 発動要求元が無効化されていたら、実行中のスキルにも触れない。
-        if (requestToken.IsCancellationRequested || _isInterrupting || !CanUseSkill(definition))
+        // 中断した連撃の再開待ちなら、クールダウンの判定より優先する（再開は TryUseSkill / InterruptAndStartAsync が行う）。
+        if (requestToken.IsCancellationRequested || _isInterrupting
+            || (!CanUseSkill(definition) && !IsResumable(definition)))
             return false;
 
         if (_currentExecution == null)
             return TryUseSkill(definition, direction);
 
-        if (!CanInterrupt(definition, _currentExecution))
+        // 同じスキルへの押下は割り込みではなく、そのスキルへの入力（HandleSkillInput）として扱う。
+        if (_currentExecution.Definition == definition || !CanInterrupt(definition, _currentExecution))
             return false;
 
         return await InterruptAndStartAsync(definition, direction, requestToken);
@@ -118,7 +121,12 @@ public class SkillSystem : ISkillSystem, IDisposable
             if (requestToken.IsCancellationRequested)
                 return false;
             // 待っている間に状態が変わり得るので、発動できるか確認し直す。
-            if (!CanUseSkill(definition) || _currentExecution != null || _isExecuting.Value)
+            if (_currentExecution != null || _isExecuting.Value)
+                return false;
+            // 他のスキル中に、中断した連撃のキーを押したときは、最初からではなく続きの段から始める。
+            if (TryResumeSkill(definition, direction))
+                return true;
+            if (!CanUseSkill(definition))
                 return false;
 
             StartSkill(definition, direction);
@@ -312,6 +320,12 @@ public class SkillSystem : ISkillSystem, IDisposable
         _resumeStage = execution.ResumeStage;
         _resumeDeadline = execution.ResumeDeadline;
         _resumeWindowDuration = execution.ResumeWindowDuration;
+    }
+
+    private bool IsResumable(SkillDefinition definition)
+    {
+        ExpireResumeIfNeeded();
+        return !_disposed && definition != null && definition == _resumeSkill;
     }
 
     /// <summary>

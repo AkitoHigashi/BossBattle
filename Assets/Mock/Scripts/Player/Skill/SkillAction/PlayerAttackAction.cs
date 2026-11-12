@@ -52,6 +52,9 @@ public class PlayerAttackAction : SkillAction
             receiver.PrepareAttack(
                 execution.ApplyMultipliers(new AttackData(_damage, _breakValue)),
                 execution.ExcludedHitTargets);
+            // 前に中断した攻撃の中断用 Trigger が使われずに残っていると、この攻撃 State に入った直後に
+            // その Trigger で抜けてしまう（終了イベント前に State を離れたエラーになる）。始める前に消しておく。
+            ResetInterruptTrigger(context, animator);
             animator.SetTrigger(_triggerName);
 
             await WaitForStateEntryAsync(animator, stateHash, token);
@@ -209,6 +212,14 @@ public class PlayerAttackAction : SkillAction
         }
 
         Debug.LogWarning($"中断用Animator Triggerが存在しません: {_interruptTriggerName}");
+    }
+
+    private void ResetInterruptTrigger(SkillContext context, Animator animator)
+    {
+        if (string.IsNullOrWhiteSpace(_interruptTriggerName))
+            return;
+        if (context.HasAnimatorParameter(_interruptTriggerName, AnimatorControllerParameterType.Trigger))
+            animator.ResetTrigger(_interruptTriggerName);
     }
 
     private static void ValidateAnimator(Animator animator)

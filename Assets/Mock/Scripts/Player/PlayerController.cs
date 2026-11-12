@@ -69,7 +69,6 @@ public class PlayerController : MonoBehaviour
     private bool _initialized;
     private bool _subscribed;
     private bool _wasUsingSkill;
-    // 斜め移動の離し方の補正用
     private Vector2 _appliedMoveInput;
     private Vector2 _pendingMoveInput;
     private float _pendingMoveSince;
@@ -359,6 +358,8 @@ public class PlayerController : MonoBehaviour
     private void SendSkillInput(SkillDefinition definition, SkillInputPhase phase)
     {
         Vector3 direction = TryGetMouseDirection(out var mouseDirection) ? mouseDirection : transform.forward;
+        if (phase == SkillInputPhase.Pressed && TryInterruptWith(definition, direction))
+            return;
         bool accepted = _skillSystem.HandleSkillInput(definition, phase, direction);
 
         // 解放は未実行なら無視されるのが正常なので、ログは押下だけにする。
@@ -385,9 +386,30 @@ public class PlayerController : MonoBehaviour
             .Forget(ex => Debug.LogException(ex, this));
     }
 
+    /// <summary>
+    /// 別のスキルを実行中なら、割り込みでの発動を要求して true を返す（回避と同じ経路）。
+    /// 割り込めるかは各スキルの Can Interrupt Others / Can Be Interrupted の設定で決まる。
+    /// </summary>
+    /// <remarks>
+    /// TryUseSkill / HandleSkillInput は「実行中なら発動しない」ので、
+    /// これを通さないと連撃の入力待ち中などに Q・E が効かなくなる。
+    /// </remarks>
+    private bool TryInterruptWith(SkillDefinition definition, Vector3 direction)
+    {
+        SkillDefinition current = _skillSystem.CurrentSkill;
+        if (current == null || current == definition)
+            return false;
+
+        _skillSystem.TryUseSkillAsync(definition, direction, _skillRequestCts.Token)
+            .Forget(ex => Debug.LogException(ex, this));
+        return true;
+    }
+
     private void UseSkill(SkillDefinition definition, Vector3 direction)
     {
         if (_skillSystem == null || definition == null)
+            return;
+        if (TryInterruptWith(definition, direction))
             return;
 
         bool accepted = _skillSystem.TryUseSkill(definition, direction);

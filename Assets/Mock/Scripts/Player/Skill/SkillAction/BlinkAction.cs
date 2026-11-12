@@ -12,6 +12,8 @@ public class BlinkAction : SkillAction
     [SerializeField] private float _aimRotationSpeed = 9000f;
     [Tooltip("移動中に敵（ダメージを受けられる相手）をすり抜けるか。地面や壁はすり抜けない")]
     [SerializeField] private bool _passThroughEnemies = false;
+    [Tooltip("すり抜けの終わりで敵に埋まっていたら、抜け出るまで追加で進む最大距離。0 なら延長しない")]
+    [SerializeField, Min(0f)] private float _maxExtraDistance = 5f;
 
     [Header("踏み込み攻撃")]
     [Tooltip("移動中に体が触れた敵へ攻撃するか。アニメーションに関係なく当たるので、攻撃前にすり抜けても取りこぼさない")]
@@ -69,6 +71,8 @@ public class BlinkAction : SkillAction
                 elapsed += Time.fixedDeltaTime;
             }
 
+            if (_passThroughEnemies)
+                await ExtendUntilClearAsync(motor, execution, moveDirection.normalized, step, dashHitTargets);
         }
         finally
         {
@@ -78,6 +82,31 @@ public class BlinkAction : SkillAction
             motor.ClearOverrideFacingDirection();
             if (_passThroughEnemies)
                 motor.EndPassThrough();
+        }
+    }
+
+    /// <summary>
+    /// 予定の距離を進み終えた時点で敵に埋まっていたら、抜け出るまで同じ速度で進み続ける。
+    /// </summary>
+    /// <remarks>
+    /// 埋まったまま止まると、すり抜けを戻したときに物理エンジンが体を押し出し、
+    /// 来た方向へ弾き戻されたり、敵の中に居続けたりする。そのため「敵の向こう側へ抜ける」まで距離を伸ばす。
+    /// 壁や地面に向かって無限に進まないよう、追加の距離には上限を設ける。
+    /// </remarks>
+    private async UniTask ExtendUntilClearAsync(
+        CharacterMotor motor, SkillExecution execution, Vector3 direction, Vector3 step, HashSet<IDamageable> dashHitTargets)
+    {
+        float extra = 0f;
+        float stepLength = step.magnitude;
+        while (extra < _maxExtraDistance && motor.IsOverlappingPassThroughTargets())
+        {
+            execution.Token.ThrowIfCancellationRequested();
+            // 延長した先に別の敵がいても埋まらないよう、次に進む区間の敵もすり抜け対象に加える。
+            motor.BeginPassThrough(FindEnemiesOnPath(motor, direction, stepLength));
+            if (_dashHit)
+                ApplyDashHits(motor, execution, step, dashHitTargets);
+            await UniTask.Yield(PlayerLoopTiming.FixedUpdate, execution.Token);
+            extra += stepLength;
         }
     }
 

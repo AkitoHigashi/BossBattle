@@ -17,5 +17,6 @@ MonoBehaviour:
   _actions:
   - {fileID: 11400000, guid: 4ec4a301075c891cbc3a0dd98cc8cd0a, type: 2}
   _cooldownPolicy: 1
-  _canInterruptOthers: 0
+  _canInterruptOthers: 1
   _canBeInterrupted: 1
+  _canMoveDuringSkill: 1
