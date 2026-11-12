@@ -15,6 +15,11 @@ public class AttackAnimationEvents : MonoBehaviour
     /// 剣を振った瞬間に飛び道具を出すなど、アニメーションのタイミングに合わせたい処理が購読する。
     /// </summary>
     public event Action HitStarted;
+    /// <summary>
+    /// 攻撃判定が閉じた瞬間（OnHitEnd、または OnHitEnd のないアニメーションでは OnAttackFinished）に通知する。
+    /// 「振り終わった」タイミングで何かしたい処理（連撃の再開受付など）が購読する。
+    /// </summary>
+    public event Action HitEnded;
     private AttackHitbox _hitbox;
     private AttackData _attackData;
     private IReadOnlyCollection<IDamageable> _excludedTargets;
@@ -52,7 +57,9 @@ public class AttackAnimationEvents : MonoBehaviour
     /// </summary>
     public void OnHitEnd()
     {
-        if (IsPlaying) _hitbox.EndHit();
+        if (!IsPlaying) return;
+        _hitbox.EndHit();
+        HitEnded?.Invoke();
     }
 
     /// <summary>
@@ -66,6 +73,7 @@ public class AttackAnimationEvents : MonoBehaviour
         if (!IsPlaying) return;
         _hitbox.EndHit();
         IsPlaying = false;
+        HitEnded?.Invoke();
     }
 
     /// <summary>

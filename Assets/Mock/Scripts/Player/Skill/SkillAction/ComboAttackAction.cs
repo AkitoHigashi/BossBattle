@@ -36,6 +36,20 @@ public class ComboAttackAction : SkillAction
             if (attack == null)
                 throw new InvalidOperationException($"連撃{stage + 1}段目が未設定です。");
 
+            // 振り終わった（判定が閉じた）時点から、回避で中断されても次の段から再開できるようにする。
+            // 攻撃モーションの戻りの最中に回避したときも、「この段は出し終わった」と扱うため。
+            // 最終段の後は続きがないので登録しない。
+            AttackAnimationEvents events = context.AnimationEvents;
+            int nextStage = stage + 1;
+            bool hasNextStage = nextStage < _attacks.Length;
+            void OnHitEnded()
+            {
+                if (execution.ResumeStage < 0)
+                    execution.SetResumePoint(nextStage, Time.time + _followUpWindow, _followUpWindow);
+            }
+            if (hasNextStage && events != null)
+                events.HitEnded += OnHitEnded;
+
             try
             {
                 // 設定された方向モードで、この段の移動方向を決定
@@ -50,6 +64,8 @@ public class ComboAttackAction : SkillAction
             finally
             {
                 motor.ClearOverrideVelocity();
+                if (hasNextStage && events != null)
+                    events.HitEnded -= OnHitEnded;
             }
 
             // 最終段なら終了
@@ -96,7 +112,8 @@ public class ComboAttackAction : SkillAction
                 execution.ClearInputWindow();
             }
 
-            // 次の段の攻撃中に中断されたら、もう再開はできない（通常の中断としてクールダウンへ）。
+            // 次の段を振り終わる前に中断されたら、もう再開はできない（通常の中断としてクールダウンへ）。
+            // 次の段を振り終わると、上の OnHitEnded で再び再開できるようになる。
             execution.ClearResumePoint();
             // 攻撃中は、スキルの設定どおり歩けない状態に戻す。
             motor.SetLocomotionLocked(!execution.Definition.CanMoveDuringSkill);

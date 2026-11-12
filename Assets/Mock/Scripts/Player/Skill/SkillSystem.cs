@@ -31,8 +31,11 @@ public class SkillSystem : ISkillSystem, IDisposable
     private bool _disposed;
     // 割り込みで前のスキルの後片付けを待つ間、新しい発動や入力が入り込むのを防ぐ。
     private bool _isInterrupting;
+    // 割り込みで中断された連撃の、続きから再開できる段。再開できない状態なら -1。
     private int _resumeStage;
+    // 再開できる期限（Time.time）。期限を過ぎたら、再開はできずクールダウンに入る。
     private float _resumeDeadline;
+    // 再開できる期限の長さ。UI のバー表示用。
     private float _resumeWindowDuration;
 
     public SkillSystem(SkillContext skillContext)
@@ -204,12 +207,10 @@ public class SkillSystem : ISkillSystem, IDisposable
         }
         catch (OperationCanceledException)
         {
-            // 回避による割り込みや無効化での中断は、通常の終了として扱う。
             Debug.Log($"スキルの実行がキャンセルされました。{execution.Definition.SkillName}");
         }
         catch (Exception ex)
         {
-            // 設定ミスなど予期しない失敗は、どのスキルで起きたか分かるよう記録する。
             Debug.LogError($"スキルの実行中にエラーが発生しました。{execution.Definition.SkillName} {ex}");
         }
         finally
