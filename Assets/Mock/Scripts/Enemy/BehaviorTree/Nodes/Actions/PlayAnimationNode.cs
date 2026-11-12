@@ -8,34 +8,51 @@ public class PlayAnimationNode : ActionNode
     private const int BaseLayer = 0;
     private const float StateEntryTimeout = 1f;
 
-    [SerializeField] private string _animationName;
-    [SerializeField] private bool _waitForCompletion;
+    [SerializeField, Tooltip("再生するアニメーションの名前")]
+    private string _animationName;
+    [SerializeField, Tooltip("オンにするとアニメーションが1周再生されるまで待機する")]
+    private bool _waitForCompletion;
 
     private Animator _animator;
     private int _stateHash;
-    private int _playFrame;
-    private double _playFixedTime;
-    private float _stateEntryDeadline;
-    private bool _enteredState;
 
     protected override void OnStart()
     {
         _animator = null;
-        _enteredState = false;
 
         var animator = _blackBoard?.Animator;
-        if (animator == null || !animator.isActiveAndEnabled || string.IsNullOrWhiteSpace(_animationName))
+        if (animator == null || !animator.isActiveAndEnabled ||
+            string.IsNullOrWhiteSpace(_animationName))
+        {
+            Debug.LogWarning(
+                $"[{nameof(PlayAnimationNode)}] Animatorが無効か、アニメーション名が空です。");
             return;
+        }
 
         _stateHash = Animator.StringToHash(_animationName);
         if (!animator.HasState(BaseLayer, _stateHash))
+        {
+            Debug.LogWarning(
+                $"[{nameof(PlayAnimationNode)}] ステート[{_animationName}]が存在しません。");
             return;
+        }
+
+        animator.Play(_stateHash, BaseLayer, 0f);
+
+        if (_waitForCompletion)
+        {
+            animator.Update(0f);
+
+            var stateInfo = animator.GetCurrentAnimatorStateInfo(BaseLayer);
+            if (!IsRequestedState(stateInfo))
+            {
+                Debug.LogWarning(
+                    $"[{nameof(PlayAnimationNode)}] ステート[{_animationName}]に入れませんでした。");
+                return;
+            }
+        }
 
         _animator = animator;
-        _playFrame = Time.frameCount;
-        _playFixedTime = Time.fixedTimeAsDouble;
-        _stateEntryDeadline = Time.time + StateEntryTimeout;
-        animator.Play(_stateHash, BaseLayer, 0f);
     }
 
     protected override NodeStatus OnUpdate()
@@ -46,22 +63,16 @@ public class PlayAnimationNode : ActionNode
         if (!_waitForCompletion)
             return NodeStatus.Success;
 
-        // Animatorが更新されてから進行度を見る。
-        if (Time.frameCount == _playFrame ||
-            (_animator.updateMode == AnimatorUpdateMode.Fixed && Time.fixedTimeAsDouble == _playFixedTime))
-            return NodeStatus.Running;
-
         var stateInfo = _animator.GetCurrentAnimatorStateInfo(BaseLayer);
-        if (stateInfo.fullPathHash == _stateHash || stateInfo.shortNameHash == _stateHash)
-        {
-            _enteredState = true;
-            return stateInfo.normalizedTime >= 1f ? NodeStatus.Success : NodeStatus.Running;
-        }
-
-        // Controller が再生後に遷移した場合も待機を終える。
-        if (_enteredState)
+        if (!IsRequestedState(stateInfo) || stateInfo.normalizedTime >= 1f)
             return NodeStatus.Success;
 
-        return Time.time >= _stateEntryDeadline ? NodeStatus.Failure : NodeStatus.Running;
+        return NodeStatus.Running;
+    }
+
+    private bool IsRequestedState(AnimatorStateInfo stateInfo)
+    {
+        return stateInfo.fullPathHash == _stateHash ||
+               stateInfo.shortNameHash == _stateHash;
     }
 }
