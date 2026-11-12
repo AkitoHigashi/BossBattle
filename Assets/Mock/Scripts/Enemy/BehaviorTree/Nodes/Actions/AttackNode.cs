@@ -174,6 +174,6 @@ public abstract class AttackNode : ActionNode
         }
 
         // 位置・向きを一度だけ確定し、表示と命中判定で同じ値を使う
-        return AttackPose.TryAtGround(owner, _blackBoard.NavMeshAgent, _groundSearchRadius, _yawOffset, out _pose);
+        return AttackPose.TryCreateGroundAttackPose(owner, _blackBoard.NavMeshAgent, _groundSearchRadius, _yawOffset, out _pose);
     }
 }

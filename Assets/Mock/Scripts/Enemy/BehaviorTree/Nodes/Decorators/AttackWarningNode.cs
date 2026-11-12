@@ -23,7 +23,7 @@ public sealed class AttackWarningNode : DecoratorNode
         if (_childNode == null || _warningArea == null || view == null || !view.isActiveAndEnabled)
             return;
 
-        if (!AttackPose.TryAtGround(_blackBoard.Transform, _blackBoard.NavMeshAgent,
+        if (!AttackPose.TryCreateGroundAttackPose(_blackBoard.Transform, _blackBoard.NavMeshAgent,
                 _groundSearchRadius, _yawOffset, out AttackPose pose))
             return;
 

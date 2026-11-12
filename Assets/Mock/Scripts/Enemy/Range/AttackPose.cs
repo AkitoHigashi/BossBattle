@@ -13,7 +13,16 @@ public readonly struct AttackPose
     public Vector3 Origin { get; }
     public Vector3 Forward { get; }
 
-    public static bool TryAtGround(Transform owner, NavMeshAgent agent, float searchRadius, float yawOffset, out AttackPose pose)
+    /// <summary>
+    /// NavMesh上の地面を検索し、攻撃位置と方向を確定する。
+    /// </summary>
+    /// <param name="owner">攻撃を行うオブジェクトのTransform</param>
+    /// <param name="agent">地面の検索に使用するNavMeshAgent</param>
+    /// <param name="searchRadius">NavMeshを検索する最大距離</param>
+    /// <param name="yawOffset">攻撃方向を水平方向に回転させる角度</param>
+    /// <param name="pose">確定した攻撃位置と方向を格納する引数</param>
+    /// <returns>攻撃位置の取得に成功した場合はtrue、失敗した場合はfalse</returns>
+    public static bool TryCreateGroundAttackPose(Transform owner, NavMeshAgent agent, float searchRadius, float yawOffset, out AttackPose pose)
     {
         pose = default;
         if (owner == null || agent == null || !agent.isActiveAndEnabled || !agent.isOnNavMesh)
