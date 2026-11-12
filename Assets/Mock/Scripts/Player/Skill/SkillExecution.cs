@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
 
@@ -50,12 +51,24 @@ public class SkillExecution : IDisposable
     // 連撃の追加入力など、「今押すと次が出る」受付時間の残り秒数と全体の長さ。受付中でなければ 0。UI 表示用。
     public float InputWindowRemaining { get; private set; }
     public float InputWindowDuration { get; private set; }
+    // この実行の中で、以降の攻撃では当てない相手。踏み込みで当たった敵に、続く斬撃を二重に当てないために使う。
+    public IReadOnlyCollection<IDamageable> ExcludedHitTargets => _excludedHitTargets;
+    // 何段目から始めるか。回避で中断した連撃を続きから再開するときに 1 以上になる。
+    public int StartStage { get; }
+    // 回避などで中断されたとき、続きから再開できる段。再開できない状態なら -1。連撃の入力待ちの間だけ設定される。
+    public int ResumeStage { get; private set; } = -1;
+    // 再開できる期限（Time.time）と、受付時間全体の長さ（UI のバー表示用）。
+    public float ResumeDeadline { get; private set; }
+    public float ResumeWindowDuration { get; private set; }
+    // 回避などのキャンセル行動で割り込まれて終わったか。キャラクターの無効化による中断とは区別する。
+    public bool WasInterrupted { get; private set; }
 
     private readonly CancellationTokenSource _cts = new();
+    private readonly HashSet<IDamageable> _excludedHitTargets = new();
     private readonly UniTaskCompletionSource _completionSource = new();
     private bool _disposed;
 
-    public SkillExecution(SkillDefinition definition, Vector3 direction)
+    public SkillExecution(SkillDefinition definition, Vector3 direction, int startStage = 0)
     {
         if (definition == null)
             throw new ArgumentNullException(nameof(definition));
@@ -63,6 +76,7 @@ public class SkillExecution : IDisposable
         Definition = definition;
         Direction = direction;
         CurrentAimDirection = direction.normalized;
+        StartStage = Mathf.Max(0, startStage);
     }
 
     /// <summary>
@@ -158,6 +172,41 @@ public class SkillExecution : IDisposable
     public AttackData ApplyMultipliers(AttackData baseData)
     {
         return baseData.Scale(DamageMultiplier, BreakMultiplier);
+    }
+
+    /// <summary>
+    /// 中断されても、期限までなら指定した段から再開できるようにする。連撃が次の段の入力を待つ間に呼ぶ。
+    /// </summary>
+    public void SetResumePoint(int stage, float deadline, float windowDuration)
+    {
+        ResumeStage = stage;
+        ResumeDeadline = deadline;
+        ResumeWindowDuration = windowDuration;
+    }
+
+    /// <summary>
+    /// 再開できる状態を解除する。次の段へ進んだとき・受付時間が切れたときに呼ぶ。
+    /// </summary>
+    public void ClearResumePoint()
+    {
+        ResumeStage = -1;
+    }
+
+    /// <summary>
+    /// キャンセル行動で割り込まれたことを記録する。SkillSystem が Cancel の直前に呼ぶ。
+    /// </summary>
+    public void MarkInterrupted()
+    {
+        WasInterrupted = true;
+    }
+
+    /// <summary>
+    /// この実行の以降の攻撃で、指定した相手には当てないようにする。
+    /// </summary>
+    public void ExcludeFromLaterHits(IDamageable target)
+    {
+        if (target != null)
+            _excludedHitTargets.Add(target);
     }
 
     /// <summary>

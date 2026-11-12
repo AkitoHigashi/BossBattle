@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -16,6 +17,7 @@ public class AttackAnimationEvents : MonoBehaviour
     public event Action HitStarted;
     private AttackHitbox _hitbox;
     private AttackData _attackData;
+    private IReadOnlyCollection<IDamageable> _excludedTargets;
 
     public void Init(AttackHitbox hitbox)
     {
@@ -26,10 +28,12 @@ public class AttackAnimationEvents : MonoBehaviour
     /// 新しい攻撃の開始前に前回の命中状態をリセットする。
     /// </summary>
     /// <param name="attackData">この攻撃が命中したときに与える内容。</param>
-    public void PrepareAttack(AttackData attackData)
+    /// <param name="excludedTargets">この攻撃では当てない相手。null なら除外なし。</param>
+    public void PrepareAttack(AttackData attackData, IReadOnlyCollection<IDamageable> excludedTargets = null)
     {
         CancelAttack();
         _attackData = attackData;
+        _excludedTargets = excludedTargets;
         IsPlaying = true;
     }
 
@@ -39,7 +43,7 @@ public class AttackAnimationEvents : MonoBehaviour
     public void OnHitBegin()
     {
         if (!IsPlaying) return;
-        _hitbox.BeginHit(_attackData);
+        _hitbox.BeginHit(_attackData, _excludedTargets);
         HitStarted?.Invoke();
     }
 

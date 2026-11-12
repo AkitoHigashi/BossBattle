@@ -48,7 +48,10 @@ public class PlayerAttackAction : SkillAction
         try
         {
             // 倍率は通常 1。溜め攻撃では ChargeAction が溜め結果に応じて設定する。
-            receiver.PrepareAttack(execution.ApplyMultipliers(new AttackData(_damage, _breakValue)));
+            // 同じスキルの踏み込みですでに当たった相手には当てない（BlinkAction の設定による）。
+            receiver.PrepareAttack(
+                execution.ApplyMultipliers(new AttackData(_damage, _breakValue)),
+                execution.ExcludedHitTargets);
             animator.SetTrigger(_triggerName);
 
             await WaitForStateEntryAsync(animator, stateHash, token);
