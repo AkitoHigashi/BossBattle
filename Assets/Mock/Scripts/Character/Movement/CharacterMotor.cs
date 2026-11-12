@@ -291,6 +291,7 @@ public class CharacterMotor : MonoBehaviour
         velocity.y += _pendingExternalY;
         _pendingExternalY = 0f;
         _rigidbody.linearVelocity = velocity;
+        _rigidbody.angularVelocity = Vector3.zero;
 
         Vector3 facingDirection;
         float rotationSpeed;
