@@ -19,4 +19,4 @@ MonoBehaviour:
   _cooldownPolicy: 0
   _canInterruptOthers: 0
   _canBeInterrupted: 1
-  _canMoveDuringSkill: 0
+  _canMoveDuringSkill: 1

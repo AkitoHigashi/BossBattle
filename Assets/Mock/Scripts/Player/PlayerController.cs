@@ -235,7 +235,10 @@ public class PlayerController : MonoBehaviour
         if (hasAim)
             _skillSystem?.UpdateAimDirection(direction);
 
-        bool isUsingSkill = _skillSystem?.CurrentSkill != null;
+        // 連撃の入力待ちの間は歩けるので、向きも通常の移動と同じ扱いにする（マウス方向に固定しない）。
+        SkillDefinition currentSkill = _skillSystem?.CurrentSkill;
+        bool isUsingSkill = currentSkill != null
+            && !_skillSystem.TryGetInputWindow(currentSkill, out _, out _);
 
         if (_wasUsingSkill && !isUsingSkill && !_faceMouseCursor)
             RestoreFacingAfterSkill();
