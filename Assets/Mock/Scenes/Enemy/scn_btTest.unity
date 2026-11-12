@@ -298,6 +298,7 @@ MonoBehaviour:
   _characterComposition: {fileID: 1713203491}
   _playerController: {fileID: 1713203492}
   _skillCooldownView: {fileID: 0}
+  _playerHealthView: {fileID: 0}
 --- !u!4 &880272062
 Transform:
   m_ObjectHideFlags: 0
@@ -817,6 +818,33 @@ MonoBehaviour:
   m_DefaultActionMap: 
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!1 &1853367490 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3215137012722501895, guid: 2353347b0a3ce4d4d8bece2460670bb1, type: 3}
+  m_PrefabInstance: {fileID: 6893269355909901892}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &1853367497
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1853367490}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: cc60e8d0eef8f4443a04867791be326e, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1001 &6893269355909901892
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -876,7 +904,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3215137012722501895, guid: 2353347b0a3ce4d4d8bece2460670bb1, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1853367497}
   m_SourcePrefab: {fileID: 100100000, guid: 2353347b0a3ce4d4d8bece2460670bb1, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

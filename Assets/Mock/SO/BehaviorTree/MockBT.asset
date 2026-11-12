@@ -51,7 +51,7 @@ MonoBehaviour:
   m_Name: PatrolNode
   m_EditorClassIdentifier: Assembly-CSharp::PatrolNode
   _guid: de35d72f9fc61074aaba9f76bfa9b47f
-  _graphPosition: {x: 3400, y: 480}
+  _graphPosition: {x: 3200, y: 480}
   _weight: 0
   _patrolRadius: 100
   _patrolDuration: 10
@@ -107,7 +107,7 @@ MonoBehaviour:
   m_Name: AreaAttackNode
   m_EditorClassIdentifier: Assembly-CSharp::AreaAttackNode
   _guid: bb41bd5c26156034898117de8ade1341
-  _graphPosition: {x: 819.2001, y: 1456}
+  _graphPosition: {x: 800, y: 1440}
   _weight: 1
   _attackMultiplier: 1.5
   _overrideTimeToAttack: 1
@@ -208,7 +208,7 @@ MonoBehaviour:
   m_Name: ReactiveSelectorNode
   m_EditorClassIdentifier: Assembly-CSharp::ReactiveSelectorNode
   _guid: 1f858e424f31028429ae9afd8448da89
-  _graphPosition: {x: 2225, y: 240}
+  _graphPosition: {x: 2100, y: 240}
   _weight: 0
   _childNodes:
   - {fileID: 6612034311430203234}
@@ -228,6 +228,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BehaviorTree
   _rootNode: {fileID: 2094587108836020744}
   _nodes:
+  - {fileID: 8300000000000000002}
   - {fileID: 2094587108836020744}
   - {fileID: 1006830939558596924}
   - {fileID: -4664037579331798385}
@@ -250,7 +251,6 @@ MonoBehaviour:
   - {fileID: -2406217897236330683}
   - {fileID: -2707690120323413053}
   - {fileID: 8100000000000000000}
-  - {fileID: 8100000000000000001}
   - {fileID: 8100000000000000002}
   - {fileID: 8100000000000000003}
   - {fileID: 8100000000000000004}
@@ -272,7 +272,7 @@ MonoBehaviour:
   m_Name: MoveToTargetPositionNode
   m_EditorClassIdentifier: Assembly-CSharp::MoveToTargetPositionNode
   _guid: cb09afc457515874a95616f98e30c303
-  _graphPosition: {x: 3200, y: 720}
+  _graphPosition: {x: 3000, y: 720}
   _weight: 0
   _moveSpeed: 12
   _arrivalDistance: 0.3
@@ -292,7 +292,7 @@ MonoBehaviour:
   m_Name: NearByPlayerNode
   m_EditorClassIdentifier: Assembly-CSharp::NearByPlayerNode
   _guid: 179af47e766f6c04ab360a13bcabfe5b
-  _graphPosition: {x: 3000, y: 720}
+  _graphPosition: {x: 2800, y: 720}
   _weight: 0
   _detectDistance: 15
 --- !u!114 &1526699814569467676
@@ -341,7 +341,7 @@ MonoBehaviour:
   m_Name: RootNode
   m_EditorClassIdentifier: Assembly-CSharp::RootNode
   _guid: 6ae534e338f35a043993ef767a92b8df
-  _graphPosition: {x: 2225, y: 0}
+  _graphPosition: {x: 2100, y: 0}
   _weight: 0
   _childNode: {fileID: -223975113274450872}
 --- !u!114 &4648436356791507739
@@ -375,7 +375,7 @@ MonoBehaviour:
   m_Name: WeightedRandomNode
   m_EditorClassIdentifier: Assembly-CSharp::WeightedRandomNode
   _guid: 521aa5ce3adccfa4a9f8ddcdab7aba90
-  _graphPosition: {x: 1050, y: 480}
+  _graphPosition: {x: 1000, y: 480}
   _weight: 1
   _childNodes:
   - {fileID: -551833040610638705}
@@ -394,7 +394,7 @@ MonoBehaviour:
   m_Name: SequenceNode
   m_EditorClassIdentifier: Assembly-CSharp::SequenceNode
   _guid: e20b7ddc03d905a4db0c6306686a16c6
-  _graphPosition: {x: 3100, y: 480}
+  _graphPosition: {x: 2900, y: 480}
   _weight: 0
   _childNodes:
   - {fileID: 1006830939558596924}
@@ -434,31 +434,12 @@ MonoBehaviour:
   m_Name: SequenceNode
   m_EditorClassIdentifier: Assembly-CSharp::SequenceNode
   _guid: cfc921b8d8e84e50beea5ecdae8853fe
-  _graphPosition: {x: 2300, y: 960}
+  _graphPosition: {x: 2100, y: 960}
   _weight: 1
   _childNodes:
-  - {fileID: 8100000000000000001}
   - {fileID: 8100000000000000002}
   - {fileID: 8100000000000000003}
-  - {fileID: 8100000000000000004}
-  - {fileID: 8100000000000000005}
-  - {fileID: 8100000000000000007}
---- !u!114 &8100000000000000001
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2ea8471df83b41c2a37cb25804e7667c, type: 3}
-  m_Name: ChaseNode
-  m_EditorClassIdentifier: Assembly-CSharp::ChaseNode
-  _guid: 69b2aff2d2d045b78c29d93e357041ed
-  _graphPosition: {x: 1800, y: 1200}
-  _weight: 1
-  _arrivalDistance: 3
+  - {fileID: 8300000000000000002}
 --- !u!114 &8100000000000000002
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -472,7 +453,7 @@ MonoBehaviour:
   m_Name: MoveToTargetPositionNode
   m_EditorClassIdentifier: Assembly-CSharp::MoveToTargetPositionNode
   _guid: 0f4cf397d3074d7eaedb4e18ccc3520f
-  _graphPosition: {x: 2000, y: 1200}
+  _graphPosition: {x: 1800, y: 1200}
   _weight: 1
   _moveSpeed: 12
   _arrivalDistance: 100
@@ -492,7 +473,7 @@ MonoBehaviour:
   m_Name: PlayAnimationNode
   m_EditorClassIdentifier: Assembly-CSharp::PlayAnimationNode
   _guid: 8eea0be071354c139215a4a1f9150a83
-  _graphPosition: {x: 2200, y: 1200}
+  _graphPosition: {x: 2000, y: 1200}
   _weight: 1
   _animationName: TakeOffAnimation
   _waitForCompletion: 1
@@ -509,7 +490,7 @@ MonoBehaviour:
   m_Name: WarpToTargetXZNode
   m_EditorClassIdentifier: Assembly-CSharp::WarpToTargetXZNode
   _guid: 3cbfad85a18f41ca91abc562788c2acc
-  _graphPosition: {x: 2400, y: 1200}
+  _graphPosition: {x: 2200, y: 1440}
   _weight: 1
   _sampleRadius: 2
 --- !u!114 &8100000000000000005
@@ -525,12 +506,13 @@ MonoBehaviour:
   m_Name: AttackWarningNode
   m_EditorClassIdentifier: Assembly-CSharp::AttackWarningNode
   _guid: 6da71dccf1d24f7fbe32c30eb7c2220f
-  _graphPosition: {x: 2600, y: 1200}
+  _graphPosition: {x: 2451.2, y: 1456}
   _weight: 1
   _childNode: {fileID: 8100000000000000006}
   _warningArea: {fileID: 11400000, guid: fd3771dfb725af94fae8bc094620c508, type: 2}
   _groundSearchRadius: 2
   _yawOffset: 0
+  _waitForWarningCompletion: 1
 --- !u!114 &8100000000000000006
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -543,8 +525,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4cbe5a88c45e5441b241c998b26bd1b, type: 3}
   m_Name: PlayAnimationNode
   m_EditorClassIdentifier: Assembly-CSharp::PlayAnimationNode
-  _guid: 422ee0db689341e1878137ea0878241b
-  _graphPosition: {x: 2600, y: 1440}
+  _guid: 1d90301a9c794828a652f7f26d3a2cba
+  _graphPosition: {x: 2400, y: 1680}
   _weight: 1
   _animationName: DropAnimation
   _waitForCompletion: 1
@@ -561,7 +543,7 @@ MonoBehaviour:
   m_Name: AreaAttackNode
   m_EditorClassIdentifier: Assembly-CSharp::AreaAttackNode
   _guid: 4230830285d6435792f826c3846b760d
-  _graphPosition: {x: 2800, y: 1200}
+  _graphPosition: {x: 2600, y: 1440}
   _weight: 1
   _attackMultiplier: 1.5
   _overrideTimeToAttack: 1
@@ -583,8 +565,8 @@ MonoBehaviour:
   m_Name: SequenceNode
   m_EditorClassIdentifier: Assembly-CSharp::SequenceNode
   _guid: f421207b3c174cc7af7f4fec96627ad3
-  _graphPosition: {x: 1950, y: 720}
-  _weight: 20
+  _graphPosition: {x: 1850, y: 720}
+  _weight: 100
   _childNodes:
   - {fileID: 8100000000000000009}
   - {fileID: 8100000000000000000}
@@ -604,6 +586,25 @@ MonoBehaviour:
   _graphPosition: {x: 1600, y: 960}
   _weight: 1
   _attackRange: 5
+--- !u!114 &8300000000000000002
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aefcc002a437a4f48ab196345602a76c, type: 3}
+  m_Name: SequenceNode
+  m_EditorClassIdentifier: Assembly-CSharp::SequenceNode
+  _guid: a136a2edbd72440494ef846b70f1d46f
+  _graphPosition: {x: 2400, y: 1200}
+  _weight: 1
+  _childNodes:
+  - {fileID: 8100000000000000004}
+  - {fileID: 8100000000000000005}
+  - {fileID: 8100000000000000007}
 --- !u!114 &8782425140697016413
 MonoBehaviour:
   m_ObjectHideFlags: 1
