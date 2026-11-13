@@ -544,8 +544,8 @@ MonoBehaviour:
   m_Name: SequenceNode
   m_EditorClassIdentifier: Assembly-CSharp::SequenceNode
   _guid: f421207b3c174cc7af7f4fec96627ad3
-  _graphPosition: {x: 1850, y: 720}
-  _weight: 100
+  _graphPosition: {x: 1899.2001, y: 736}
+  _weight: 20
   _childNodes:
   - {fileID: 8100000000000000009}
   - {fileID: 8100000000000000000}

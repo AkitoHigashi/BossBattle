@@ -84,7 +84,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 35d764e077a1eff4481212b2ace53cc6, type: 3}
-  m_Name: MockBTDroop
+  m_Name: MockBTDrop
   m_EditorClassIdentifier: Assembly-CSharp::BehaviorTree
   _rootNode: {fileID: 2094587108836020744}
   _nodes:
