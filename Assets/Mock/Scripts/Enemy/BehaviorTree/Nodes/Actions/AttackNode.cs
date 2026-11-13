@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.AI;
 using UnityEngine.Serialization;
 
 /// <summary>
@@ -174,21 +173,7 @@ public abstract class AttackNode : ActionNode
             return true;
         }
 
-        var agent = _blackBoard.NavMeshAgent;
-        if (agent == null || !agent.isActiveAndEnabled || !agent.isOnNavMesh)
-            return false;
-
-        var filter = new NavMeshQueryFilter { agentTypeID = agent.agentTypeID, areaMask = agent.areaMask };
-        Vector3 origin = owner.position;
-        Vector3 ground = origin - Vector3.up * agent.baseOffset;
-        if (!NavMesh.SamplePosition(ground, out NavMeshHit hit, Mathf.Max(0.01f, _groundSearchRadius), filter))
-            return false;
-
         // 位置・向きを一度だけ確定し、表示と命中判定で同じ値を使う
-        origin.y = hit.position.y;
-        Vector3 forward = SectorRange.GetHorizontalForward(owner.forward);
-        forward = Quaternion.AngleAxis(_yawOffset, Vector3.up) * forward;
-        _pose = new AttackPose(origin, forward);
-        return true;
+        return AttackPose.TryCreateGroundAttackPose(owner, _blackBoard.NavMeshAgent, _groundSearchRadius, _yawOffset, out _pose);
     }
 }
