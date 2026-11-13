@@ -17,3 +17,9 @@ MonoBehaviour:
   _duration: 0.15
   _aimRotationSpeed: 9000
   _passThroughEnemies: 1
+  _maxExtraDistance: 0
+  _dashHit: 1
+  _dashDamage: 20
+  _dashBreakValue: 1
+  _dashHitRadius: 0
+  _skipLaterHitsOnDashHit: 1

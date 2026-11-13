@@ -14,6 +14,8 @@ public class ComboAttackAction : SkillAction
     [SerializeField] private MoveDirectionMode _direction;
     [Tooltip("各段の開始・入力待ち・猶予切れを Console に出す（連撃のつながりを確認するとき用）")]
     [SerializeField] private bool _logStages = false;
+    [Tooltip("次の段の入力を待っている間は歩けるようにする（スキル中に歩けない設定でも）")]
+    [SerializeField] private bool _canMoveWhileWaiting = true;
 
     public override async UniTask ExecuteAsync(SkillContext context, SkillExecution execution)
     {
@@ -21,14 +23,32 @@ public class ComboAttackAction : SkillAction
             throw new InvalidOperationException("連撃は1〜3段に設定してください。");
 
         CharacterMotor motor = context.CharacterMotor;
+        // 回避で中断した連撃を再開するときは、途中の段から始める。
+        int startStage = Mathf.Min(execution.StartStage, _attacks.Length - 1);
+        if (startStage > 0)
+            Log($"{startStage + 1}段目から再開");
 
-        for (int stage = 0; stage < _attacks.Length; stage++)
+        for (int stage = startStage; stage < _attacks.Length; stage++)
         {
             execution.Token.ThrowIfCancellationRequested();
             PlayerAttackAction attack = _attacks[stage];
 
             if (attack == null)
                 throw new InvalidOperationException($"連撃{stage + 1}段目が未設定です。");
+
+            // 振り終わった（判定が閉じた）時点から、回避で中断されても次の段から再開できるようにする。
+            // 攻撃モーションの戻りの最中に回避したときも、「この段は出し終わった」と扱うため。
+            // 最終段の後は続きがないので登録しない。
+            AttackAnimationEvents events = context.AnimationEvents;
+            int nextStage = stage + 1;
+            bool hasNextStage = nextStage < _attacks.Length;
+            void OnHitEnded()
+            {
+                if (execution.ResumeStage < 0)
+                    execution.SetResumePoint(nextStage, Time.time + _followUpWindow, _followUpWindow);
+            }
+            if (hasNextStage && events != null)
+                events.HitEnded += OnHitEnded;
 
             try
             {
@@ -44,17 +64,24 @@ public class ComboAttackAction : SkillAction
             finally
             {
                 motor.ClearOverrideVelocity();
+                if (hasNextStage && events != null)
+                    events.HitEnded -= OnHitEnded;
             }
 
             // 最終段なら終了
             if (stage == _attacks.Length - 1)
                 break;
 
-            // 初回入力を1回目として数えるため、
-            // 次の段には stage + 2 回の入力が必要
-            int requiredPressCount = stage + 2;
+            // 初回入力（再開時は再開の入力）を1回目として数えるため、
+            // この実行で進んだ段数 + 2 回の入力が必要
+            int requiredPressCount = stage - startStage + 2;
             // 猶予の計測は各段の終了後から開始する（攻撃中の再生時間は含めない）。
             float waitStartedAt = Time.time;
+
+            // 入力待ちの間に回避で中断されても、猶予内に押せば次の段から再開できるようにする。
+            execution.SetResumePoint(stage + 1, waitStartedAt + _followUpWindow, _followUpWindow);
+            if (_canMoveWhileWaiting)
+                motor.SetLocomotionLocked(false);
 
             Log($"{stage + 1}段目終了。次の段には合計{requiredPressCount}回の押下が必要（現在{execution.PressCount}回）");
 
@@ -71,6 +98,7 @@ public class ComboAttackAction : SkillAction
                     if (elapsed >= _followUpWindow)
                     {
                         Log($"猶予{_followUpWindow}秒以内に押されなかったため、{stage + 1}段で終了");
+                        execution.ClearResumePoint();
                         return;
                     }
 
@@ -84,6 +112,11 @@ public class ComboAttackAction : SkillAction
                 execution.ClearInputWindow();
             }
 
+            // 次の段を振り終わる前に中断されたら、もう再開はできない（通常の中断としてクールダウンへ）。
+            // 次の段を振り終わると、上の OnHitEnded で再び再開できるようになる。
+            execution.ClearResumePoint();
+            // 攻撃中は、スキルの設定どおり歩けない状態に戻す。
+            motor.SetLocomotionLocked(!execution.Definition.CanMoveDuringSkill);
             Log($"{stage + 2}段目へ");
         }
     }

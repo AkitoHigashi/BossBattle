@@ -61,7 +61,8 @@ public class AttackHitbox : MonoBehaviour
     /// 攻撃の当たり判定を開始する。攻撃の対象となるオブジェクトにダメージを与えるために使用される。
     /// </summary>
     /// <param name="attackData">命中した相手に与える内容。</param>
-    public void BeginHit(AttackData attackData)
+    /// <param name="excludedTargets">この判定では当てない相手（同じスキルの前の攻撃で当たった敵など）。null なら除外なし。</param>
+    public void BeginHit(AttackData attackData, IReadOnlyCollection<IDamageable> excludedTargets = null)
     {
         if (_previous == null || _ownerRoot == null)
             throw new System.InvalidOperationException("AttackHitbox.Initを先に呼び出してください。");
@@ -69,6 +70,9 @@ public class AttackHitbox : MonoBehaviour
         _active = true;
         // 命中履歴は判定開始ごとにリセットするため、次の段では同じ敵に再びダメージを与えられる。
         _hitTargets.Clear();
+        // 当てない相手は「当たり済み」として先に登録しておく。命中処理側に分岐を増やさずに済む。
+        if (excludedTargets != null)
+            _hitTargets.UnionWith(excludedTargets);
         SaveCurrentPoints();
         CheckOverlap();
     }

@@ -25,9 +25,18 @@ public class SkillSystem : ISkillSystem, IDisposable
     private readonly Dictionary<SkillDefinition, float> _nextUsableTimes = new Dictionary<SkillDefinition, float>();
     private readonly ReactiveProperty<bool> _isExecuting = new ReactiveProperty<bool>(false);
     private SkillExecution _currentExecution;
+
+    // 連撃の入力待ち中に回避などで割り込まれたとき、続きから再開するための情報。再開できるのは1つだけ。
+    private SkillDefinition _resumeSkill;
     private bool _disposed;
     // 割り込みで前のスキルの後片付けを待つ間、新しい発動や入力が入り込むのを防ぐ。
     private bool _isInterrupting;
+    // 割り込みで中断された連撃の、続きから再開できる段。再開できない状態なら -1。
+    private int _resumeStage;
+    // 再開できる期限（Time.time）。期限を過ぎたら、再開はできずクールダウンに入る。
+    private float _resumeDeadline;
+    // 再開できる期限の長さ。UI のバー表示用。
+    private float _resumeWindowDuration;
 
     public SkillSystem(SkillContext skillContext)
     {
@@ -39,7 +48,12 @@ public class SkillSystem : ISkillSystem, IDisposable
     /// </summary>
     public bool TryUseSkill(SkillDefinition definition, Vector3 direction)
     {
-        if (!CanUseSkill(definition) || _isExecuting.Value || _isInterrupting)
+        if (_isExecuting.Value || _isInterrupting)
+            return false;
+        // 回避で中断した連撃の続きなら、クールダウンに関係なく続きの段から始める。
+        if (TryResumeSkill(definition, direction))
+            return true;
+        if (!CanUseSkill(definition))
             return false;
 
         StartSkill(definition, direction);
@@ -73,13 +87,16 @@ public class SkillSystem : ISkillSystem, IDisposable
     public async UniTask<bool> TryUseSkillAsync(SkillDefinition definition, Vector3 direction, CancellationToken requestToken)
     {
         // 発動要求元が無効化されていたら、実行中のスキルにも触れない。
-        if (requestToken.IsCancellationRequested || _isInterrupting || !CanUseSkill(definition))
+        // 中断した連撃の再開待ちなら、クールダウンの判定より優先する（再開は TryUseSkill / InterruptAndStartAsync が行う）。
+        if (requestToken.IsCancellationRequested || _isInterrupting
+            || (!CanUseSkill(definition) && !IsResumable(definition)))
             return false;
 
         if (_currentExecution == null)
             return TryUseSkill(definition, direction);
 
-        if (!CanInterrupt(definition, _currentExecution))
+        // 同じスキルへの押下は割り込みではなく、そのスキルへの入力（HandleSkillInput）として扱う。
+        if (_currentExecution.Definition == definition || !CanInterrupt(definition, _currentExecution))
             return false;
 
         return await InterruptAndStartAsync(definition, direction, requestToken);
@@ -95,6 +112,8 @@ public class SkillSystem : ISkillSystem, IDisposable
         {
             // Cancel は中断の要求だけ。当たり判定や移動の解除まで終わるのを Completion で待つ。
             SkillExecution oldExecution = _currentExecution;
+            // 割り込みでの中断だと記録する。連撃の入力待ち中なら、後で続きから再開できるようにするため。
+            oldExecution.MarkInterrupted();
             oldExecution.Cancel();
             await oldExecution.Completion;
 
@@ -102,7 +121,12 @@ public class SkillSystem : ISkillSystem, IDisposable
             if (requestToken.IsCancellationRequested)
                 return false;
             // 待っている間に状態が変わり得るので、発動できるか確認し直す。
-            if (!CanUseSkill(definition) || _currentExecution != null || _isExecuting.Value)
+            if (_currentExecution != null || _isExecuting.Value)
+                return false;
+            // 他のスキル中に、中断した連撃のキーを押したときは、最初からではなく続きの段から始める。
+            if (TryResumeSkill(definition, direction))
+                return true;
+            if (!CanUseSkill(definition))
                 return false;
 
             StartSkill(definition, direction);
@@ -129,6 +153,7 @@ public class SkillSystem : ISkillSystem, IDisposable
     /// </summary>
     public float GetCooldownRemaing(SkillDefinition definition)
     {
+        ExpireResumeIfNeeded();
         if (definition == null || !_nextUsableTimes.TryGetValue(definition, out float nextUsableTime))
             return 0f;
 
@@ -136,19 +161,36 @@ public class SkillSystem : ISkillSystem, IDisposable
     }
 
     /// <summary>
-    /// 実行中のスキルが追加入力を受け付けている残り時間（連撃の猶予など）。受付中でなければ false。
+    /// 指定したスキルが追加入力を受け付けている残り時間（連撃の猶予など）。受付中でなければ false。
+    /// 回避で中断した連撃の、再開できる残り時間も含む。
     /// </summary>
-    public bool TryGetInputWindow(out float remaining, out float duration)
+    public bool TryGetInputWindow(SkillDefinition definition, out float remaining, out float duration)
     {
-        remaining = _currentExecution?.InputWindowRemaining ?? 0f;
-        duration = _currentExecution?.InputWindowDuration ?? 0f;
+        remaining = 0f;
+        duration = 0f;
+        if (definition == null)
+            return false;
+
+        ExpireResumeIfNeeded();
+        if (_resumeSkill == definition)
+        {
+            remaining = Mathf.Max(0f, _resumeDeadline - Time.time);
+            duration = _resumeWindowDuration;
+            return duration > 0f;
+        }
+
+        if (_currentExecution == null || _currentExecution.Definition != definition)
+            return false;
+        remaining = _currentExecution.InputWindowRemaining;
+        duration = _currentExecution.InputWindowDuration;
         return duration > 0f;
     }
 
 
-    private void StartSkill(SkillDefinition definition, Vector3 direction)
+    private void StartSkill(SkillDefinition definition, Vector3 direction, int startStage = 0)
     {
-        var execution = new SkillExecution(definition, direction);
+        // 中断した連撃の再開待ちは、他のスキルを使っても消さない。受付時間が切れるまで、押せば続きの段が出る。
+        var execution = new SkillExecution(definition, direction, startStage);
         // 発動のきっかけになった押下も、この実行の1回目の押下として数える。
         execution.ReceiveInput(SkillInputPhase.Pressed);
         _currentExecution = execution;
@@ -173,12 +215,10 @@ public class SkillSystem : ISkillSystem, IDisposable
         }
         catch (OperationCanceledException)
         {
-            // 回避による割り込みや無効化での中断は、通常の終了として扱う。
             Debug.Log($"スキルの実行がキャンセルされました。{execution.Definition.SkillName}");
         }
         catch (Exception ex)
         {
-            // 設定ミスなど予期しない失敗は、どのスキルで起きたか分かるよう記録する。
             Debug.LogError($"スキルの実行中にエラーが発生しました。{execution.Definition.SkillName} {ex}");
         }
         finally
@@ -234,8 +274,11 @@ public class SkillSystem : ISkillSystem, IDisposable
 
     private void ReleaseExecution(SkillExecution execution)
     {
+        // 連撃の入力待ち中に割り込まれたなら、クールダウンにせず、猶予内に押せば続きから再開できるようにする。
+        if (CanKeepForResume(execution))
+            SaveResume(execution);
         // 終了時開始の設定なら、中断やエラーで終わった場合もここからクールダウンを始める。
-        if (execution.Definition.CooldownPolicy == CooldownStartPolicy.OnEnd)
+        else if (execution.Definition.CooldownPolicy == CooldownStartPolicy.OnEnd)
             StartCooldown(execution.Definition);
         execution.Dispose();
 
@@ -251,7 +294,77 @@ public class SkillSystem : ISkillSystem, IDisposable
 
     private void StartCooldown(SkillDefinition definition)
     {
-        _nextUsableTimes[definition] = Time.time + definition.Cooldown;
+        StartCooldownFrom(definition, Time.time);
+    }
+
+    private void StartCooldownFrom(SkillDefinition definition, float startTime)
+    {
+        _nextUsableTimes[definition] = startTime + definition.Cooldown;
+    }
+
+    private bool CanKeepForResume(SkillExecution execution)
+    {
+        return !_disposed
+            && execution.WasInterrupted
+            && execution.ResumeStage >= 0
+            && Time.time < execution.ResumeDeadline;
+    }
+
+    private void SaveResume(SkillExecution execution)
+    {
+        // 再開待ちは1つだけ持つ。別のスキルの再開待ちが残っていたら、クールダウンなしで消えないよう今から始める。
+        if (_resumeSkill != null && _resumeSkill != execution.Definition)
+            EndResume(Time.time);
+
+        _resumeSkill = execution.Definition;
+        _resumeStage = execution.ResumeStage;
+        _resumeDeadline = execution.ResumeDeadline;
+        _resumeWindowDuration = execution.ResumeWindowDuration;
+    }
+
+    private bool IsResumable(SkillDefinition definition)
+    {
+        ExpireResumeIfNeeded();
+        return !_disposed && definition != null && definition == _resumeSkill;
+    }
+
+    /// <summary>
+    /// 中断した連撃の続きを始める。再開できるスキルでなければ false。
+    /// </summary>
+    private bool TryResumeSkill(SkillDefinition definition, Vector3 direction)
+    {
+        ExpireResumeIfNeeded();
+        if (_disposed || definition == null || definition != _resumeSkill)
+            return false;
+
+        int stage = _resumeStage;
+        _resumeSkill = null;
+        StartSkill(definition, direction, stage);
+        return true;
+    }
+
+    /// <summary>
+    /// 再開の期限が過ぎていたら、期限の時点で連撃が終わったものとしてクールダウンを始める。
+    /// </summary>
+    /// <remarks>
+    /// 毎フレーム監視する代わりに、状態を読むとき（UI の表示・発動の判定）に確認する。
+    /// クールダウンの開始時刻を期限に合わせるので、確認が遅れても終了時刻はずれない。
+    /// </remarks>
+    private void ExpireResumeIfNeeded()
+    {
+        if (_resumeSkill != null && Time.time >= _resumeDeadline)
+            EndResume(_resumeDeadline);
+    }
+
+    /// <summary>
+    /// 再開をあきらめ、指定した時刻からクールダウンを始める（終了時開始のスキルの場合）。
+    /// </summary>
+    private void EndResume(float cooldownStartTime)
+    {
+        SkillDefinition skill = _resumeSkill;
+        _resumeSkill = null;
+        if (skill != null && skill.CooldownPolicy == CooldownStartPolicy.OnEnd)
+            StartCooldownFrom(skill, cooldownStartTime);
     }
 
     /// <summary>
@@ -299,6 +412,7 @@ public class SkillSystem : ISkillSystem, IDisposable
     /// </summary>
     private bool CanUseSkill(SkillDefinition definition)
     {
+        ExpireResumeIfNeeded();
         if (_disposed || definition == null || definition.Actions == null || definition.Actions.Length == 0)
             return false;
 
