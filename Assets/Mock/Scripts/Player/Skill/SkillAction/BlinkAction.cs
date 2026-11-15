@@ -12,6 +12,18 @@ public class BlinkAction : SkillAction
     [SerializeField] private float _aimRotationSpeed = 9000f;
     [Tooltip("移動中に敵（ダメージを受けられる相手）をすり抜けるか。地面や壁はすり抜けない")]
     [SerializeField] private bool _passThroughEnemies = false;
+    [Tooltip("すり抜けの終わりで敵に埋まっていたら、抜け出るまで追加で進む最大距離。0 なら延長しない")]
+    [SerializeField, Min(0f)] private float _maxExtraDistance = 5f;
+
+    [Header("踏み込み攻撃")]
+    [Tooltip("移動中に体が触れた敵へ攻撃するか。アニメーションに関係なく当たるので、攻撃前にすり抜けても取りこぼさない")]
+    [SerializeField] private bool _dashHit = false;
+    [SerializeField, Min(0)] private int _dashDamage = 10;
+    [SerializeField, Min(0f)] private float _dashBreakValue = 0f;
+    [Tooltip("当たり判定の半径。0 なら体の太さに合わせる")]
+    [SerializeField, Min(0f)] private float _dashHitRadius = 0f;
+    [Tooltip("踏み込みで当たった敵には、同じスキルの後の攻撃（斬撃など）を当てない")]
+    [SerializeField] private bool _skipLaterHitsOnDashHit = true;
 
     public override async UniTask ExecuteAsync(SkillContext context, SkillExecution execution)
     {
@@ -44,14 +56,23 @@ public class BlinkAction : SkillAction
                 motor.SetOverrideFacingDirection(forward, 0f);
             }
 
+            // 1回の物理更新で進む距離。踏み込み攻撃の判定に使う。
+            Vector3 step = moveDirection.normalized * (_speed * Time.fixedDeltaTime);
+            // 1回の踏み込みで、同じ敵に何度も当てないための記録。
+            var dashHitTargets = _dashHit ? new HashSet<IDamageable>() : null;
+
             float elapsed = 0f;
             while (elapsed < _duration)
             {
                 execution.Token.ThrowIfCancellationRequested();
+                if (_dashHit)
+                    ApplyDashHits(motor, execution, step, dashHitTargets);
                 await UniTask.Yield(PlayerLoopTiming.FixedUpdate, execution.Token);
                 elapsed += Time.fixedDeltaTime;
             }
 
+            if (_passThroughEnemies)
+                await ExtendUntilClearAsync(motor, execution, moveDirection.normalized, step, dashHitTargets);
         }
         finally
         {
@@ -62,6 +83,66 @@ public class BlinkAction : SkillAction
             if (_passThroughEnemies)
                 motor.EndPassThrough();
         }
+    }
+
+    /// <summary>
+    /// 予定の距離を進み終えた時点で敵に埋まっていたら、抜け出るまで同じ速度で進み続ける。
+    /// </summary>
+    /// <remarks>
+    /// 埋まったまま止まると、すり抜けを戻したときに物理エンジンが体を押し出し、
+    /// 来た方向へ弾き戻されたり、敵の中に居続けたりする。そのため「敵の向こう側へ抜ける」まで距離を伸ばす。
+    /// 壁や地面に向かって無限に進まないよう、追加の距離には上限を設ける。
+    /// </remarks>
+    private async UniTask ExtendUntilClearAsync(
+        CharacterMotor motor, SkillExecution execution, Vector3 direction, Vector3 step, HashSet<IDamageable> dashHitTargets)
+    {
+        float extra = 0f;
+        float stepLength = step.magnitude;
+        while (extra < _maxExtraDistance && motor.IsOverlappingPassThroughTargets())
+        {
+            execution.Token.ThrowIfCancellationRequested();
+            // 延長した先に別の敵がいても埋まらないよう、次に進む区間の敵もすり抜け対象に加える。
+            motor.BeginPassThrough(FindEnemiesOnPath(motor, direction, stepLength));
+            if (_dashHit)
+                ApplyDashHits(motor, execution, step, dashHitTargets);
+            await UniTask.Yield(PlayerLoopTiming.FixedUpdate, execution.Token);
+            extra += stepLength;
+        }
+    }
+
+    /// <summary>
+    /// 今の位置から、次の物理更新で進む先までの範囲にいる敵へ攻撃する。
+    /// </summary>
+    /// <remarks>
+    /// 毎回「次に進む区間」を調べ、区間をつなげて全体を調べる。
+    /// 今の位置だけを見ると、速く動いたときに1回の更新で敵を飛び越して取りこぼすため。
+    /// </remarks>
+    private void ApplyDashHits(CharacterMotor motor, SkillExecution execution, Vector3 step, HashSet<IDamageable> hitTargets)
+    {
+        Bounds body = motor.GetBodyBounds();
+        float radius = _dashHitRadius > 0f ? _dashHitRadius : GetBodyRadius(body);
+        Vector3 start = body.center;
+
+        // 溜めなどの倍率は、他の攻撃と同じく掛ける。
+        AttackData data = execution.ApplyMultipliers(new AttackData(_dashDamage, _dashBreakValue));
+        foreach (Collider hit in Physics.OverlapCapsule(start, start + step, radius, ~0, QueryTriggerInteraction.Collide))
+        {
+            if (hit.transform.IsChildOf(motor.transform))
+                continue;
+            IDamageable target = hit.GetComponentInParent<IDamageable>();
+            if (target == null || !hitTargets.Add(target))
+                continue;
+
+            data.ApplyTo(target);
+            if (_skipLaterHitsOnDashHit)
+                execution.ExcludeFromLaterHits(target);
+        }
+    }
+
+    // 体の太さ（横幅の半分）に少し余裕を足したもの。
+    private static float GetBodyRadius(Bounds body)
+    {
+        return Mathf.Max(body.extents.x, body.extents.z) + 0.1f;
     }
 
     /// <summary>
@@ -77,7 +158,7 @@ public class BlinkAction : SkillAction
         const float margin = 0.5f;
 
         Bounds body = motor.GetBodyBounds();
-        float radius = Mathf.Max(body.extents.x, body.extents.z) + 0.1f;
+        float radius = GetBodyRadius(body);
         Vector3 start = body.center;
         Vector3 end = start + direction.normalized * (distance + margin);
 

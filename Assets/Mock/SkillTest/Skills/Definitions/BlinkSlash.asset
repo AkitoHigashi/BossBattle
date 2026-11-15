@@ -18,6 +18,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a7abe2ea3fee9344ba4c35b4a7bb24f3, type: 2}
   - {fileID: 11400000, guid: c95231d3750d62441880f828006d06a2, type: 2}
   _cooldownPolicy: 0
-  _canInterruptOthers: 0
-  _canBeInterrupted: 0
+  _canInterruptOthers: 1
+  _canBeInterrupted: 1
   _canMoveDuringSkill: 0

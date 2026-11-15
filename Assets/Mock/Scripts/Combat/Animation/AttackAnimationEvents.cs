@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -14,8 +15,14 @@ public class AttackAnimationEvents : MonoBehaviour
     /// 剣を振った瞬間に飛び道具を出すなど、アニメーションのタイミングに合わせたい処理が購読する。
     /// </summary>
     public event Action HitStarted;
+    /// <summary>
+    /// 攻撃判定が閉じた瞬間（OnHitEnd、または OnHitEnd のないアニメーションでは OnAttackFinished）に通知する。
+    /// 「振り終わった」タイミングで何かしたい処理（連撃の再開受付など）が購読する。
+    /// </summary>
+    public event Action HitEnded;
     private AttackHitbox _hitbox;
     private AttackData _attackData;
+    private IReadOnlyCollection<IDamageable> _excludedTargets;
 
     public void Init(AttackHitbox hitbox)
     {
@@ -26,10 +33,12 @@ public class AttackAnimationEvents : MonoBehaviour
     /// 新しい攻撃の開始前に前回の命中状態をリセットする。
     /// </summary>
     /// <param name="attackData">この攻撃が命中したときに与える内容。</param>
-    public void PrepareAttack(AttackData attackData)
+    /// <param name="excludedTargets">この攻撃では当てない相手。null なら除外なし。</param>
+    public void PrepareAttack(AttackData attackData, IReadOnlyCollection<IDamageable> excludedTargets = null)
     {
         CancelAttack();
         _attackData = attackData;
+        _excludedTargets = excludedTargets;
         IsPlaying = true;
     }
 
@@ -39,7 +48,7 @@ public class AttackAnimationEvents : MonoBehaviour
     public void OnHitBegin()
     {
         if (!IsPlaying) return;
-        _hitbox.BeginHit(_attackData);
+        _hitbox.BeginHit(_attackData, _excludedTargets);
         HitStarted?.Invoke();
     }
 
@@ -48,7 +57,9 @@ public class AttackAnimationEvents : MonoBehaviour
     /// </summary>
     public void OnHitEnd()
     {
-        if (IsPlaying) _hitbox.EndHit();
+        if (!IsPlaying) return;
+        _hitbox.EndHit();
+        HitEnded?.Invoke();
     }
 
     /// <summary>
@@ -62,6 +73,7 @@ public class AttackAnimationEvents : MonoBehaviour
         if (!IsPlaying) return;
         _hitbox.EndHit();
         IsPlaying = false;
+        HitEnded?.Invoke();
     }
 
     /// <summary>

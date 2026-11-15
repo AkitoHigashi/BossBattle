@@ -89,14 +89,16 @@ public class SkillCooldownView : MonoBehaviour
     /// </summary>
     private void UpdateSlot(Slot slot, bool isActive)
     {
+        // 連撃の追加入力を受け付けている間は、残り秒数とバーで「いつまでに押せばつながるか」を見せる。
+        // 回避で中断した連撃も、再開できる間はここに入る（使用中ではないが、押せば続きが出る）。
+        bool hasWindow = _skillSystem.TryGetInputWindow(slot.Skill, out float windowRemaining, out float windowDuration);
+
         // 終了時にクールダウンが始まるスキルは、使用中はまだ残り時間が 0 なので、別に「使用中」を出す。
-        if (isActive)
+        if (isActive || hasWindow)
         {
             slot.Background.color = _activeColor;
             slot.Overlay.anchorMax = new Vector2(1f, 0f);
 
-            // 連撃の追加入力を受け付けている間は、残り秒数とバーで「いつまでに押せばつながるか」を見せる。
-            bool hasWindow = _skillSystem.TryGetInputWindow(out float windowRemaining, out float windowDuration);
             slot.InputWindowBar.gameObject.SetActive(hasWindow);
             if (hasWindow)
                 slot.InputWindowBar.anchorMax = new Vector2(Mathf.Clamp01(windowRemaining / windowDuration), 1f);

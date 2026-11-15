@@ -291,6 +291,7 @@ public class CharacterMotor : MonoBehaviour
         velocity.y += _pendingExternalY;
         _pendingExternalY = 0f;
         _rigidbody.linearVelocity = velocity;
+        _rigidbody.angularVelocity = Vector3.zero;
 
         Vector3 facingDirection;
         float rotationSpeed;
@@ -370,6 +371,20 @@ public class CharacterMotor : MonoBehaviour
             foreach (Collider body in _bodyColliders)
                 Physics.IgnoreCollision(body, target, false);
         }
+    }
+
+    /// <summary>
+    /// すり抜け中の相手のどれかと、今も体が重なっているか。
+    /// ブリンクの終わりに敵の中に埋まっていないかを調べるために使う。
+    /// </summary>
+    public bool IsOverlappingPassThroughTargets()
+    {
+        foreach (Collider target in _passThroughTargets)
+        {
+            if (target != null && IsOverlapping(target))
+                return true;
+        }
+        return false;
     }
 
     private bool IsOverlapping(Collider target)
