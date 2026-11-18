@@ -18,6 +18,7 @@ public sealed class ShowSwirlNode : ActionNode
 
     private SwirlWarningView _view;
     private float _startTime;
+    private bool _isViewInitialized;
     private bool _isShown;
 
     protected override void OnStart()
@@ -26,22 +27,31 @@ public sealed class ShowSwirlNode : ActionNode
             return;
 
         if (!AttackPose.TryCreateGroundAttackPose(
-            _blackBoard.Transform,
-            _blackBoard.NavMeshAgent,
+                _blackBoard.Transform,
+                _blackBoard.NavMeshAgent,
                 _groundSearchRadius,
                 0f,
                 out AttackPose pose))
             return;
 
+        Vector3 position = pose.Origin + Vector3.up * _surfaceOffset;
+        if (_view == null)
+        {
+            _view = Instantiate(_prefab, position, Quaternion.identity);
+            _isViewInitialized = false;
+        }
+
+        if (!_isViewInitialized)
+        {
+            _isViewInitialized = _view.TryShow(_clockwise);
+            if (!_isViewInitialized)
+                return;
+        }
+
+        _view.transform.SetPositionAndRotation(position, Quaternion.identity);
         _startTime = Time.time;
-
-
-        _view = Instantiate(
-            _prefab,
-            pose.Origin + Vector3.up * _surfaceOffset,
-            Quaternion.identity);
-
-        _isShown = _view.TryShow(_clockwise);
+        _view.gameObject.SetActive(true);
+        _isShown = true;
     }
 
     protected override NodeStatus OnUpdate()
@@ -63,9 +73,15 @@ public sealed class ShowSwirlNode : ActionNode
         if (_view == null)
             return;
 
-        // Destroyが処理される前に次の攻撃ノードが開始する。
         _view.gameObject.SetActive(false);
-        Destroy(_view.gameObject);
-        _view = null;
+    }
+
+    private void OnDestroy()
+    {
+        if (_view != null)
+        {
+            _view.gameObject.SetActive(false);
+            Destroy(_view.gameObject);
+        }
     }
 }
