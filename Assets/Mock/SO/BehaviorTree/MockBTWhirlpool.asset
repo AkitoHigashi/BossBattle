@@ -1,0 +1,375 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-2986920472863374988
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37a7b8498dc34268b119a20dbed4b9c5, type: 3}
+  m_Name: AreaAttackNode
+  m_EditorClassIdentifier: Assembly-CSharp::AreaAttackNode
+  _guid: ed161c4efb6f83549a47ad40fa09a937
+  _graphPosition: {x: 1000, y: 960}
+  _weight: 1
+  _attackMultiplier: 1.5
+  _overrideTimeToAttack: 1
+  _timeToAttack: 1
+  _warningArea: {fileID: 11400000, guid: 412a667226954b79b9607f786e57f303, type: 2}
+  _yawOffset: 90
+  _groundSearchRadius: 2
+  _recoveryTime: 0.15
+--- !u!114 &-2708993200970000736
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37a7b8498dc34268b119a20dbed4b9c5, type: 3}
+  m_Name: AreaAttackNode
+  m_EditorClassIdentifier: Assembly-CSharp::AreaAttackNode
+  _guid: c516302c2aa368c4f9b5a5b159c1df08
+  _graphPosition: {x: 1200, y: 960}
+  _weight: 1
+  _attackMultiplier: 1.5
+  _overrideTimeToAttack: 1
+  _timeToAttack: 1
+  _warningArea: {fileID: 11400000, guid: 412a667226954b79b9607f786e57f303, type: 2}
+  _yawOffset: 180
+  _groundSearchRadius: 2
+  _recoveryTime: 0.15
+--- !u!114 &-1945459680776417794
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37a7b8498dc34268b119a20dbed4b9c5, type: 3}
+  m_Name: AreaAttackNode
+  m_EditorClassIdentifier: Assembly-CSharp::AreaAttackNode
+  _guid: 19b58cb8e8558d24b81624aa1b559e33
+  _graphPosition: {x: 1400, y: 960}
+  _weight: 1
+  _attackMultiplier: 1.5
+  _overrideTimeToAttack: 1
+  _timeToAttack: 1
+  _warningArea: {fileID: 11400000, guid: 412a667226954b79b9607f786e57f303, type: 2}
+  _yawOffset: 270
+  _groundSearchRadius: 2
+  _recoveryTime: 0.65
+--- !u!114 &-311407269953389892
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37a7b8498dc34268b119a20dbed4b9c5, type: 3}
+  m_Name: AreaAttackNode
+  m_EditorClassIdentifier: Assembly-CSharp::AreaAttackNode
+  _guid: bef0e9691c344e348892ac3e248f45f2
+  _graphPosition: {x: 800, y: 960}
+  _weight: 1
+  _attackMultiplier: 1.5
+  _overrideTimeToAttack: 1
+  _timeToAttack: 2
+  _warningArea: {fileID: 11400000, guid: 412a667226954b79b9607f786e57f303, type: 2}
+  _yawOffset: 0
+  _groundSearchRadius: 2
+  _recoveryTime: 0.15
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35d764e077a1eff4481212b2ace53cc6, type: 3}
+  m_Name: MockBTWhirlpool
+  m_EditorClassIdentifier: Assembly-CSharp::BehaviorTree
+  _rootNode: {fileID: 2094587108836020744}
+  _nodes:
+  - {fileID: 2094587108836020744}
+  - {fileID: 74000001}
+  - {fileID: 74000002}
+  - {fileID: 74000003}
+  - {fileID: 5286185974756772419}
+  - {fileID: 71000001}
+  - {fileID: 72000001}
+  - {fileID: -311407269953389892}
+  - {fileID: -2986920472863374988}
+  - {fileID: -2708993200970000736}
+  - {fileID: -1945459680776417794}
+  - {fileID: 71000002}
+  - {fileID: 72000002}
+  - {fileID: 73000001}
+  - {fileID: 73000002}
+  - {fileID: 73000003}
+  - {fileID: 73000004}
+--- !u!114 &71000001
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aefcc002a437a4f48ab196345602a76c, type: 3}
+  m_Name: SequenceNode
+  m_EditorClassIdentifier: Assembly-CSharp::SequenceNode
+  _guid: 90c1ad1287a94aee92ed262d68be2146
+  _graphPosition: {x: 1000, y: 720}
+  _weight: 1
+  _childNodes:
+  - {fileID: 72000001}
+  - {fileID: -311407269953389892}
+  - {fileID: -2986920472863374988}
+  - {fileID: -2708993200970000736}
+  - {fileID: -1945459680776417794}
+--- !u!114 &71000002
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aefcc002a437a4f48ab196345602a76c, type: 3}
+  m_Name: SequenceNode
+  m_EditorClassIdentifier: Assembly-CSharp::SequenceNode
+  _guid: 1304c85c2f344f65bd17c60a875b4b0e
+  _graphPosition: {x: 2000, y: 720}
+  _weight: 1
+  _childNodes:
+  - {fileID: 72000002}
+  - {fileID: 73000001}
+  - {fileID: 73000002}
+  - {fileID: 73000003}
+  - {fileID: 73000004}
+--- !u!114 &72000001
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10fa838ea9054e3b9b7103c8bdc6de04, type: 3}
+  m_Name: ShowSwirlNode
+  m_EditorClassIdentifier: Assembly-CSharp::ShowSwirlNode
+  _guid: 154b0ac6eca949cab62a9c02224db278
+  _graphPosition: {x: 600, y: 960}
+  _weight: 1
+  _prefab: {fileID: 11400000, guid: 57bb20c2b58e4172b36d28ff275edca5, type: 3}
+  _clockwise: 1
+  _duration: 1.5
+  _groundSearchRadius: 2
+  _surfaceOffset: 0.07
+--- !u!114 &72000002
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10fa838ea9054e3b9b7103c8bdc6de04, type: 3}
+  m_Name: ShowSwirlNode
+  m_EditorClassIdentifier: Assembly-CSharp::ShowSwirlNode
+  _guid: 3edc0f64f8e24b55a9048a210a2a5f67
+  _graphPosition: {x: 1600, y: 960}
+  _weight: 1
+  _prefab: {fileID: 11400000, guid: 57bb20c2b58e4172b36d28ff275edca5, type: 3}
+  _clockwise: 0
+  _duration: 1.5
+  _groundSearchRadius: 2
+  _surfaceOffset: 0.07
+--- !u!114 &73000001
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37a7b8498dc34268b119a20dbed4b9c5, type: 3}
+  m_Name: AreaAttackNode
+  m_EditorClassIdentifier: Assembly-CSharp::AreaAttackNode
+  _guid: 903b1d32b77847de84d0d8eb1f84152f
+  _graphPosition: {x: 1800, y: 960}
+  _weight: 1
+  _attackMultiplier: 1.5
+  _overrideTimeToAttack: 1
+  _timeToAttack: 2
+  _warningArea: {fileID: 11400000, guid: 412a667226954b79b9607f786e57f303, type: 2}
+  _yawOffset: 0
+  _groundSearchRadius: 2
+  _recoveryTime: 0.15
+--- !u!114 &73000002
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37a7b8498dc34268b119a20dbed4b9c5, type: 3}
+  m_Name: AreaAttackNode
+  m_EditorClassIdentifier: Assembly-CSharp::AreaAttackNode
+  _guid: ec35eb8013a349bdb6b0961692fc18ef
+  _graphPosition: {x: 2000, y: 960}
+  _weight: 1
+  _attackMultiplier: 1.5
+  _overrideTimeToAttack: 1
+  _timeToAttack: 1
+  _warningArea: {fileID: 11400000, guid: 412a667226954b79b9607f786e57f303, type: 2}
+  _yawOffset: -90
+  _groundSearchRadius: 2
+  _recoveryTime: 0.15
+--- !u!114 &73000003
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37a7b8498dc34268b119a20dbed4b9c5, type: 3}
+  m_Name: AreaAttackNode
+  m_EditorClassIdentifier: Assembly-CSharp::AreaAttackNode
+  _guid: 880cfe31baf14630b2788cbe7ddaefcd
+  _graphPosition: {x: 2200, y: 960}
+  _weight: 1
+  _attackMultiplier: 1.5
+  _overrideTimeToAttack: 1
+  _timeToAttack: 1
+  _warningArea: {fileID: 11400000, guid: 412a667226954b79b9607f786e57f303, type: 2}
+  _yawOffset: -180
+  _groundSearchRadius: 2
+  _recoveryTime: 0.15
+--- !u!114 &73000004
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37a7b8498dc34268b119a20dbed4b9c5, type: 3}
+  m_Name: AreaAttackNode
+  m_EditorClassIdentifier: Assembly-CSharp::AreaAttackNode
+  _guid: ae7b22e534054567a2663120de8b2979
+  _graphPosition: {x: 2417.5999, y: 976}
+  _weight: 1
+  _attackMultiplier: 1.5
+  _overrideTimeToAttack: 1
+  _timeToAttack: 1
+  _warningArea: {fileID: 11400000, guid: 412a667226954b79b9607f786e57f303, type: 2}
+  _yawOffset: -270
+  _groundSearchRadius: 2
+  _recoveryTime: 0.65
+--- !u!114 &74000001
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aefcc002a437a4f48ab196345602a76c, type: 3}
+  m_Name: SequenceNode
+  m_EditorClassIdentifier: Assembly-CSharp::SequenceNode
+  _guid: 49661d70597c4ca8a7f48de58126fefa
+  _graphPosition: {x: 750, y: 240}
+  _weight: 1
+  _childNodes:
+  - {fileID: 74000002}
+  - {fileID: 74000003}
+  - {fileID: 5286185974756772419}
+--- !u!114 &74000002
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ea8471df83b41c2a37cb25804e7667c, type: 3}
+  m_Name: ChaseNode
+  m_EditorClassIdentifier: Assembly-CSharp::ChaseNode
+  _guid: 919688db650048b9a04d543ca33e79dc
+  _graphPosition: {x: 200, y: 480}
+  _weight: 1
+  _arrivalDistance: 4
+--- !u!114 &74000003
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05aea194352712145957c18a2295c807, type: 3}
+  m_Name: FaceTargetNode
+  m_EditorClassIdentifier: Assembly-CSharp::FaceTargetNode
+  _guid: dfe0bcea636b4091af8f170c902ded94
+  _graphPosition: {x: 400, y: 480}
+  _weight: 1
+--- !u!114 &2094587108836020744
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 769c7c8dcd3799a449e453e603a71cbf, type: 3}
+  m_Name: RootNode
+  m_EditorClassIdentifier: Assembly-CSharp::RootNode
+  _guid: 6ae534e338f35a043993ef767a92b8df
+  _graphPosition: {x: 750, y: 0}
+  _weight: 0
+  _childNode: {fileID: 74000001}
+--- !u!114 &5286185974756772419
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2029356025b92494ba0155b1c023263e, type: 3}
+  m_Name: RandomSelectorNode
+  m_EditorClassIdentifier: Assembly-CSharp::RandomSelectorNode
+  _guid: c3ce26b94a38c0d4ab4a37630a9c8aca
+  _graphPosition: {x: 1500, y: 480}
+  _weight: 1
+  _childNodes:
+  - {fileID: 71000001}
+  - {fileID: 71000002}
